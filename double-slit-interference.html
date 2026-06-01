@@ -1,0 +1,952 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>雙狹縫干涉：角度與光程差模擬</title>
+  <style>
+    :root {
+      --ink: #182033;
+      --muted: #657086;
+      --line: #dbe1ec;
+      --panel: rgba(255, 255, 255, .94);
+      --soft: #f5f7fb;
+      --blue: #3777e3;
+      --cyan: #39b9e8;
+      --violet: #7257d9;
+      --orange: #ef8b38;
+      --green: #16866d;
+      --shadow: 0 14px 32px rgba(35, 55, 92, .09);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      min-width: 320px;
+      margin: 0;
+      color: var(--ink);
+      background: linear-gradient(145deg, #edf5ff 0%, #f8fbff 45%, #f6f2ff 100%);
+      font-family: Arial, "Noto Sans TC", "Microsoft JhengHei", sans-serif;
+    }
+
+    header {
+      padding: 24px 24px 12px;
+    }
+
+    .eyebrow {
+      margin-bottom: 6px;
+      color: var(--blue);
+      font-size: 13px;
+      font-weight: 800;
+      letter-spacing: .12em;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(27px, 3vw, 40px);
+      letter-spacing: -.04em;
+    }
+
+    .subtitle {
+      max-width: 980px;
+      margin: 9px 0 0;
+      color: #536079;
+      font-size: 16px;
+      line-height: 1.6;
+    }
+
+    main {
+      padding: 6px 24px 28px;
+    }
+
+    .workspace {
+      display: grid;
+      grid-template-columns: minmax(680px, 1fr) 350px;
+      gap: 16px;
+      align-items: start;
+    }
+
+    .card {
+      border: 1px solid rgba(208, 217, 232, .9);
+      border-radius: 18px;
+      background: var(--panel);
+      box-shadow: var(--shadow);
+    }
+
+    .stage {
+      min-width: 0;
+      overflow-x: auto;
+      padding: 12px;
+    }
+
+    canvas {
+      display: block;
+      width: 100%;
+      height: auto;
+      border-radius: 12px;
+    }
+
+    #scene {
+      min-width: 680px;
+      background: #091327;
+    }
+
+    .sidebar {
+      padding: 14px;
+    }
+
+    h2, h3 {
+      margin: 0;
+    }
+
+    h2 {
+      font-size: 17px;
+      letter-spacing: -.01em;
+    }
+
+    h3 {
+      margin-bottom: 8px;
+      color: #3c4961;
+      font-size: 14px;
+    }
+
+    .preset-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 7px;
+      margin: 11px 0 14px;
+    }
+
+    button {
+      min-height: 40px;
+      border: 1px solid #cbd5e5;
+      border-radius: 10px;
+      background: #f9fbff;
+      color: #36445d;
+      font: inherit;
+      font-size: 13px;
+      font-weight: 800;
+      cursor: pointer;
+      transition: .18s ease;
+    }
+
+    button:hover {
+      border-color: #90afe4;
+      background: #edf5ff;
+    }
+
+    button.active {
+      border-color: var(--blue);
+      background: #e7f1ff;
+      color: #1857bd;
+    }
+
+    .control {
+      padding: 10px 0;
+      border-top: 1px solid var(--line);
+    }
+
+    label {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      color: #36445d;
+      font-size: 14px;
+      font-weight: 800;
+    }
+
+    output {
+      color: #165ec6;
+      font-variant-numeric: tabular-nums;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      margin: 9px 0 0;
+      accent-color: var(--blue);
+      cursor: pointer;
+    }
+
+    .two-buttons {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .readout-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 11px;
+      margin-top: 16px;
+    }
+
+    .spacing-banner {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      gap: 18px;
+      align-items: center;
+      margin-top: 16px;
+      padding: 15px 18px;
+      border: 2px solid #86b6ff;
+      border-radius: 16px;
+      background: linear-gradient(100deg, #e8f3ff, #f7fbff 55%, #f3efff);
+      box-shadow: var(--shadow);
+    }
+
+    .spacing-banner b {
+      display: block;
+      color: #3566ae;
+      font-size: 13px;
+      letter-spacing: .05em;
+    }
+
+    .spacing-value {
+      color: #125ec4;
+      font-size: clamp(32px, 5vw, 48px);
+      font-weight: 800;
+      letter-spacing: -.05em;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .spacing-detail {
+      color: #516079;
+      font-size: 14px;
+      line-height: 1.6;
+      text-align: right;
+    }
+
+    .spacing-detail span {
+      color: #1d2a40;
+      font-weight: 800;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .readout {
+      min-height: 106px;
+      padding: 13px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: rgba(255, 255, 255, .94);
+      box-shadow: var(--shadow);
+    }
+
+    .readout b {
+      display: block;
+      margin-bottom: 8px;
+      color: #6c7890;
+      font-size: 12px;
+      letter-spacing: .04em;
+    }
+
+    .readout span {
+      color: #202a3e;
+      font-size: 22px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .readout small {
+      display: block;
+      margin-top: 7px;
+      color: #7c879b;
+      font-size: 12px;
+      line-height: 1.4;
+    }
+
+    .lower {
+      display: grid;
+      grid-template-columns: minmax(540px, 1fr) 350px;
+      gap: 16px;
+      margin-top: 16px;
+    }
+
+    .formula-card, .notes {
+      padding: 16px;
+    }
+
+    .formula-block {
+      margin-top: 11px;
+      padding: 12px 14px;
+      overflow-x: auto;
+      border-radius: 11px;
+      background: #101a31;
+      color: #dbe9ff;
+      font-family: Consolas, "Courier New", monospace;
+      font-size: 14px;
+      line-height: 1.65;
+      white-space: nowrap;
+    }
+
+    .formula-block strong {
+      color: #73daf7;
+    }
+
+    .calculation {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px 18px;
+      margin-top: 13px;
+      color: #506078;
+      font-size: 14px;
+      line-height: 1.45;
+    }
+
+    .calculation span {
+      color: #1d2a40;
+      font-weight: 800;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .notes p {
+      margin: 9px 0 0;
+      color: #59667d;
+      font-size: 14px;
+      line-height: 1.58;
+    }
+
+    .result {
+      display: inline-block;
+      margin-top: 12px;
+      padding: 7px 10px;
+      border-radius: 999px;
+      background: #e8f6f2;
+      color: #08735b;
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    @media (max-width: 1080px) {
+      .workspace, .lower { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 720px) {
+      header, main { padding-inline: 12px; }
+      .readout-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .spacing-banner { grid-template-columns: 1fr; gap: 5px; }
+      .spacing-detail { text-align: left; }
+      .calculation { grid-template-columns: 1fr; }
+    }
+    .home-link{position:fixed;z-index:20;top:14px;right:16px;padding:9px 13px;border:1px solid #bfd0e6;border-radius:999px;background:rgba(255,255,255,.92);box-shadow:0 7px 18px rgba(35,52,86,.1);color:#2562ad;text-decoration:none;font-size:13px;font-weight:800}.home-link:hover{background:#eaf3ff}
+  </style>
+</head>
+<body>
+  <a class="home-link" href="./index.html">← 回到模擬首頁</a>
+  <header>
+    <div class="eyebrow">PHYSICS LAB · INTERACTIVE SIMULATION</div>
+    <h1>雙狹縫干涉：旋轉狹縫與屏幕</h1>
+    <p class="subtitle">拖動角度，觀察斜入射、狹縫旋轉與屏幕旋轉如何改變光程差、中央亮紋位置及屏幕上的條紋寬度。畫面中的狹縫間距會放大呈現，右側計算仍使用實際物理尺度。</p>
+  </header>
+
+  <main>
+    <section class="workspace">
+      <div class="stage card">
+        <canvas id="scene" width="1160" height="680" aria-label="雙狹縫干涉幾何圖與屏幕亮紋動畫"></canvas>
+      </div>
+
+      <aside class="sidebar card">
+        <h2>題目情境與自由調整</h2>
+        <div class="preset-grid">
+          <button type="button" data-preset="standard" class="active">標準模式</button>
+          <button type="button" data-preset="incident">(1) 斜入射</button>
+          <button type="button" data-preset="slit">(2) 旋轉狹縫</button>
+          <button type="button" data-preset="screen">(3) 旋轉屏幕</button>
+          <button type="button" data-preset="both">(4) 同步旋轉</button>
+          <button type="button" id="resetPoint">觀察點歸零</button>
+        </div>
+
+        <div class="control">
+          <label for="incidentAngle">入射角 α <output id="incidentAngleOut"></output></label>
+          <input id="incidentAngle" type="range" min="-6" max="6" step="0.5" value="0">
+        </div>
+        <div class="control">
+          <label for="slitAngle">狹縫角度 β <output id="slitAngleOut"></output></label>
+          <input id="slitAngle" type="range" min="-24" max="24" step="1" value="0">
+        </div>
+        <div class="control">
+          <label for="screenAngle">屏幕角度 γ <output id="screenAngleOut"></output></label>
+          <input id="screenAngle" type="range" min="-24" max="24" step="1" value="0">
+        </div>
+        <div class="control">
+          <label for="point">觀察點 P 的屏幕座標 q <output id="pointOut"></output></label>
+          <input id="point" type="range" min="-58" max="58" step="0.1" value="0">
+        </div>
+        <div class="control">
+          <label for="wavelength">波長 λ <output id="wavelengthOut"></output></label>
+          <input id="wavelength" type="range" min="420" max="680" step="5" value="540">
+        </div>
+        <div class="control">
+          <label for="slitDistance">狹縫間距 d <output id="slitDistanceOut"></output></label>
+          <input id="slitDistance" type="range" min="60" max="180" step="5" value="100">
+        </div>
+        <div class="control">
+          <label for="distance">屏幕距離 L <output id="distanceOut"></output></label>
+          <input id="distance" type="range" min="60" max="140" step="5" value="100">
+        </div>
+
+        <div class="two-buttons">
+          <button type="button" id="pauseBtn">暫停動畫</button>
+          <button type="button" id="centerBtn">跳到中央亮紋</button>
+        </div>
+      </aside>
+    </section>
+
+    <section class="spacing-banner" aria-label="亮紋間距量尺">
+      <div>
+        <b>屏幕亮紋間距 w</b>
+        <div class="spacing-value" id="spacingValue">5.40 mm</div>
+      </div>
+      <div></div>
+      <div class="spacing-detail">
+        中央亮紋 q₀：<span id="spacingCenter">0.00 mm</span><br>
+        相鄰亮紋 q₁：<span id="spacingNext">5.40 mm</span>　寬度比：<span id="spacingRatio">1.000 ×</span>
+      </div>
+    </section>
+
+    <section class="readout-grid" aria-label="重要計算結果">
+      <div class="readout">
+        <b>總光程差 Δ(P)</b>
+        <span id="deltaTotal">0.000 μm</span>
+        <small>入射相位差 + 狹縫到 P 的路徑差</small>
+      </div>
+      <div class="readout">
+        <b>Δ / λ</b>
+        <span id="order">0.000</span>
+        <small>整數接近亮紋，半整數接近暗紋</small>
+      </div>
+      <div class="readout">
+        <b>P 點相對亮度</b>
+        <span id="intensity">100.0%</span>
+        <small>I / Imax = cos²(πΔ / λ)</small>
+      </div>
+      <div class="readout">
+        <b>中央亮紋位置 q₀</b>
+        <span id="centerPosition">0.00 mm</span>
+        <small>數值搜尋 Δ(q₀) = 0 的位置</small>
+      </div>
+      <div class="readout">
+        <b>局部亮紋間距 w</b>
+        <span id="fringeWidth">5.40 mm</span>
+        <small>由中央亮紋到下一條亮紋的實際距離</small>
+      </div>
+      <div class="readout">
+        <b>標準模式 wₛ</b>
+        <span id="standardWidth">5.40 mm</span>
+        <small>wₛ ≈ λL / d</small>
+      </div>
+      <div class="readout">
+        <b>寬度比 w / wₛ</b>
+        <span id="widthRatio">1.000 ×</span>
+        <small>大於 1 代表屏幕上條紋較寬</small>
+      </div>
+      <div class="readout">
+        <b>目前觀察</b>
+        <span id="patternState">中央亮紋</span>
+        <small id="scenarioText">標準模式：光源、狹縫與屏幕皆未旋轉</small>
+      </div>
+    </section>
+
+    <section class="lower">
+      <div class="formula-card card">
+        <h2>光程差公式與即時計算</h2>
+        <div class="formula-block">
+          <strong>Δ(P)</strong> = δ<sub>入射</sub> + δ<sub>傳播</sub><br>
+          δ<sub>入射</sub> = k̂ · (S₂ - S₁)<br>
+          δ<sub>傳播</sub> = |P - S₂| - |P - S₁|<br>
+          <strong>I(P) / I<sub>max</sub></strong> = cos²(πΔ / λ)<br>
+          <strong>標準模式條紋寬度</strong> wₛ ≈ λL / d
+        </div>
+        <div class="calculation">
+          <div>δ<sub>入射</sub>：<span id="deltaIncoming">0.000 μm</span></div>
+          <div>δ<sub>傳播</sub>：<span id="deltaOutgoing">0.000 μm</span></div>
+          <div>|P - S₁|：<span id="path1">100.000000 cm</span></div>
+          <div>|P - S₂|：<span id="path2">100.000000 cm</span></div>
+          <div>相位差 φ = 2πΔ / λ：<span id="phase">0.000 rad</span></div>
+          <div>下一亮紋位置 q₁：<span id="nextBright">5.40 mm</span></div>
+        </div>
+      </div>
+
+      <div class="notes card">
+        <h2>如何讀這個模擬</h2>
+        <p>右側彩色屏幕是干涉條紋。白色十字為你選取的觀察點 P，青色十字為中央亮紋 q₀。兩條虛線代表 S₁、S₂ 到 P 的路徑。</p>
+        <p>題目中的「中央正對面的亮帶長度」可以用局部亮紋間距 w 來比較。先點選四個題目情境，再觀察寬度比如何改變。此模型固定狹縫中心與屏幕中心，旋轉皆繞各自中心進行。</p>
+        <span class="result" id="conclusion">標準模式：作為比較基準</span>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const canvas = document.getElementById("scene");
+    const ctx = canvas.getContext("2d");
+
+    const controls = {
+      incidentAngle: document.getElementById("incidentAngle"),
+      slitAngle: document.getElementById("slitAngle"),
+      screenAngle: document.getElementById("screenAngle"),
+      point: document.getElementById("point"),
+      wavelength: document.getElementById("wavelength"),
+      slitDistance: document.getElementById("slitDistance"),
+      distance: document.getElementById("distance")
+    };
+
+    const outs = {};
+    [
+      "incidentAngle", "slitAngle", "screenAngle", "point", "wavelength",
+      "slitDistance", "distance", "deltaTotal", "order", "intensity",
+      "centerPosition", "fringeWidth", "standardWidth", "widthRatio",
+      "patternState", "scenarioText", "deltaIncoming", "deltaOutgoing",
+      "path1", "path2", "phase", "nextBright", "conclusion", "spacingValue",
+      "spacingCenter", "spacingNext", "spacingRatio"
+    ].forEach(id => outs[id] = document.getElementById(id + (controls[id] ? "Out" : "")));
+
+    const pauseBtn = document.getElementById("pauseBtn");
+    const centerBtn = document.getElementById("centerBtn");
+    const resetPoint = document.getElementById("resetPoint");
+    const presetButtons = [...document.querySelectorAll("[data-preset]")];
+
+    const presets = {
+      standard: { alpha: 0, beta: 0, gamma: 0, text: "標準模式：光源、狹縫與屏幕皆未旋轉", conclusion: "標準模式：作為比較基準" },
+      incident: { alpha: 3, beta: 0, gamma: 0, text: "(1) 光源斜射：中央亮紋會平移", conclusion: "(1) 斜入射：條紋寬度近似不變，位置改變" },
+      slit: { alpha: 0, beta: -18, gamma: 0, text: "(2) 狹縫旋轉：有效投影間距改變", conclusion: "(2) 狹縫旋轉：條紋變寬" },
+      screen: { alpha: 0, beta: 0, gamma: -18, text: "(3) 屏幕旋轉：沿屏幕量到的距離改變", conclusion: "(3) 屏幕旋轉：條紋變寬" },
+      both: { alpha: 0, beta: -18, gamma: -18, text: "(4) 屏幕與狹縫同步旋轉", conclusion: "(4) 同步旋轉：在此模型中兩種投影效果疊加" },
+      custom: { text: "自由調整：正在使用一般化光程差計算", conclusion: "自由調整：比較 w / wₛ 判斷寬窄" }
+    };
+
+    let activePreset = "standard";
+    let paused = false;
+    let animationTime = 0;
+    let lastFrame = performance.now();
+
+    function number(id) {
+      return parseFloat(controls[id].value);
+    }
+
+    function radians(degrees) {
+      return degrees * Math.PI / 180;
+    }
+
+    function add(a, b) {
+      return { x: a.x + b.x, y: a.y + b.y };
+    }
+
+    function subtract(a, b) {
+      return { x: a.x - b.x, y: a.y - b.y };
+    }
+
+    function scale(v, amount) {
+      return { x: v.x * amount, y: v.y * amount };
+    }
+
+    function dot(a, b) {
+      return a.x * b.x + a.y * b.y;
+    }
+
+    function magnitude(v) {
+      return Math.hypot(v.x, v.y);
+    }
+
+    function physicalModel() {
+      const alpha = radians(number("incidentAngle"));
+      const beta = radians(number("slitAngle"));
+      const gamma = radians(number("screenAngle"));
+      const lambda = number("wavelength") * 1e-9;
+      const d = number("slitDistance") * 1e-6;
+      const L = number("distance") / 100;
+      const slitAxis = { x: Math.sin(beta), y: Math.cos(beta) };
+      const screenAxis = { x: Math.sin(gamma), y: Math.cos(gamma) };
+      const incoming = { x: Math.cos(alpha), y: Math.sin(alpha) };
+      const s1 = scale(slitAxis, -d / 2);
+      const s2 = scale(slitAxis, d / 2);
+      const screenCenter = { x: L, y: 0 };
+
+      function valuesAt(qMillimeters) {
+        const q = qMillimeters / 1000;
+        const p = add(screenCenter, scale(screenAxis, q));
+        const path1 = magnitude(subtract(p, s1));
+        const path2 = magnitude(subtract(p, s2));
+        const deltaIncoming = dot(incoming, subtract(s2, s1));
+        const deltaOutgoing = path2 - path1;
+        const delta = deltaIncoming + deltaOutgoing;
+        const order = delta / lambda;
+        const intensity = Math.pow(Math.cos(Math.PI * order), 2);
+        return { q, p, path1, path2, deltaIncoming, deltaOutgoing, delta, order, intensity };
+      }
+
+      function rootForOrder(order, estimate) {
+        const target = order * lambda;
+        let bestQ = estimate;
+        let bestError = Infinity;
+        const minQ = -300;
+        const maxQ = 300;
+        const samples = 2400;
+        for (let i = 0; i <= samples; i++) {
+          const q = minQ + (maxQ - minQ) * i / samples;
+          const error = Math.abs(valuesAt(q).delta - target);
+          if (error < bestError) {
+            bestError = error;
+            bestQ = q;
+          }
+        }
+        let low = Math.max(minQ, bestQ - 0.2);
+        let high = Math.min(maxQ, bestQ + 0.2);
+        for (let i = 0; i < 45; i++) {
+          const left = low + (high - low) / 3;
+          const right = high - (high - low) / 3;
+          const leftError = Math.abs(valuesAt(left).delta - target);
+          const rightError = Math.abs(valuesAt(right).delta - target);
+          if (leftError < rightError) high = right;
+          else low = left;
+        }
+        return (low + high) / 2;
+      }
+
+      const selected = valuesAt(number("point"));
+      const standardWidth = lambda * L / d * 1000;
+      const center = rootForOrder(0, 0);
+      const nextCandidates = [
+        rootForOrder(1, center - standardWidth),
+        rootForOrder(-1, center + standardWidth)
+      ];
+      const next = nextCandidates.reduce((best, q) => {
+        const distance = Math.abs(q - center);
+        return distance > 0.02 && distance < Math.abs(best - center) ? q : best;
+      });
+      const fringeWidth = Math.abs(next - center);
+
+      return {
+        alpha, beta, gamma, lambda, d, L, slitAxis, screenAxis, incoming,
+        s1, s2, screenCenter, selected, center, next, fringeWidth, standardWidth,
+        ratio: fringeWidth / standardWidth, valuesAt
+      };
+    }
+
+    function line(x1, y1, x2, y2, color = "#ffffff", width = 2, dash = []) {
+      ctx.save();
+      ctx.beginPath();
+      ctx.strokeStyle = color;
+      ctx.lineWidth = width;
+      ctx.lineCap = "round";
+      ctx.setLineDash(dash);
+      ctx.moveTo(x1, y1);
+      ctx.lineTo(x2, y2);
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    function text(value, x, y, size = 16, color = "#ffffff", align = "left", weight = "400") {
+      ctx.fillStyle = color;
+      ctx.font = `${weight} ${size}px Arial, "Noto Sans TC", sans-serif`;
+      ctx.textAlign = align;
+      ctx.textBaseline = "middle";
+      ctx.fillText(value, x, y);
+    }
+
+    function dotMarker(x, y, radius, fill, stroke = "#ffffff") {
+      ctx.beginPath();
+      ctx.fillStyle = fill;
+      ctx.strokeStyle = stroke;
+      ctx.lineWidth = 2;
+      ctx.arc(x, y, radius, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+    }
+
+    function arrow(x1, y1, x2, y2, color = "#8de3ff", width = 2) {
+      line(x1, y1, x2, y2, color, width);
+      const angle = Math.atan2(y2 - y1, x2 - x1);
+      const length = 10;
+      line(x2, y2, x2 - Math.cos(angle - .55) * length, y2 - Math.sin(angle - .55) * length, color, width);
+      line(x2, y2, x2 - Math.cos(angle + .55) * length, y2 - Math.sin(angle + .55) * length, color, width);
+    }
+
+    function waveColor(nanometers, alpha = 1) {
+      let r = 0, g = 0, b = 0;
+      if (nanometers < 440) { r = -(nanometers - 440) / 20; b = 1; }
+      else if (nanometers < 490) { g = (nanometers - 440) / 50; b = 1; }
+      else if (nanometers < 510) { g = 1; b = -(nanometers - 510) / 20; }
+      else if (nanometers < 580) { r = (nanometers - 510) / 70; g = 1; }
+      else if (nanometers < 645) { r = 1; g = -(nanometers - 645) / 65; }
+      else { r = 1; }
+      const boost = .22;
+      return `rgba(${Math.round(255 * (boost + r * (1 - boost)))}, ${Math.round(255 * (boost + g * (1 - boost)))}, ${Math.round(255 * (boost + b * (1 - boost)))}, ${alpha})`;
+    }
+
+    function geometryForCanvas(m) {
+      const slitCenter = { x: 405, y: 345 };
+      const screenCenter = { x: 965, y: 345 };
+      const slitAxis = { x: Math.sin(m.beta), y: Math.cos(m.beta) };
+      const screenAxis = { x: Math.sin(m.gamma), y: Math.cos(m.gamma) };
+      const slitGap = 34;
+      const screenScale = 4;
+      const s1 = add(slitCenter, scale(slitAxis, -slitGap));
+      const s2 = add(slitCenter, scale(slitAxis, slitGap));
+
+      function screenPoint(qMillimeters) {
+        return add(screenCenter, scale(screenAxis, qMillimeters * screenScale));
+      }
+
+      return { slitCenter, screenCenter, slitAxis, screenAxis, s1, s2, screenScale, screenPoint };
+    }
+
+    function drawBackground() {
+      const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+      gradient.addColorStop(0, "#0d1c39");
+      gradient.addColorStop(.64, "#091529");
+      gradient.addColorStop(1, "#111936");
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = "rgba(129, 178, 255, .06)";
+      for (let x = 0; x <= canvas.width; x += 40) ctx.fillRect(x, 0, 1, canvas.height);
+      for (let y = 0; y <= canvas.height; y += 40) ctx.fillRect(0, y, canvas.width, 1);
+    }
+
+    function drawIncomingWaves(m, g) {
+      const direction = m.incoming;
+      const normal = { x: -direction.y, y: direction.x };
+      const color = waveColor(number("wavelength"), .48);
+      const center = { x: 235, y: 345 };
+      for (let i = -5; i <= 4; i++) {
+        const travel = ((animationTime * 72) % 42) + i * 42;
+        const waveCenter = add(center, scale(direction, travel));
+        const a = add(waveCenter, scale(normal, -175));
+        const b = add(waveCenter, scale(normal, 175));
+        line(a.x, a.y, b.x, b.y, color, 2);
+      }
+      for (let i = -2; i <= 2; i++) {
+        const a = add({ x: 74, y: 345 }, scale(normal, i * 49));
+        const b = add(a, scale(direction, 78));
+        arrow(a.x, a.y, b.x, b.y, waveColor(number("wavelength"), .9), 2);
+      }
+      text("平面入射波", 66, 82, 17, "#b8c9ed", "left", "700");
+      text(`α = ${number("incidentAngle").toFixed(0)}°`, 66, 106, 15, "#7e96c7");
+    }
+
+    function drawSlitPlate(g) {
+      const axis = g.slitAxis;
+      const gapHalf = 8;
+      const points = [-210, -34 - gapHalf, -34 + gapHalf, 34 - gapHalf, 34 + gapHalf, 210];
+      line(
+        g.slitCenter.x + axis.x * points[0], g.slitCenter.y + axis.y * points[0],
+        g.slitCenter.x + axis.x * points[1], g.slitCenter.y + axis.y * points[1],
+        "#d5e1fb", 9
+      );
+      line(
+        g.slitCenter.x + axis.x * points[2], g.slitCenter.y + axis.y * points[2],
+        g.slitCenter.x + axis.x * points[3], g.slitCenter.y + axis.y * points[3],
+        "#d5e1fb", 9
+      );
+      line(
+        g.slitCenter.x + axis.x * points[4], g.slitCenter.y + axis.y * points[4],
+        g.slitCenter.x + axis.x * points[5], g.slitCenter.y + axis.y * points[5],
+        "#d5e1fb", 9
+      );
+      dotMarker(g.s1.x, g.s1.y, 7, "#50d8ff");
+      dotMarker(g.s2.x, g.s2.y, 7, "#50d8ff");
+      text("S₁", g.s1.x - 24, g.s1.y - 14, 17, "#a8edff", "right", "700");
+      text("S₂", g.s2.x - 24, g.s2.y + 15, 17, "#a8edff", "right", "700");
+      text("雙狹縫", g.slitCenter.x - 54, 86, 17, "#d5e1fb", "center", "700");
+      text(`β = ${number("slitAngle").toFixed(0)}°`, g.slitCenter.x - 54, 110, 15, "#879bc5", "center");
+    }
+
+    function drawScreen(m, g) {
+      const axis = g.screenAxis;
+      const normal = { x: axis.y, y: -axis.x };
+      for (let y = -250; y <= 250; y += 2) {
+        const q = y / g.screenScale;
+        const brightness = m.valuesAt(q).intensity;
+        const p = add(g.screenCenter, scale(axis, y));
+        const color = waveColor(number("wavelength"), .12 + .88 * brightness);
+        line(
+          p.x - normal.x * (7 + brightness * 8), p.y - normal.y * (7 + brightness * 8),
+          p.x + normal.x * (7 + brightness * 8), p.y + normal.y * (7 + brightness * 8),
+          color, 3
+        );
+      }
+      const a = add(g.screenCenter, scale(axis, -270));
+      const b = add(g.screenCenter, scale(axis, 270));
+      line(a.x, a.y, b.x, b.y, "rgba(235, 242, 255, .75)", 2);
+      text("屏幕", 1066, 87, 17, "#d5e1fb", "center", "700");
+      text(`γ = ${number("screenAngle").toFixed(0)}°`, 1066, 111, 15, "#879bc5", "center");
+    }
+
+    function drawRays(m, g) {
+      const point = g.screenPoint(number("point"));
+      line(g.s1.x, g.s1.y, point.x, point.y, "rgba(126, 213, 255, .68)", 2, [8, 7]);
+      line(g.s2.x, g.s2.y, point.x, point.y, "rgba(255, 174, 107, .75)", 2, [8, 7]);
+      text("r₁", (g.s1.x + point.x) / 2, (g.s1.y + point.y) / 2 - 18, 17, "#8cdfff", "center", "700");
+      text("r₂", (g.s2.x + point.x) / 2, (g.s2.y + point.y) / 2 + 20, 17, "#ffbc86", "center", "700");
+
+      const centerPoint = g.screenPoint(m.center);
+      const intensity = m.selected.intensity;
+      const selectedColor = intensity > .52 ? "#ffffff" : "#ffb268";
+      line(point.x - 15, point.y, point.x + 15, point.y, selectedColor, 2);
+      line(point.x, point.y - 15, point.x, point.y + 15, selectedColor, 2);
+      line(centerPoint.x - 12, centerPoint.y, centerPoint.x + 12, centerPoint.y, "#69f1dc", 2);
+      line(centerPoint.x, centerPoint.y - 12, centerPoint.x, centerPoint.y + 12, "#69f1dc", 2);
+      text("P", point.x + 24, point.y - 16, 18, selectedColor, "left", "700");
+      text("q₀", centerPoint.x - g.screenAxis.y * 24, centerPoint.y + g.screenAxis.x * 24 + 5, 16, "#69f1dc", "right", "700");
+    }
+
+    function drawFringeRuler(m, g) {
+      const centerPoint = g.screenPoint(m.center);
+      const nextPoint = g.screenPoint(m.next);
+      const axis = g.screenAxis;
+      const normal = { x: axis.y, y: -axis.x };
+      const offset = 53;
+      const start = add(centerPoint, scale(normal, offset));
+      const end = add(nextPoint, scale(normal, offset));
+      const color = "#ffd166";
+      const arrowSize = 11;
+
+      line(centerPoint.x, centerPoint.y, start.x, start.y, "rgba(255, 209, 102, .72)", 2, [4, 4]);
+      line(nextPoint.x, nextPoint.y, end.x, end.y, "rgba(255, 209, 102, .72)", 2, [4, 4]);
+      line(start.x, start.y, end.x, end.y, color, 4);
+      line(start.x, start.y, start.x + axis.x * arrowSize + normal.x * 6, start.y + axis.y * arrowSize + normal.y * 6, color, 3);
+      line(start.x, start.y, start.x + axis.x * arrowSize - normal.x * 6, start.y + axis.y * arrowSize - normal.y * 6, color, 3);
+      line(end.x, end.y, end.x - axis.x * arrowSize + normal.x * 6, end.y - axis.y * arrowSize + normal.y * 6, color, 3);
+      line(end.x, end.y, end.x - axis.x * arrowSize - normal.x * 6, end.y - axis.y * arrowSize - normal.y * 6, color, 3);
+
+      dotMarker(nextPoint.x, nextPoint.y, 6, "#ffd166", "#fff3c4");
+      text("q₁", nextPoint.x - normal.x * 24, nextPoint.y - normal.y * 24 + 5, 16, "#ffd166", "right", "700");
+
+      ctx.fillStyle = "rgba(7, 17, 36, .92)";
+      ctx.fillRect(725, 132, 210, 90);
+      line(725, 132, 935, 132, "rgba(255, 209, 102, .78)", 2);
+      text("屏幕亮紋間距", 743, 157, 15, "#ffdd8a", "left", "700");
+      text(`w = ${m.fringeWidth.toFixed(2)} mm`, 743, 187, 23, "#ffd166", "left", "700");
+      text(`q₀ ${m.center.toFixed(2)}　q₁ ${m.next.toFixed(2)} mm`, 743, 209, 13, "#d5def1");
+    }
+
+    function drawSecondaryWaves(m, g) {
+      const color = waveColor(number("wavelength"), .32);
+      [g.s1, g.s2].forEach(source => {
+        for (let radius = 24 + (animationTime * 74) % 42; radius < 530; radius += 42) {
+          ctx.beginPath();
+          ctx.strokeStyle = color;
+          ctx.lineWidth = 1.5;
+          ctx.arc(source.x, source.y, radius, -.72, .72);
+          ctx.stroke();
+        }
+      });
+    }
+
+    function drawLegend(m) {
+      ctx.fillStyle = "rgba(7, 17, 36, .84)";
+      ctx.fillRect(24, 560, 625, 91);
+      text("讀圖提示", 42, 583, 16, "#d6e5ff", "left", "700");
+      text("白色十字：觀察點 P　青色十字：中央亮紋 q₀", 42, 609, 15, "#c2d1ee");
+      text("屏幕亮度由 I / Imax = cos²(πΔ / λ) 計算", 42, 632, 15, "#8ea6d0");
+
+      ctx.fillStyle = "rgba(7, 17, 36, .84)";
+      ctx.fillRect(690, 584, 442, 67);
+      text(`P 點亮度 ${(m.selected.intensity * 100).toFixed(1)}%`, 710, 608, 19, "#ffffff", "left", "700");
+      text(`Δ = ${(m.selected.delta * 1e6).toFixed(3)} μm　　Δ / λ = ${m.selected.order.toFixed(3)}`, 710, 633, 15, "#b7c9ea");
+    }
+
+    function drawScene(m) {
+      drawBackground();
+      const g = geometryForCanvas(m);
+      drawIncomingWaves(m, g);
+      drawSecondaryWaves(m, g);
+      drawScreen(m, g);
+      drawSlitPlate(g);
+      drawRays(m, g);
+      drawFringeRuler(m, g);
+      drawLegend(m);
+    }
+
+    function formatMicrometers(value) {
+      return `${(value * 1e6).toFixed(3)} μm`;
+    }
+
+    function updateOutputs(m) {
+      outs.incidentAngle.textContent = `${number("incidentAngle").toFixed(0)}°`;
+      outs.slitAngle.textContent = `${number("slitAngle").toFixed(0)}°`;
+      outs.screenAngle.textContent = `${number("screenAngle").toFixed(0)}°`;
+      outs.point.textContent = `${number("point").toFixed(1)} mm`;
+      outs.wavelength.textContent = `${number("wavelength").toFixed(0)} nm`;
+      outs.slitDistance.textContent = `${number("slitDistance").toFixed(0)} μm`;
+      outs.distance.textContent = `${number("distance").toFixed(0)} cm`;
+
+      outs.deltaTotal.textContent = formatMicrometers(m.selected.delta);
+      outs.order.textContent = m.selected.order.toFixed(3);
+      outs.intensity.textContent = `${(m.selected.intensity * 100).toFixed(1)}%`;
+      outs.centerPosition.textContent = `${m.center.toFixed(2)} mm`;
+      outs.fringeWidth.textContent = `${m.fringeWidth.toFixed(2)} mm`;
+      outs.standardWidth.textContent = `${m.standardWidth.toFixed(2)} mm`;
+      outs.widthRatio.textContent = `${m.ratio.toFixed(3)} ×`;
+      outs.deltaIncoming.textContent = formatMicrometers(m.selected.deltaIncoming);
+      outs.deltaOutgoing.textContent = formatMicrometers(m.selected.deltaOutgoing);
+      outs.path1.textContent = `${(m.selected.path1 * 100).toFixed(6)} cm`;
+      outs.path2.textContent = `${(m.selected.path2 * 100).toFixed(6)} cm`;
+      outs.phase.textContent = `${(2 * Math.PI * m.selected.order).toFixed(3)} rad`;
+      outs.nextBright.textContent = `${m.next.toFixed(2)} mm`;
+      outs.spacingValue.textContent = `${m.fringeWidth.toFixed(2)} mm`;
+      outs.spacingCenter.textContent = `${m.center.toFixed(2)} mm`;
+      outs.spacingNext.textContent = `${m.next.toFixed(2)} mm`;
+      outs.spacingRatio.textContent = `${m.ratio.toFixed(3)} ×`;
+
+      const distanceToInteger = Math.abs(m.selected.order - Math.round(m.selected.order));
+      const distanceToHalf = Math.abs(Math.abs(m.selected.order - Math.floor(m.selected.order)) - .5);
+      if (distanceToInteger < .08) outs.patternState.textContent = "接近亮紋";
+      else if (distanceToHalf < .08) outs.patternState.textContent = "接近暗紋";
+      else outs.patternState.textContent = "亮暗過渡";
+      if (Math.abs(number("point") - m.center) < .09) outs.patternState.textContent = "中央亮紋";
+
+      const scenario = presets[activePreset] || presets.custom;
+      outs.scenarioText.textContent = scenario.text;
+      outs.conclusion.textContent = scenario.conclusion;
+    }
+
+    function setPreset(name) {
+      const preset = presets[name];
+      activePreset = name;
+      controls.incidentAngle.value = preset.alpha;
+      controls.slitAngle.value = preset.beta;
+      controls.screenAngle.value = preset.gamma;
+      controls.point.value = 0;
+      presetButtons.forEach(button => button.classList.toggle("active", button.dataset.preset === name));
+    }
+
+    Object.values(controls).forEach(control => {
+      control.addEventListener("input", () => {
+        if (!["point", "wavelength", "slitDistance", "distance"].includes(control.id)) {
+          activePreset = "custom";
+          presetButtons.forEach(button => button.classList.remove("active"));
+        }
+      });
+    });
+
+    presetButtons.forEach(button => {
+      button.addEventListener("click", () => setPreset(button.dataset.preset));
+    });
+
+    resetPoint.addEventListener("click", () => {
+      controls.point.value = 0;
+    });
+
+    centerBtn.addEventListener("click", () => {
+      const m = physicalModel();
+      controls.point.value = Math.max(-58, Math.min(58, m.center)).toFixed(1);
+    });
+
+    pauseBtn.addEventListener("click", () => {
+      paused = !paused;
+      pauseBtn.textContent = paused ? "繼續動畫" : "暫停動畫";
+      pauseBtn.classList.toggle("active", paused);
+    });
+
+    function frame(now) {
+      const deltaTime = Math.min(.05, (now - lastFrame) / 1000);
+      lastFrame = now;
+      if (!paused) animationTime += deltaTime;
+      const model = physicalModel();
+      updateOutputs(model);
+      drawScene(model);
+      requestAnimationFrame(frame);
+    }
+
+    requestAnimationFrame(frame);
+  </script>
+</body>
+</html>

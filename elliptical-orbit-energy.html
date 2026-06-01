@@ -1,0 +1,968 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>橢圓軌道力學能：兩種半徑不能混用</title>
+  <style>
+    :root {
+      --ink: #152338;
+      --muted: #63728a;
+      --line: #dce5ef;
+      --panel: rgba(255,255,255,.96);
+      --soft: #f6f9fc;
+      --navy: #10243a;
+      --blue: #3d7cf0;
+      --cyan: #10a6a6;
+      --red: #ef5c61;
+      --orange: #e68a27;
+      --violet: #7757d9;
+      --green: #118768;
+      --yellow: #f6c760;
+      --shadow: 0 14px 30px rgba(34,63,96,.10);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      min-width: 320px;
+      margin: 0;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 5% 0%, rgba(61,124,240,.13), transparent 28rem),
+        linear-gradient(145deg, #f2f8ff, #fbfcff 42%, #f7f4ff);
+      font-family: Arial, "Noto Sans TC", "Microsoft JhengHei", sans-serif;
+    }
+
+    header {
+      max-width: 1540px;
+      margin: 0 auto;
+      padding: 25px 25px 10px;
+    }
+
+    .eyebrow {
+      margin-bottom: 7px;
+      color: var(--blue);
+      font-size: 13px;
+      font-weight: 800;
+      letter-spacing: .12em;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(27px, 3vw, 42px);
+      letter-spacing: -.055em;
+    }
+
+    .subtitle {
+      max-width: 1080px;
+      margin: 9px 0 0;
+      color: #52647f;
+      font-size: 16px;
+      line-height: 1.65;
+    }
+
+    main {
+      max-width: 1540px;
+      margin: 0 auto;
+      padding: 8px 25px 30px;
+    }
+
+    .workspace {
+      display: grid;
+      grid-template-columns: minmax(720px, 1fr) 370px;
+      gap: 16px;
+      align-items: start;
+    }
+
+    .card {
+      border: 1px solid rgba(211,222,235,.96);
+      border-radius: 19px;
+      background: var(--panel);
+      box-shadow: var(--shadow);
+    }
+
+    .stage {
+      min-width: 0;
+      overflow-x: auto;
+      padding: 12px;
+    }
+
+    canvas {
+      display: block;
+      width: 100%;
+      height: auto;
+      border-radius: 13px;
+    }
+
+    #orbitCanvas {
+      min-width: 720px;
+      background: var(--navy);
+      cursor: grab;
+      touch-action: none;
+    }
+
+    #orbitCanvas.dragging { cursor: grabbing; }
+
+    aside { padding: 15px; }
+    h2, h3, p { margin-top: 0; }
+    h2 { margin-bottom: 10px; font-size: 18px; }
+    h3 { margin-bottom: 8px; font-size: 14px; }
+
+    .small {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.55;
+    }
+
+    .preset-grid,
+    .button-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 7px;
+    }
+
+    button {
+      min-height: 39px;
+      border: 1px solid #cad6e5;
+      border-radius: 10px;
+      background: #fbfdff;
+      color: #35455e;
+      font: inherit;
+      font-size: 13px;
+      font-weight: 800;
+      cursor: pointer;
+      transition: .18s ease;
+    }
+
+    button:hover { border-color: var(--blue); color: #1d63ca; }
+    button.active { border-color: #83aef5; background: #e9f2ff; color: #1f63c4; }
+
+    .section {
+      padding: 13px 0;
+      border-top: 1px solid var(--line);
+    }
+
+    .section:first-of-type { border-top: 0; padding-top: 0; }
+
+    .control { margin-top: 11px; }
+
+    label,
+    .label-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      color: #35465d;
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    output {
+      color: #2365bf;
+      font-variant-numeric: tabular-nums;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      margin: 9px 0 0;
+      accent-color: var(--blue);
+    }
+
+    .switches {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .switch {
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 7px;
+      min-height: 36px;
+      padding: 7px 8px;
+      border: 1px solid var(--line);
+      border-radius: 9px;
+      background: var(--soft);
+      color: #536179;
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .switch input { margin: 0; accent-color: var(--blue); }
+
+    .meters {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .meter {
+      min-height: 74px;
+      padding: 10px;
+      border: 1px solid var(--line);
+      border-radius: 11px;
+      background: var(--soft);
+    }
+
+    .meter b {
+      display: block;
+      margin-bottom: 6px;
+      color: #63728a;
+      font-size: 11px;
+      letter-spacing: .025em;
+    }
+
+    .meter span {
+      color: #18314d;
+      font-size: 19px;
+      font-weight: 800;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .meter.distance span { color: var(--orange); }
+    .meter.curvature span { color: var(--cyan); }
+
+    .energy-box {
+      display: grid;
+      gap: 8px;
+    }
+
+    .energy-line {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 10px;
+      border-radius: 10px;
+      background: #f5f8fc;
+      color: #3e4c62;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .energy-line strong {
+      color: #1b3554;
+      font-size: 17px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .energy-line.wrong {
+      border: 1px solid #ffd7d9;
+      background: #fff6f6;
+    }
+
+    .energy-line.wrong strong { color: #d04c53; }
+
+    .error-note {
+      margin: 9px 0 0;
+      color: #b74c52;
+      font-size: 12px;
+      font-weight: 800;
+      line-height: 1.5;
+    }
+
+    .formula {
+      margin: 10px 0 0;
+      padding: 10px 11px;
+      border-radius: 10px;
+      background: #132944;
+      color: #eaf3ff;
+      font-family: Consolas, "Courier New", monospace;
+      font-size: 12px;
+      line-height: 1.65;
+    }
+
+    .challenge {
+      padding: 11px;
+      border: 1px solid #d9e4f4;
+      border-radius: 12px;
+      background: linear-gradient(145deg, #f4f8ff, #f8f5ff);
+    }
+
+    #guessWrap[hidden] { display: none; }
+
+    .challenge .button-row {
+      grid-template-columns: 1.1fr 1fr;
+      margin-top: 9px;
+    }
+
+    .feedback {
+      min-height: 18px;
+      margin: 8px 0 0;
+      color: #586a85;
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .bottom-grid {
+      display: grid;
+      grid-template-columns: minmax(520px, 1.1fr) minmax(390px, .9fr);
+      gap: 16px;
+      margin-top: 16px;
+    }
+
+    .bottom-card { padding: 15px; }
+
+    .analogy-grid {
+      display: grid;
+      grid-template-columns: minmax(330px, .95fr) 1fr;
+      gap: 14px;
+      align-items: center;
+    }
+
+    #projectileCanvas {
+      min-width: 320px;
+      background: #f8fbff;
+      border: 1px solid #e2eaf3;
+    }
+
+    .analogy-text p,
+    .notes li {
+      color: #56667e;
+      font-size: 14px;
+      line-height: 1.62;
+    }
+
+    .analogy-text p { margin-bottom: 8px; }
+    .notes ol { margin: 0; padding-left: 21px; }
+
+    .inline-formula {
+      padding: 2px 5px;
+      border-radius: 5px;
+      background: #eef4fc;
+      color: #255f9f;
+      font-family: Consolas, monospace;
+      font-size: .93em;
+      white-space: nowrap;
+    }
+
+    .key {
+      display: inline-block;
+      margin-right: 5px;
+      color: var(--ink);
+      font-weight: 800;
+    }
+
+    @media (max-width: 1160px) {
+      .workspace, .bottom-grid { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 700px) {
+      header { padding: 18px 13px 8px; }
+      main { padding: 6px 13px 22px; }
+      .analogy-grid { grid-template-columns: 1fr; }
+      .subtitle { font-size: 14px; }
+    }
+    .home-link{position:fixed;z-index:20;top:14px;right:16px;padding:9px 13px;border:1px solid #bfd0e6;border-radius:999px;background:rgba(255,255,255,.92);box-shadow:0 7px 18px rgba(35,52,86,.1);color:#2562ad;text-decoration:none;font-size:13px;font-weight:800}.home-link:hover{background:#eaf3ff}
+  </style>
+</head>
+<body>
+  <a class="home-link" href="./index.html">← 回到模擬首頁</a>
+  <header>
+    <div class="eyebrow">ELLIPTICAL ORBIT LAB · 橢圓軌道實驗室</div>
+    <h1>萬有引力可以直接當向心力嗎？</h1>
+    <p class="subtitle">
+      拖曳軌道上的行星，觀察兩種容易混淆的半徑：萬有引力中的 <strong>距離 r</strong>，
+      與曲線運動中的 <strong>曲率半徑 ρ</strong>。只有圓軌道時，它們才會處處相同。
+    </p>
+  </header>
+
+  <main>
+    <section class="workspace">
+      <div class="stage card">
+        <canvas id="orbitCanvas" width="1100" height="650" aria-label="橢圓軌道互動模擬：可拖曳軌道上的行星"></canvas>
+      </div>
+
+      <aside class="card">
+        <section class="section">
+          <h2>橢圓軌道控制台</h2>
+          <p class="small">拖曳畫布中的行星，或先從三個代表位置觀察。</p>
+          <div class="preset-grid">
+            <button type="button" data-position="perihelion">近日點</button>
+            <button type="button" data-position="top">橢圓上方</button>
+            <button type="button" data-position="aphelion">遠日點</button>
+          </div>
+          <div class="control">
+            <label for="semiMajor">半長軸 a <output id="semiMajorOut"></output></label>
+            <input id="semiMajor" data-testid="semi-major" type="range" min=".80" max="1.65" step=".01" value="1.20">
+          </div>
+          <div class="control">
+            <label for="eccentricity">離心率 e <output id="eccentricityOut"></output></label>
+            <input id="eccentricity" data-testid="eccentricity" type="range" min="0" max=".75" step=".01" value=".58">
+          </div>
+          <div class="switches">
+            <label class="switch"><input id="autoPlay" type="checkbox"> 自動繞行</label>
+            <label class="switch"><input id="showCircle" type="checkbox" checked> 曲率圓解答</label>
+            <label class="switch"><input id="showVectors" type="checkbox" checked> 向量分解</label>
+            <label class="switch"><input id="showAxes" type="checkbox" checked> 半長軸標示</label>
+          </div>
+        </section>
+
+        <section class="section">
+          <h3>現在位置的兩種半徑</h3>
+          <div class="meters">
+            <div class="meter distance"><b>太陽到行星距離 r</b><span id="distanceValue"></span></div>
+            <div class="meter curvature"><b>軌跡曲率半徑 ρ</b><span id="curvatureValue"></span></div>
+            <div class="meter"><b>正確速率 v</b><span id="speedValue"></span></div>
+            <div class="meter"><b>切向加速度占比</b><span id="tangentValue"></span></div>
+          </div>
+        </section>
+
+        <section class="section">
+          <h3>用哪個式子求動能？</h3>
+          <div class="energy-box">
+            <div class="energy-line">
+              <span>橢圓軌道：由力學能</span>
+              <strong id="correctEnergy"></strong>
+            </div>
+            <div class="energy-line wrong">
+              <span>誤套圓軌道：令 F<sub>g</sub> = mv²/r</span>
+              <strong id="wrongEnergy"></strong>
+            </div>
+          </div>
+          <p class="error-note" id="errorNote"></p>
+          <div class="formula">正確：v² = GM ( 2/r - 1/a )<br>曲線運動：a<sub>n</sub> = v²/ρ<br>注意：一般位置的重力還有切向分量</div>
+        </section>
+
+        <section class="section">
+          <div class="challenge">
+            <h3>圓規挑戰：找出局部最貼合的圓</h3>
+            <p class="small">開啟後先隱藏答案。調整藍色猜測圓，讓它在行星附近盡量貼合橢圓，再顯示解答。</p>
+            <div class="button-row">
+              <button type="button" id="challengeBtn">開始圓規挑戰</button>
+              <button type="button" id="revealBtn" class="active">隱藏解答</button>
+            </div>
+            <div id="guessWrap" hidden>
+              <div class="control">
+                <label for="guessRadius">猜測半徑 ρ<sub>猜</sub> <output id="guessOut"></output></label>
+                <input id="guessRadius" data-testid="guess-radius" type="range" min=".10" max="3.20" step=".01" value="1.00">
+              </div>
+              <p class="feedback" id="feedback"></p>
+            </div>
+          </div>
+        </section>
+      </aside>
+    </section>
+
+    <section class="bottom-grid">
+      <article class="card bottom-card">
+        <h2>類比：斜拋最高點的曲率半徑</h2>
+        <div class="analogy-grid">
+          <canvas id="projectileCanvas" width="600" height="285" aria-label="斜拋最高點曲率圓示意圖"></canvas>
+          <div class="analogy-text">
+            <p><span class="key">你已經做過的：</span>在斜拋最高點，速度水平、重力垂直，因此重力剛好全部是法向加速度。</p>
+            <p><span class="inline-formula">g = v²/ρ</span> 中的 <span class="inline-formula">ρ</span> 是拋物線在最高點的曲率半徑，不是離地高度。</p>
+            <p><span class="key">橢圓軌道也一樣：</span>先問「軌跡在此處彎得多急」，不要把到太陽的距離直接塞進曲率半徑的位置。</p>
+          </div>
+        </div>
+      </article>
+
+      <article class="card bottom-card notes">
+        <h2>帶著學生看三個位置</h2>
+        <ol>
+          <li><strong>近日點、遠日點：</strong>重力方向剛好沿法線，但 <span class="inline-formula">r ≠ ρ</span>，所以仍不能把分母直接寫成距離。</li>
+          <li><strong>橢圓上方：</strong>可清楚看到紅色重力向量不是完全沿法線，還有橘色切向分量。</li>
+          <li><strong>圓軌道：</strong>把離心率拉到 <span class="inline-formula">e = 0</span>。此時 <span class="inline-formula">r = ρ = a</span>，熟悉的圓軌道公式才處處成立。</li>
+        </ol>
+      </article>
+    </section>
+  </main>
+
+  <script>
+    const orbitCanvas = document.getElementById("orbitCanvas");
+    const ctx = orbitCanvas.getContext("2d");
+    const projectileCanvas = document.getElementById("projectileCanvas");
+    const pctx = projectileCanvas.getContext("2d");
+    const $ = id => document.getElementById(id);
+    const controls = {
+      semiMajor: $("semiMajor"),
+      eccentricity: $("eccentricity"),
+      autoPlay: $("autoPlay"),
+      showCircle: $("showCircle"),
+      showVectors: $("showVectors"),
+      showAxes: $("showAxes"),
+      guessRadius: $("guessRadius")
+    };
+
+    const KM_PER_SECOND_AT_1_AU = 29.7847;
+    const center = { x: 520, y: 322 };
+    const scale = 255;
+    let anomaly = Math.PI * 0.64;
+    let meanAnomaly = anomaly;
+    let dragging = false;
+    let challengeActive = false;
+    let last = performance.now();
+
+    const clamp = (n, min, max) => Math.max(min, Math.min(max, n));
+    const f2 = n => n.toFixed(2);
+    const aValue = () => parseFloat(controls.semiMajor.value);
+    const eValue = () => parseFloat(controls.eccentricity.value);
+
+    function solveKepler(M, e) {
+      let E = M;
+      for (let i = 0; i < 7; i++) E -= (E - e * Math.sin(E) - M) / (1 - e * Math.cos(E));
+      return E;
+    }
+
+    function orbitModel() {
+      const a = aValue();
+      const e = eValue();
+      const b = a * Math.sqrt(1 - e * e);
+      const c = a * e;
+      const cos = Math.cos(anomaly);
+      const sin = Math.sin(anomaly);
+      const point = { x: center.x + a * scale * cos, y: center.y - b * scale * sin };
+      const sun = { x: center.x - c * scale, y: center.y };
+      const r = a * (1 + e * cos);
+      const rho = Math.pow(a * a * sin * sin + b * b * cos * cos, 1.5) / (a * b);
+      const curveCenter = {
+        x: center.x + (c * c / a) * scale * Math.pow(cos, 3),
+        y: center.y + (c * c / b) * scale * Math.pow(sin, 3)
+      };
+      const speed = KM_PER_SECOND_AT_1_AU * Math.sqrt(2 / r - 1 / a);
+      const circularSpeed = KM_PER_SECOND_AT_1_AU / Math.sqrt(r);
+      const energy = speed * speed / 2;
+      const wrongEnergy = circularSpeed * circularSpeed / 2;
+      const tangent = normalize({ x: -a * sin, y: -b * cos });
+      const normal = normalize({ x: curveCenter.x - point.x, y: curveCenter.y - point.y });
+      const gravity = normalize({ x: sun.x - point.x, y: sun.y - point.y });
+      const normalShare = clamp(dot(gravity, normal), -1, 1);
+      const tangentShare = dot(gravity, tangent);
+      return { a, b, c, e, point, sun, r, rho, curveCenter, speed, circularSpeed, energy, wrongEnergy, tangent, normal, gravity, normalShare, tangentShare };
+    }
+
+    function normalize(v) {
+      const length = Math.hypot(v.x, v.y) || 1;
+      return { x: v.x / length, y: v.y / length };
+    }
+
+    function dot(a, b) { return a.x * b.x + a.y * b.y; }
+
+    function line(a, b, color, width = 2, dash = []) {
+      ctx.save();
+      ctx.beginPath();
+      ctx.setLineDash(dash);
+      ctx.lineCap = "round";
+      ctx.strokeStyle = color;
+      ctx.lineWidth = width;
+      ctx.moveTo(a.x, a.y);
+      ctx.lineTo(b.x, b.y);
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    function arrow(from, vector, length, color, label, offset = { x: 0, y: 0 }) {
+      const to = { x: from.x + vector.x * length, y: from.y + vector.y * length };
+      line(from, to, color, 3);
+      const head = 9;
+      const angle = Math.atan2(to.y - from.y, to.x - from.x);
+      ctx.save();
+      ctx.fillStyle = color;
+      ctx.beginPath();
+      ctx.moveTo(to.x, to.y);
+      ctx.lineTo(to.x - head * Math.cos(angle - .48), to.y - head * Math.sin(angle - .48));
+      ctx.lineTo(to.x - head * Math.cos(angle + .48), to.y - head * Math.sin(angle + .48));
+      ctx.closePath();
+      ctx.fill();
+      ctx.restore();
+      if (label) drawText(label, to.x + offset.x, to.y + offset.y, 15, color, "700");
+    }
+
+    function drawText(text, x, y, size = 16, color = "#edf5ff", weight = "400", align = "left") {
+      ctx.save();
+      ctx.fillStyle = color;
+      ctx.font = `${weight} ${size}px Arial, "Noto Sans TC", "Microsoft JhengHei", sans-serif`;
+      ctx.textAlign = align;
+      ctx.textBaseline = "middle";
+      ctx.fillText(text, x, y);
+      ctx.restore();
+    }
+
+    function ellipsePath(model) {
+      ctx.beginPath();
+      ctx.ellipse(center.x, center.y, model.a * scale, model.b * scale, 0, 0, Math.PI * 2);
+    }
+
+    function drawStarfield() {
+      ctx.fillStyle = "#10243a";
+      ctx.fillRect(0, 0, orbitCanvas.width, orbitCanvas.height);
+      const stars = [
+        [65,70,1],[125,188,1.5],[224,93,1],[302,548,1],[389,52,1.4],[494,592,1],
+        [610,92,1],[714,572,1.2],[836,81,1],[942,180,1.5],[1023,62,1],[1002,526,1.4],
+        [77,518,1.2],[188,425,1],[896,419,1],[745,181,1],[584,498,1],[357,228,1]
+      ];
+      for (const [x, y, radius] of stars) {
+        ctx.beginPath();
+        ctx.fillStyle = "rgba(226,239,255,.58)";
+        ctx.arc(x, y, radius, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+
+    function drawSun(model) {
+      const glow = ctx.createRadialGradient(model.sun.x, model.sun.y, 2, model.sun.x, model.sun.y, 43);
+      glow.addColorStop(0, "rgba(255,240,166,.95)");
+      glow.addColorStop(.35, "rgba(255,195,73,.64)");
+      glow.addColorStop(1, "rgba(255,181,46,0)");
+      ctx.fillStyle = glow;
+      ctx.beginPath();
+      ctx.arc(model.sun.x, model.sun.y, 44, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = "#ffd05f";
+      ctx.beginPath();
+      ctx.arc(model.sun.x, model.sun.y, 14, 0, Math.PI * 2);
+      ctx.fill();
+      drawText("太陽（焦點）", model.sun.x, model.sun.y + 34, 14, "#f8d685", "700", "center");
+    }
+
+    function drawPlanet(model) {
+      const glow = ctx.createRadialGradient(model.point.x, model.point.y, 1, model.point.x, model.point.y, 26);
+      glow.addColorStop(0, "rgba(128,202,255,.7)");
+      glow.addColorStop(1, "rgba(128,202,255,0)");
+      ctx.fillStyle = glow;
+      ctx.beginPath();
+      ctx.arc(model.point.x, model.point.y, 27, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = "#83c9ff";
+      ctx.beginPath();
+      ctx.arc(model.point.x, model.point.y, 10, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = "#e7f6ff";
+      ctx.lineWidth = 2;
+      ctx.stroke();
+      drawText("拖曳行星", model.point.x + 16, model.point.y - 19, 14, "#b7dcff", "700");
+    }
+
+    function drawDistance(model) {
+      line(model.sun, model.point, "#f0aa3d", 2.2, [7, 6]);
+      const mid = { x: (model.sun.x + model.point.x) / 2, y: (model.sun.y + model.point.y) / 2 };
+      drawTag(`距離 r = ${f2(model.r)} AU`, mid.x, mid.y - 16, "#d9831f");
+    }
+
+    function drawTag(text, x, y, color) {
+      ctx.save();
+      ctx.font = '700 14px Arial, "Noto Sans TC", sans-serif';
+      const width = ctx.measureText(text).width + 18;
+      ctx.fillStyle = "rgba(13,32,52,.88)";
+      ctx.beginPath();
+      ctx.roundRect(x - width / 2, y - 13, width, 26, 8);
+      ctx.fill();
+      ctx.fillStyle = color;
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText(text, x, y);
+      ctx.restore();
+    }
+
+    function drawCurvatureCircle(model) {
+      if (!controls.showCircle.checked) return;
+      const radius = model.rho * scale;
+      ctx.save();
+      ctx.setLineDash([10, 8]);
+      ctx.strokeStyle = "rgba(71,221,208,.78)";
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      ctx.arc(model.curveCenter.x, model.curveCenter.y, radius, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.restore();
+      line(model.point, model.curveCenter, "#42d3c9", 2.3, [6, 5]);
+      ctx.fillStyle = "#42d3c9";
+      ctx.beginPath();
+      ctx.arc(model.curveCenter.x, model.curveCenter.y, 5, 0, Math.PI * 2);
+      ctx.fill();
+      const mid = { x: (model.curveCenter.x + model.point.x) / 2, y: (model.curveCenter.y + model.point.y) / 2 };
+      drawTag(`曲率半徑 ρ = ${f2(model.rho)} AU`, mid.x, mid.y + 16, "#5ee0d6");
+    }
+
+    function drawGuessCircle(model) {
+      if (!challengeActive) return;
+      const guessed = parseFloat(controls.guessRadius.value);
+      const radius = guessed * scale;
+      const centerGuess = {
+        x: model.point.x + model.normal.x * radius,
+        y: model.point.y + model.normal.y * radius
+      };
+      ctx.save();
+      ctx.strokeStyle = "rgba(113,163,255,.92)";
+      ctx.lineWidth = 2.3;
+      ctx.setLineDash([4, 6]);
+      ctx.beginPath();
+      ctx.arc(centerGuess.x, centerGuess.y, radius, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.restore();
+      line(model.point, centerGuess, "#78a8ff", 2, [4, 5]);
+      drawTag(`猜測 ρ = ${f2(guessed)} AU`, (model.point.x + centerGuess.x) / 2, (model.point.y + centerGuess.y) / 2 - 15, "#8db8ff");
+    }
+
+    function drawAxes(model) {
+      if (!controls.showAxes.checked) return;
+      const y = 586;
+      const left = { x: center.x - model.a * scale, y };
+      const right = { x: center.x + model.a * scale, y };
+      line(left, right, "rgba(207,224,247,.55)", 1.6);
+      arrow({ x: left.x + 5, y }, { x: -1, y: 0 }, 1, "#c7d9ee");
+      arrow({ x: right.x - 5, y }, { x: 1, y: 0 }, 1, "#c7d9ee");
+      drawText(`長軸 2a = ${f2(2 * model.a)} AU`, center.x, y - 16, 14, "#c7d9ee", "700", "center");
+    }
+
+    function drawVectors(model) {
+      if (!controls.showVectors.checked) return;
+      const origin = model.point;
+      arrow(origin, model.tangent, 92, "#cfc3ff", "速度 v", { x: 8, y: -5 });
+      arrow(origin, model.gravity, 112, "#ff7175", "重力 Fg", { x: 7, y: -8 });
+      const normalLength = 86 * Math.abs(model.normalShare);
+      const tangentLength = 86 * Math.abs(model.tangentShare);
+      arrow(origin, model.normal, normalLength, "#5ee0d6", "法向", { x: 7, y: 13 });
+      if (tangentLength > 4) {
+        const tangentDirection = model.tangentShare >= 0 ? model.tangent : { x: -model.tangent.x, y: -model.tangent.y };
+        arrow(origin, tangentDirection, tangentLength, "#f5a548", "切向", { x: 8, y: 13 });
+      }
+    }
+
+    function drawOrbit(model) {
+      ellipsePath(model);
+      ctx.strokeStyle = "#7aa4ff";
+      ctx.lineWidth = 3;
+      ctx.stroke();
+      ellipsePath(model);
+      ctx.strokeStyle = "rgba(160,196,255,.16)";
+      ctx.lineWidth = 10;
+      ctx.stroke();
+    }
+
+    function drawCanvasTitle(model) {
+      drawText("拖曳行星，找出橢圓在每一點的曲率圓", 28, 32, 20, "#f2f7ff", "700");
+      drawText(`目前：a = ${f2(model.a)} AU，e = ${f2(model.e)}`, 28, 58, 14, "#9eb3ce", "700");
+      drawLegend(30, 620, "#f0aa3d", "距離 r");
+      drawLegend(145, 620, "#42d3c9", "曲率半徑 ρ");
+      drawLegend(305, 620, "#ff7175", "重力");
+      drawLegend(395, 620, "#f5a548", "切向分量");
+    }
+
+    function drawLegend(x, y, color, label) {
+      ctx.fillStyle = color;
+      ctx.beginPath();
+      ctx.arc(x, y, 5, 0, Math.PI * 2);
+      ctx.fill();
+      drawText(label, x + 11, y, 13, "#c7d5e7", "700");
+    }
+
+    function render() {
+      const model = orbitModel();
+      drawStarfield();
+      drawCanvasTitle(model);
+      drawAxes(model);
+      drawGuessCircle(model);
+      drawCurvatureCircle(model);
+      drawOrbit(model);
+      drawDistance(model);
+      drawSun(model);
+      drawVectors(model);
+      drawPlanet(model);
+      updatePanel(model);
+    }
+
+    function updatePanel(model) {
+      $("semiMajorOut").textContent = `${f2(model.a)} AU`;
+      $("eccentricityOut").textContent = f2(model.e);
+      $("distanceValue").textContent = `${f2(model.r)} AU`;
+      $("curvatureValue").textContent = `${f2(model.rho)} AU`;
+      $("speedValue").textContent = `${f2(model.speed)} km/s`;
+      $("tangentValue").textContent = `${Math.round(Math.abs(model.tangentShare) * 100)}%`;
+      $("correctEnergy").textContent = `${f2(model.energy)} MJ/kg`;
+      $("wrongEnergy").textContent = `${f2(model.wrongEnergy)} MJ/kg`;
+      const error = (model.wrongEnergy - model.energy) / model.energy * 100;
+      $("errorNote").textContent = model.e < .005
+        ? "現在是圓軌道：r = ρ = a，圓軌道公式可以使用。"
+        : Math.abs(error) < .05
+          ? "這一點數值碰巧相同，但推導仍不成立：r ≠ ρ，而且重力有切向分量。"
+        : `誤套圓軌道公式，動能會相差 ${Math.abs(error).toFixed(1)}%（${error > 0 ? "高估" : "低估"}）。`;
+      $("guessOut").textContent = `${f2(parseFloat(controls.guessRadius.value))} AU`;
+      const guessError = Math.abs(parseFloat(controls.guessRadius.value) - model.rho) / model.rho * 100;
+      $("feedback").textContent = guessError < 2
+        ? "非常接近。這個圓在行星附近幾乎貼住橢圓。"
+        : guessError < 10
+          ? "已經很接近，再微調一下。"
+          : "觀察行星附近：藍色圓的彎曲程度和橢圓一致嗎？";
+    }
+
+    function closestAnomaly(x, y) {
+      const a = aValue();
+      const e = eValue();
+      const b = a * Math.sqrt(1 - e * e);
+      let best = anomaly;
+      let bestDistance = Infinity;
+      for (let i = 0; i < 720; i++) {
+        const E = i / 720 * Math.PI * 2;
+        const px = center.x + a * scale * Math.cos(E);
+        const py = center.y - b * scale * Math.sin(E);
+        const distance = (px - x) ** 2 + (py - y) ** 2;
+        if (distance < bestDistance) {
+          bestDistance = distance;
+          best = E;
+        }
+      }
+      return best;
+    }
+
+    function pointInCanvas(event) {
+      const rect = orbitCanvas.getBoundingClientRect();
+      return {
+        x: (event.clientX - rect.left) * orbitCanvas.width / rect.width,
+        y: (event.clientY - rect.top) * orbitCanvas.height / rect.height
+      };
+    }
+
+    orbitCanvas.addEventListener("pointerdown", event => {
+      dragging = true;
+      orbitCanvas.classList.add("dragging");
+      orbitCanvas.setPointerCapture(event.pointerId);
+      const point = pointInCanvas(event);
+      anomaly = closestAnomaly(point.x, point.y);
+      meanAnomaly = anomaly - eValue() * Math.sin(anomaly);
+      controls.autoPlay.checked = false;
+      render();
+    });
+
+    orbitCanvas.addEventListener("pointermove", event => {
+      if (!dragging) return;
+      const point = pointInCanvas(event);
+      anomaly = closestAnomaly(point.x, point.y);
+      meanAnomaly = anomaly - eValue() * Math.sin(anomaly);
+      render();
+    });
+
+    function stopDragging(event) {
+      dragging = false;
+      orbitCanvas.classList.remove("dragging");
+      if (event.pointerId !== undefined && orbitCanvas.hasPointerCapture(event.pointerId)) orbitCanvas.releasePointerCapture(event.pointerId);
+    }
+
+    orbitCanvas.addEventListener("pointerup", stopDragging);
+    orbitCanvas.addEventListener("pointercancel", stopDragging);
+
+    document.querySelectorAll("[data-position]").forEach(button => {
+      button.addEventListener("click", () => {
+        const positions = { perihelion: Math.PI, top: Math.PI / 2, aphelion: 0 };
+        anomaly = positions[button.dataset.position];
+        meanAnomaly = anomaly - eValue() * Math.sin(anomaly);
+        controls.autoPlay.checked = false;
+        render();
+      });
+    });
+
+    $("challengeBtn").addEventListener("click", () => {
+      challengeActive = !challengeActive;
+      $("guessWrap").hidden = !challengeActive;
+      $("challengeBtn").classList.toggle("active", challengeActive);
+      $("challengeBtn").textContent = challengeActive ? "結束圓規挑戰" : "開始圓規挑戰";
+      if (challengeActive) {
+        controls.showCircle.checked = false;
+        syncRevealButton();
+      }
+      render();
+    });
+
+    $("revealBtn").addEventListener("click", () => {
+      controls.showCircle.checked = !controls.showCircle.checked;
+      syncRevealButton();
+      render();
+    });
+
+    Object.values(controls).forEach(control => control.addEventListener("input", () => {
+      if (control === controls.eccentricity) meanAnomaly = anomaly - eValue() * Math.sin(anomaly);
+      if (control === controls.showCircle) syncRevealButton();
+      render();
+    }));
+
+    function syncRevealButton() {
+      $("revealBtn").classList.toggle("active", controls.showCircle.checked);
+      $("revealBtn").textContent = controls.showCircle.checked ? "隱藏解答" : "顯示解答";
+    }
+
+    function animate(now) {
+      const elapsed = Math.min(.06, (now - last) / 1000);
+      last = now;
+      if (controls.autoPlay.checked && !dragging) {
+        meanAnomaly = (meanAnomaly + elapsed * .72) % (Math.PI * 2);
+        anomaly = solveKepler(meanAnomaly, eValue());
+        render();
+      }
+      requestAnimationFrame(animate);
+    }
+
+    function drawProjectile() {
+      const W = projectileCanvas.width;
+      const H = projectileCanvas.height;
+      pctx.clearRect(0, 0, W, H);
+      pctx.fillStyle = "#f8fbff";
+      pctx.fillRect(0, 0, W, H);
+      pctx.strokeStyle = "#e1e9f3";
+      pctx.lineWidth = 1;
+      for (let x = 0; x <= W; x += 30) {
+        pctx.beginPath(); pctx.moveTo(x, 0); pctx.lineTo(x, H); pctx.stroke();
+      }
+      for (let y = 0; y <= H; y += 30) {
+        pctx.beginPath(); pctx.moveTo(0, y); pctx.lineTo(W, y); pctx.stroke();
+      }
+      const apex = { x: 292, y: 70 };
+      const rho = 125;
+      pctx.strokeStyle = "#476fae";
+      pctx.lineWidth = 3;
+      pctx.beginPath();
+      for (let x = 48; x <= 550; x += 4) {
+        const y = apex.y + .0027 * (x - apex.x) ** 2;
+        if (x === 48) pctx.moveTo(x, y); else pctx.lineTo(x, y);
+      }
+      pctx.stroke();
+      pctx.setLineDash([7, 6]);
+      pctx.strokeStyle = "#12a39f";
+      pctx.lineWidth = 2;
+      pctx.beginPath();
+      pctx.arc(apex.x, apex.y + rho, rho, 0, Math.PI * 2);
+      pctx.stroke();
+      pctx.setLineDash([]);
+      pctx.fillStyle = "#1c5dac";
+      pctx.beginPath(); pctx.arc(apex.x, apex.y, 7, 0, Math.PI * 2); pctx.fill();
+      projectileArrow(apex, { x: 1, y: 0 }, 98, "#7757d9", "速度 v");
+      projectileArrow(apex, { x: 0, y: 1 }, 88, "#ef5c61", "g = v²/ρ");
+      pctx.strokeStyle = "#12a39f";
+      pctx.lineWidth = 2;
+      pctx.setLineDash([4, 4]);
+      pctx.beginPath(); pctx.moveTo(apex.x, apex.y); pctx.lineTo(apex.x, apex.y + rho); pctx.stroke();
+      pctx.setLineDash([]);
+      projectileText("曲率半徑 ρ", apex.x + 10, apex.y + rho / 2, "#0e8886");
+      projectileText("最高點", apex.x - 13, apex.y - 18, "#365b89");
+    }
+
+    function projectileArrow(from, vector, length, color, label) {
+      const to = { x: from.x + vector.x * length, y: from.y + vector.y * length };
+      pctx.strokeStyle = color;
+      pctx.fillStyle = color;
+      pctx.lineWidth = 3;
+      pctx.beginPath(); pctx.moveTo(from.x, from.y); pctx.lineTo(to.x, to.y); pctx.stroke();
+      const angle = Math.atan2(to.y - from.y, to.x - from.x);
+      pctx.beginPath();
+      pctx.moveTo(to.x, to.y);
+      pctx.lineTo(to.x - 9 * Math.cos(angle - .5), to.y - 9 * Math.sin(angle - .5));
+      pctx.lineTo(to.x - 9 * Math.cos(angle + .5), to.y - 9 * Math.sin(angle + .5));
+      pctx.closePath(); pctx.fill();
+      projectileText(label, to.x + 8, to.y - 7, color);
+    }
+
+    function projectileText(text, x, y, color) {
+      pctx.fillStyle = color;
+      pctx.font = '700 15px Arial, "Noto Sans TC", sans-serif';
+      pctx.textBaseline = "middle";
+      pctx.fillText(text, x, y);
+    }
+
+    drawProjectile();
+    render();
+    requestAnimationFrame(animate);
+  </script>
+</body>
+</html>

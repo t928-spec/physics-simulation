@@ -1,0 +1,462 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="高中物理互動模擬：BJT 小電流控制大電流、雙狹縫干涉，以及橢圓軌道力學能。">
+  <title>物理互動模擬實驗室</title>
+  <style>
+    :root {
+      --ink: #10233d;
+      --muted: #61738c;
+      --line: rgba(199, 214, 233, .9);
+      --panel: rgba(255, 255, 255, .91);
+      --blue: #3979e8;
+      --blue-dark: #1d5dbd;
+      --cyan: #11a8b1;
+      --violet: #7557d8;
+      --orange: #e58c2b;
+      --shadow: 0 18px 46px rgba(37, 70, 112, .11);
+    }
+
+    * { box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      min-width: 320px;
+      margin: 0;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 12% -8%, rgba(74, 138, 245, .19), transparent 31rem),
+        radial-gradient(circle at 94% 11%, rgba(120, 88, 224, .13), transparent 30rem),
+        linear-gradient(145deg, #eff7ff, #fbfcff 50%, #f8f5ff);
+      font-family: Arial, "Noto Sans TC", "Microsoft JhengHei", sans-serif;
+    }
+
+    a { color: inherit; text-decoration: none; }
+
+    .shell {
+      width: min(1380px, calc(100% - 42px));
+      margin: 0 auto;
+    }
+
+    header {
+      padding: 29px 0 7px;
+    }
+
+    nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      color: #1d5dbd;
+      font-size: 14px;
+      font-weight: 900;
+      letter-spacing: .12em;
+    }
+
+    .brand-mark {
+      display: grid;
+      width: 35px;
+      height: 35px;
+      place-items: center;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #3d83ef, #7658db);
+      box-shadow: 0 8px 18px rgba(61, 125, 232, .25);
+      color: white;
+      font-size: 18px;
+      letter-spacing: 0;
+    }
+
+    .nav-link {
+      padding: 10px 14px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: rgba(255,255,255,.68);
+      color: #45617f;
+      font-size: 13px;
+      font-weight: 800;
+      transition: .2s ease;
+    }
+
+    .nav-link:hover {
+      border-color: #95b8ef;
+      color: var(--blue-dark);
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 350px;
+      gap: 30px;
+      align-items: end;
+      padding: 72px 0 43px;
+    }
+
+    .eyebrow {
+      margin-bottom: 12px;
+      color: var(--blue);
+      font-size: 13px;
+      font-weight: 900;
+      letter-spacing: .15em;
+    }
+
+    h1 {
+      max-width: 880px;
+      margin: 0;
+      font-size: clamp(42px, 6vw, 76px);
+      letter-spacing: -.075em;
+      line-height: 1.02;
+    }
+
+    .hero-copy {
+      max-width: 780px;
+      margin: 17px 0 0;
+      color: #536983;
+      font-size: 17px;
+      line-height: 1.75;
+    }
+
+    .hero-note {
+      padding: 18px 19px;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: rgba(255,255,255,.74);
+      box-shadow: var(--shadow);
+    }
+
+    .hero-note b {
+      display: block;
+      margin-bottom: 7px;
+      color: var(--blue-dark);
+      font-size: 14px;
+    }
+
+    .hero-note p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.65;
+    }
+
+    .section-head {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 14px;
+      margin: 18px 0;
+    }
+
+    h2 {
+      margin: 0;
+      font-size: 25px;
+      letter-spacing: -.035em;
+    }
+
+    .section-head span {
+      color: #74849b;
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .card {
+      display: flex;
+      min-height: 100%;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      background: var(--panel);
+      box-shadow: var(--shadow);
+      flex-direction: column;
+      transition: transform .22s ease, box-shadow .22s ease, border-color .22s ease;
+    }
+
+    .card:hover {
+      border-color: rgba(105, 158, 235, .85);
+      box-shadow: 0 23px 55px rgba(37, 70, 112, .17);
+      transform: translateY(-5px);
+    }
+
+    .preview {
+      position: relative;
+      aspect-ratio: 16 / 10;
+      overflow: hidden;
+      background: #dfeaf8;
+    }
+
+    .preview::after {
+      position: absolute;
+      inset: 0;
+      border-bottom: 1px solid rgba(199,214,233,.8);
+      background: linear-gradient(to top, rgba(14, 31, 53, .16), transparent 32%);
+      content: "";
+      pointer-events: none;
+    }
+
+    .preview img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: top left;
+      transition: transform .35s ease;
+    }
+
+    .card:hover img { transform: scale(1.035); }
+
+    .card-body {
+      display: flex;
+      padding: 17px;
+      flex: 1;
+      flex-direction: column;
+    }
+
+    .tag-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 11px;
+    }
+
+    .tag {
+      padding: 5px 8px;
+      border-radius: 999px;
+      background: #edf4ff;
+      color: #3972c5;
+      font-size: 11px;
+      font-weight: 900;
+    }
+
+    .tag.cyan { background: #e9fafa; color: #16868c; }
+    .tag.violet { background: #f0edff; color: #654bc3; }
+    .tag.orange { background: #fff4e6; color: #b96d1f; }
+
+    h3 {
+      margin: 0;
+      font-size: 21px;
+      letter-spacing: -.035em;
+      line-height: 1.27;
+    }
+
+    .description {
+      margin: 10px 0 16px;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.66;
+    }
+
+    .learn {
+      margin: auto 0 15px;
+      padding: 12px;
+      border-radius: 11px;
+      background: #f6f9fd;
+      color: #566b84;
+      font-size: 12px;
+      line-height: 1.58;
+    }
+
+    .learn strong {
+      color: #314d70;
+    }
+
+    .open-link {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      min-height: 43px;
+      padding: 0 13px;
+      border-radius: 10px;
+      background: #eaf3ff;
+      color: #2365c4;
+      font-size: 14px;
+      font-weight: 900;
+      transition: .18s ease;
+    }
+
+    .card:hover .open-link {
+      background: #3979e8;
+      color: white;
+    }
+
+    .arrow { font-size: 18px; }
+
+    .guide {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 12px;
+      margin: 46px 0 25px;
+      padding: 20px;
+      border: 1px solid var(--line);
+      border-radius: 19px;
+      background: rgba(255,255,255,.72);
+      box-shadow: var(--shadow);
+    }
+
+    .guide-intro h2 { margin-bottom: 7px; }
+
+    .guide-intro p,
+    .guide-item p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.62;
+    }
+
+    .guide-item {
+      padding: 3px 7px 3px 17px;
+      border-left: 1px solid var(--line);
+    }
+
+    .guide-item b {
+      display: block;
+      margin-bottom: 6px;
+      color: #365778;
+      font-size: 14px;
+    }
+
+    footer {
+      padding: 17px 0 31px;
+      color: #8291a5;
+      font-size: 12px;
+      text-align: center;
+    }
+
+    @media (max-width: 1050px) {
+      .hero { grid-template-columns: 1fr; gap: 17px; padding-top: 57px; }
+      .hero-note { max-width: 640px; }
+      .grid { grid-template-columns: 1fr; }
+      .card { display: grid; grid-template-columns: minmax(270px, .9fr) 1fr; }
+      .preview { aspect-ratio: auto; min-height: 285px; }
+    }
+
+    @media (max-width: 720px) {
+      .shell { width: min(100% - 24px, 580px); }
+      header { padding-top: 18px; }
+      .brand { font-size: 11px; letter-spacing: .08em; }
+      .brand-mark { width: 31px; height: 31px; }
+      .nav-link { padding: 8px 10px; font-size: 11px; }
+      .hero { padding: 44px 0 30px; }
+      h1 { font-size: clamp(39px, 13vw, 56px); }
+      .hero-copy { font-size: 15px; }
+      .section-head { align-items: start; flex-direction: column; gap: 4px; }
+      .card { display: flex; }
+      .preview { aspect-ratio: 16 / 10; min-height: 0; }
+      .guide { grid-template-columns: 1fr; margin-top: 30px; padding: 17px; }
+      .guide-item { padding: 10px 0 0; border-top: 1px solid var(--line); border-left: 0; }
+    }
+  </style>
+</head>
+<body>
+  <header class="shell">
+    <nav>
+      <div class="brand">
+        <span class="brand-mark">φ</span>
+        <span>PHYSICS LAB · 物理互動實驗室</span>
+      </div>
+      <a class="nav-link" href="#simulations">選擇模擬</a>
+    </nav>
+  </header>
+
+  <main class="shell">
+    <section class="hero">
+      <div>
+        <div class="eyebrow">LEARN BY EXPLORING · 從操作中看見物理</div>
+        <h1>把抽象公式，變成可以拉動的現象。</h1>
+        <p class="hero-copy">
+          三個適合課堂投影與學生自主操作的互動模擬。調整參數、比較情境，
+          再回頭理解公式中的每一個物理量。
+        </p>
+      </div>
+      <div class="hero-note">
+        <b>使用方式</b>
+        <p>點選下方卡片即可開始。所有內容都在瀏覽器中執行，不需安裝程式，也不會上傳資料。</p>
+      </div>
+    </section>
+
+    <section id="simulations">
+      <div class="section-head">
+        <h2>選擇一個模擬</h2>
+        <span>3 個主題 · 電學、波動、軌道力學</span>
+      </div>
+
+      <div class="grid">
+        <a class="card" href="./BJT.html">
+          <div class="preview">
+            <img src="./bjt-preview.png" alt="BJT 小電流控制大電流模擬預覽">
+          </div>
+          <div class="card-body">
+            <div class="tag-row">
+              <span class="tag">電學</span>
+              <span class="tag cyan">半導體</span>
+            </div>
+            <h3>BJT：小電流控制大電流</h3>
+            <p class="description">比較「直接推動 LED」與「透過 BJT 控制 LED」的差異，觀察基極電流如何控制更大的集極電流。</p>
+            <p class="learn"><strong>適合觀察：</strong>基極電阻、放大倍率 β、LED 電流與開關效果。</p>
+            <span class="open-link">開始模擬 <span class="arrow">→</span></span>
+          </div>
+        </a>
+
+        <a class="card" href="./double-slit-interference.html">
+          <div class="preview">
+            <img src="./double-slit-spacing-preview.png" alt="雙狹縫干涉模擬預覽">
+          </div>
+          <div class="card-body">
+            <div class="tag-row">
+              <span class="tag violet">波動</span>
+              <span class="tag cyan">干涉</span>
+            </div>
+            <h3>雙狹縫干涉：旋轉狹縫與屏幕</h3>
+            <p class="description">拖動入射角、狹縫與屏幕角度，觀察光程差、中央亮紋位置與局部亮紋間距如何改變。</p>
+            <p class="learn"><strong>適合觀察：</strong>光程差、相位差、屏幕寬度與標準模式比較。</p>
+            <span class="open-link">開始模擬 <span class="arrow">→</span></span>
+          </div>
+        </a>
+
+        <a class="card" href="./elliptical-orbit-energy.html">
+          <div class="preview">
+            <img src="./elliptical-orbit-preview.png" alt="橢圓軌道力學能模擬預覽">
+          </div>
+          <div class="card-body">
+            <div class="tag-row">
+              <span class="tag orange">力學</span>
+              <span class="tag cyan">曲率半徑</span>
+            </div>
+            <h3>橢圓軌道力學能：兩種半徑</h3>
+            <p class="description">拖曳軌道上的行星，同時比較太陽距離 r 與曲率半徑 ρ，理解萬有引力何時不能直接套用圓軌道公式。</p>
+            <p class="learn"><strong>適合觀察：</strong>曲率圓、切向加速度、力學能與斜拋最高點類比。</p>
+            <span class="open-link">開始模擬 <span class="arrow">→</span></span>
+          </div>
+        </a>
+      </div>
+    </section>
+
+    <section class="guide">
+      <div class="guide-intro">
+        <h2>課堂使用建議</h2>
+        <p>先讓學生預測，再動手改變一個參數，最後用公式整理觀察結果。</p>
+      </div>
+      <div class="guide-item">
+        <b>投影示範</b>
+        <p>教師可利用快捷按鈕切換代表情境，集中比較關鍵變因。</p>
+      </div>
+      <div class="guide-item">
+        <b>自主探索</b>
+        <p>學生使用一般瀏覽器即可操作，適合作為課堂練習或課後複習。</p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="shell">Physics Lab · Interactive Simulations</footer>
+</body>
+</html>

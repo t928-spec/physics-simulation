@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>BJT 小電流控制大電流模擬</title>
+  <style>
+    :root{--ink:#172033;--muted:#607089;--line:#dce3ee;--blue:#2676d8;--red:#fa5252;--green:#14815e;--amber:#d78300;--panel:#fff;--soft:#f5f8fc;--shadow:0 12px 28px rgba(35,52,86,.09)}
+    *{box-sizing:border-box}body{margin:0;background:#f5f8fc;color:var(--ink);font-family:Arial,"Noto Sans TC","Microsoft JhengHei",sans-serif}
+    header{padding:22px 22px 10px;background:#fff;border-bottom:1px solid var(--line)}h1{margin:0;font-size:34px;letter-spacing:-.04em}.subtitle{margin-top:7px;color:#526079;font-size:16px}
+    main{padding:16px 22px 26px}.layout{display:grid;grid-template-columns:minmax(650px,1fr) 350px;gap:16px;align-items:start}.card{border:1px solid var(--line);border-radius:16px;background:var(--panel);box-shadow:var(--shadow)}
+    .stage{min-width:0;overflow-x:auto;padding:12px}canvas{display:block;width:100%;height:auto;border-radius:12px}#scene{min-width:650px;background:#fff}
+    aside{padding:14px}.meters{display:grid;grid-template-columns:1fr 1fr;gap:8px}.meter{min-height:78px;padding:10px;border:1px solid var(--line);border-radius:10px;background:var(--soft)}.meter.state{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between}.meter b{display:block;margin-bottom:7px;color:var(--muted);font-size:12px}.meter span{font-size:21px;font-variant-numeric:tabular-nums}
+    .badge{padding:6px 11px;border-radius:999px;color:#fff;font-size:13px;font-weight:800}.off{background:var(--muted)}.weak{background:var(--amber)}.on{background:var(--green)}
+    .control{padding:12px 0;border-bottom:1px solid var(--line)}label{display:flex;justify-content:space-between;gap:8px;font-size:14px;font-weight:800}output{color:#135daf;font-variant-numeric:tabular-nums}input{width:100%;margin-top:9px;accent-color:var(--blue)}
+    .buttons{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:13px}button{min-height:40px;border:1px solid #c7d1df;border-radius:9px;background:#f8fbff;color:#37465e;font:inherit;font-weight:800;cursor:pointer}button.active{border-color:var(--blue);background:#e8f2ff;color:#1759b1}
+    .explain{margin:14px 0 0;color:#59667a;font-size:14px;line-height:1.55}.formula{display:block;margin-top:9px;padding:9px;border-radius:8px;background:#101a31;color:#d9e6ff;font-family:Consolas,monospace;font-size:12px}
+    .bottom{display:grid;grid-template-columns:minmax(430px,1fr) 350px;gap:16px;margin-top:16px}.bottom .card{padding:14px}h2{margin:0 0 10px;font-size:18px}.notes ul{margin:0;padding-left:20px;color:#58657a;font-size:14px;line-height:1.65}
+    @media(max-width:1050px){.layout,.bottom{grid-template-columns:1fr}}@media(max-width:620px){header,main{padding-inline:10px}h1{font-size:27px}.meters{grid-template-columns:1fr}.meter.state{grid-column:auto}}
+    .home-link{position:fixed;z-index:20;top:14px;right:16px;padding:9px 13px;border:1px solid #bfd0e6;border-radius:999px;background:rgba(255,255,255,.92);box-shadow:0 7px 18px rgba(35,52,86,.1);color:#2562ad;text-decoration:none;font-size:13px;font-weight:800}.home-link:hover{background:#eaf3ff}
+  </style>
+</head>
+<body>
+  <a class="home-link" href="./index.html">← 回到模擬首頁</a>
+  <header>
+    <h1>BJT 小電流控制大電流</h1>
+    <div class="subtitle">3V 電池、LED、電流表、100kΩ 基極電阻與 NPN 電晶體互動模擬</div>
+  </header>
+  <main>
+    <section class="layout">
+      <div class="stage card"><canvas id="scene" width="1080" height="610" aria-label="沒有 BJT 與有 BJT 的電路比較"></canvas></div>
+      <aside class="card">
+        <div class="meters">
+          <div class="meter state"><div><b>目前效果</b><span id="stateText">LED 亮起</span></div><div id="stateBadge" class="badge on">ON</div></div>
+          <div class="meter"><b>沒有 BJT 的 LED 電流</b><span id="directCurrent">0.000 mA</span></div>
+          <div class="meter"><b>有 BJT 的 LED 電流</b><span id="bjtCurrent">0.00 mA</span></div>
+          <div class="meter"><b>基極電流 Ib</b><span id="baseCurrent">0.0 μA</span></div>
+          <div class="meter"><b>有效放大倍率</b><span id="gainText">0 ×</span></div>
+        </div>
+        <div class="control"><label for="signal">電池 / 控制電壓 <output id="signalOut"></output></label><input id="signal" type="range" min="0" max="3" step=".05" value="3"></div>
+        <div class="control"><label for="beta">BJT 放大能力 β <output id="betaOut"></output></label><input id="beta" type="range" min="20" max="220" step="5" value="120"></div>
+        <div class="control"><label for="speed">電流動畫速度 <output id="speedOut"></output></label><input id="speed" type="range" min=".4" max="2.4" step=".1" value="1.2"></div>
+        <div class="buttons"><button id="switchBtn" class="active">開關：接通</button><button id="pauseBtn">暫停動畫</button></div>
+        <p class="explain">100kΩ 讓基極只得到很小的電流。沒有 BJT 時，小電流直接推動 LED；有 BJT 時，少量 Ib 可以控制較大的 Ic。
+          <span class="formula">Ib ≈ (V - 0.65V) / 100kΩ<br>Ic ≈ β × Ib，但最大值受 LED 與串聯電阻限制。</span>
+        </p>
+      </aside>
+    </section>
+    <section class="bottom">
+      <div class="card"><h2>電流比較</h2><canvas id="bars" width="860" height="260"></canvas></div>
+      <div class="card notes"><h2>觀察重點</h2><ul><li>100kΩ 基極電阻限制控制電流。</li><li>開關斷開時 Ib = 0，BJT 截止，LED 不亮。</li><li>控制電壓超過約 0.65V 後，BJT 開始導通。</li><li>β 增加時，同樣的 Ib 可以控制更大的 Ic。</li></ul></div>
+    </section>
+  </main>
+  <script>
+    const scene=document.getElementById("scene"),ctx=scene.getContext("2d"),bars=document.getElementById("bars"),bctx=bars.getContext("2d");
+    const $=id=>document.getElementById(id), controls={signal:$("signal"),beta:$("beta"),speed:$("speed")};
+    let closed=true,paused=false,time=0,last=performance.now();
+    const val=id=>parseFloat(controls[id].value);
+    function model(){const v=closed?val("signal"):0,beta=val("beta"),ib=Math.max(0,(v-.65)/100000),direct=Math.max(0,(v-2)/100000),limit=Math.max(0,(v-2-.2)/330),ic=Math.min(beta*ib,limit),gain=ib?ic/ib:0,glow=Math.min(1,ic/.002);return{v,beta,ib,direct,limit,ic,gain,glow}}
+    function line(x1,y1,x2,y2,c="#1b2433",w=3){ctx.beginPath();ctx.strokeStyle=c;ctx.lineWidth=w;ctx.lineCap="round";ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.stroke()}
+    function text(s,x,y,size=18,c="#1b2433",align="left",weight="400"){ctx.fillStyle=c;ctx.font=`${weight} ${size}px Arial,"Noto Sans TC",sans-serif`;ctx.textAlign=align;ctx.textBaseline="middle";ctx.fillText(s,x,y)}
+    function resistor(x1,y,x2){ctx.beginPath();ctx.strokeStyle="#1b2433";ctx.lineWidth=3;ctx.moveTo(x1,y);for(let i=1;i<8;i++)ctx.lineTo(x1+(x2-x1)*i/8,y+(i%2?-9:9));ctx.lineTo(x2,y);ctx.stroke()}
+    function battery(x,y,label){line(x-13,y-14,x-13,y+14,"#1b2433",2);line(x+13,y-26,x+13,y+26);text("+",x+30,y-26,18);text(label,x,y+46,16,"#526079","center","700")}
+    function led(x,y,glow){if(glow>.02){const g=ctx.createRadialGradient(x,y,2,x,y,34+glow*35);g.addColorStop(0,`rgba(255,72,72,${.65*glow})`);g.addColorStop(1,"rgba(255,72,72,0)");ctx.fillStyle=g;ctx.beginPath();ctx.arc(x,y,68,0,Math.PI*2);ctx.fill()}ctx.beginPath();ctx.strokeStyle="#1b2433";ctx.lineWidth=2.5;ctx.moveTo(x-18,y+15);ctx.lineTo(x+18,y+15);ctx.lineTo(x,y-15);ctx.closePath();ctx.fillStyle=`rgba(255,55,55,${.18+.78*glow})`;ctx.fill();ctx.stroke();line(x-20,y-18,x+20,y-18,"#1b2433",2)}
+    function ammeter(x,y,value){ctx.beginPath();ctx.strokeStyle="#1b2433";ctx.lineWidth=3;ctx.arc(x,y,29,0,Math.PI*2);ctx.stroke();text("A",x,y-1,26,"#1b2433","center","700");text((value*1000).toFixed(2)+" mA",x,y+48,15,"#526079","center","700")}
+    function switcher(x,y){line(x-34,y,x-10,y);line(x+20,y,x+44,y);ctx.fillStyle="#1b2433";for(const a of [-10,20]){ctx.beginPath();ctx.arc(x+a,y,4,0,Math.PI*2);ctx.fill()}line(x-10,y,closed?x+20:x+11,closed?y:y-23)}
+    function transistor(x,y){ctx.beginPath();ctx.strokeStyle="#1b2433";ctx.lineWidth=3;ctx.arc(x,y,45,0,Math.PI*2);ctx.stroke();line(x-29,y,x-8,y);line(x-8,y-32,x-8,y+32);line(x-8,y-23,x+28,y-45);line(x-8,y+23,x+29,y+47);line(x+16,y+38,x+29,y+47);line(x+29,y+47,x+22,y+31);text("B",x-63,y-18,20);text("C",x+44,y-65,20);text("E",x+45,y+67,20)}
+    function dots(points,amount,speed){if(amount<.02||paused)return;let lengths=[],total=0;for(let i=0;i<points.length-1;i++){const l=Math.hypot(points[i+1][0]-points[i][0],points[i+1][1]-points[i][1]);lengths.push(l);total+=l}for(let n=0;n<Math.max(3,Math.round(total/(55-amount*28)));n++){let d=(n*total/12+time*speed)%total,i=0;while(d>lengths[i]&&i<lengths.length-1)d-=lengths[i++];const f=d/lengths[i],a=points[i],b=points[i+1];ctx.beginPath();ctx.fillStyle="#ff6565";ctx.arc(a[0]+(b[0]-a[0])*f,a[1]+(b[1]-a[1])*f,4,0,Math.PI*2);ctx.fill()}}
+    function direct(m){const l=55,r=440,t=150,b=505;text("沒有 BJT：100kΩ 直接推 LED",245,63,23,"#182033","center","700");text("控制電流太小，LED 幾乎不亮",245,92,16,"#607089","center");line(l,t,r,t);line(r,t,r,205);ammeter(r,235,m.direct);line(r,264,r,310);led(r,348,Math.min(1,m.direct/.002));line(r,366,r,b);line(r,b,362,b);battery(347,b,m.v.toFixed(2)+" V");line(334,b,300,b);switcher(258,b);line(214,b,186,b);resistor(100,b,186);text("100kΩ",143,b-31,17,"#526079","center");line(l,b,100,b);line(l,b,l,t);dots([[362,b],[r,b],[r,t],[l,t],[l,b],[214,b],[186,b],[100,b]],Math.min(1,m.direct/.00002),76*val("speed"))}
+    function bjt(m){const left=565,right=1030,top=130,bottom=505,qx=770,qy=290;text("有 BJT：小 Ib 控制大 Ic",797,63,23,"#182033","center","700");text("學習單電路：? = 100kΩ",797,92,16,"#607089","center");transistor(qx,qy);line(qx+28,qy-45,qx+28,top);line(qx+28,top,right,top);line(right,top,right,185);ammeter(right,215,m.ic);line(right,244,right,291);led(right,329,m.glow);line(right,347,right,bottom);line(right,bottom,895,bottom);battery(880,bottom,m.v.toFixed(2)+" V");line(867,bottom,qx+29,bottom);line(qx+29,bottom,qx+29,qy+47);line(qx-29,qy,670,qy);resistor(585,qy,670);text("100kΩ",627,qy-31,17,"#526079","center");text("?",627,qy+34,25,"#182033","center","700");line(585,qy,585,548);line(585,548,618,548);switcher(660,548);line(704,548,895,548);line(895,548,895,bottom);text("Ib = "+(m.ib*1e6).toFixed(1)+" μA",585,qy+70,17,"#176ab7","left","700");text("Ic = "+(m.ic*1000).toFixed(2)+" mA",836,qy+35,18,"#182033","left","700");dots([[895,bottom],[right,bottom],[right,top],[qx+28,top],[qx+28,qy-45],[qx+29,qy+47],[qx+29,bottom]],Math.min(1,m.ic/Math.max(.0001,m.limit)),135*val("speed"));dots([[895,bottom],[895,548],[704,548],[618,548],[585,548],[585,qy],[670,qy],[qx-29,qy],[qx+29,qy+47]],Math.min(1,m.ib/.000025),78*val("speed"))}
+    function draw(m){ctx.clearRect(0,0,scene.width,scene.height);ctx.fillStyle="#fff";ctx.fillRect(0,0,scene.width,scene.height);ctx.strokeStyle="#eef2f7";ctx.lineWidth=1;for(let x=0;x<scene.width;x+=28){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,scene.height);ctx.stroke()}for(let y=0;y<scene.height;y+=28){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(scene.width,y);ctx.stroke()}direct(m);line(525,40,525,570,"#dce3ee",2);bjt(m)}
+    function drawBars(m){bctx.clearRect(0,0,bars.width,bars.height);const max=Math.max(.0025,m.limit),items=[["沒有 BJT",m.direct,"#2676d8"],["有 BJT",m.ic,"#fa5252"],["Ib",m.ib,"#14815e"]];bctx.strokeStyle="#dce3ee";for(let i=0;i<=5;i++){const y=205-i*35;bctx.beginPath();bctx.moveTo(66,y);bctx.lineTo(830,y);bctx.stroke();bctx.fillStyle="#69758a";bctx.font="13px Arial";bctx.textAlign="right";bctx.fillText((max*1000*i/5).toFixed(1)+"mA",58,y+4)}items.forEach(([label,value,color],i)=>{const h=Math.min(175,value/max*175),x=150+i*210;bctx.fillStyle=color;bctx.fillRect(x,205-h,88,h);bctx.fillStyle="#182033";bctx.textAlign="center";bctx.font="700 15px Arial";bctx.fillText(label,x+44,235);bctx.fillText(i===2?(value*1e6).toFixed(1)+" μA":(value*1000).toFixed(3)+" mA",x+44,194-h)})}
+    function update(m){$("signalOut").textContent=m.v.toFixed(2)+" V";$("betaOut").textContent=m.beta;$("speedOut").textContent=val("speed").toFixed(1)+"×";$("directCurrent").textContent=(m.direct*1000).toFixed(3)+" mA";$("bjtCurrent").textContent=(m.ic*1000).toFixed(2)+" mA";$("baseCurrent").textContent=(m.ib*1e6).toFixed(1)+" μA";$("gainText").textContent=Math.round(m.gain)+" ×";const state=m.ic>.0007?"on":m.ic>.00008?"weak":"off",labels={on:["LED 亮起","ON"],weak:["LED 微亮","WEAK"],off:["LED 不亮","OFF"]};$("stateText").textContent=labels[state][0];$("stateBadge").textContent=labels[state][1];$("stateBadge").className="badge "+state;$("switchBtn").textContent=closed?"開關：接通":"開關：斷開";$("switchBtn").classList.toggle("active",closed)}
+    $("switchBtn").onclick=()=>closed=!closed;$("pauseBtn").onclick=()=>{paused=!paused;$("pauseBtn").textContent=paused?"繼續動畫":"暫停動畫";$("pauseBtn").classList.toggle("active",paused)};
+    function frame(now){if(!paused)time+=Math.min(.05,(now-last)/1000);last=now;const m=model();update(m);draw(m);drawBars(m);requestAnimationFrame(frame)}requestAnimationFrame(frame);
+  </script>
+</body>
+</html>
