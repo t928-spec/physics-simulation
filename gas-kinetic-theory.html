@@ -902,7 +902,7 @@
 
               <div class="node formula" data-id="ideal" data-kind="formula" style="--x:30%;--y:32%;"><button type="button"><span class="node-label">理想氣體方程式</span><span class="node-title math">PV = nRT = NkT</span><span class="node-desc">把巨觀狀態接到分子數</span></button></div>
               <div class="node formula" data-id="pressure" data-kind="formula" style="--x:61%;--y:34%;"><button type="button"><span class="node-label">壓力與動能</span><span class="node-title math">P = <span class="frac"><span>Nm<span class="overline">v²</span></span><span>3V</span></span> = <span class="frac"><span>2N<span class="overline">E</span><sub>k</sub></span><span>3V</span></span></span><span class="node-desc">容器壁壓力來自分子碰撞</span></button></div>
-              <div class="node formula" data-id="energy" data-kind="formula" style="--x:39%;--y:61%;"><button type="button"><span class="node-label">分子平均動能</span><span class="node-title math"><span class="overline">E</span><sub>k</sub> = <span class="frac"><span>3PV</span><span>2N</span></span> = <span class="frac"><span>3</span><span>2</span></span>kT</span><span class="node-desc">平均動能只由絕對溫度決定</span></button></div>
+              <div class="node formula" data-id="energy" data-kind="formula" style="--x:36%;--y:61%;--w:330px;--h:128px;"><button type="button"><span class="node-label">分子平均動能</span><span class="node-title math"><span class="overline">E</span><sub>k</sub> = <span class="frac"><span>1</span><span>2</span></span>m<span class="overline">v²</span> = <span class="frac"><span>1</span><span>2</span></span>mv<sub>rms</sub>² = <span class="frac"><span>3</span><span>2</span></span>kT</span><span class="node-desc">定義式接到溫度公式，分子質量會抵消</span></button></div>
               <div class="node formula" data-id="speed" data-kind="formula" style="--x:69%;--y:61%;"><button type="button"><span class="node-label">方均根速率</span><span class="node-title math">v<sub>rms</sub> = √<span class="overline">v²</span> = √<span class="frac"><span>3kT</span><span>m</span></span> = √<span class="frac"><span>3RT</span><span>M</span></span></span><span class="node-desc">溫度越高越快，分子越重越慢</span></button></div>
               <div class="node formula" data-id="constants" data-kind="formula" style="--x:73%;--y:22%;"><button type="button"><span class="node-label">常數與換算</span><span class="node-title math">N = nN<sub>A</sub>, k = R/N<sub>A</sub></span><span class="node-desc">T(K) = 273.15 + t(°C)</span></button></div>
             </div>
@@ -968,7 +968,7 @@
           <div class="readout-grid" aria-label="計算結果">
             <div class="readout"><b>壓力 P</b><span id="pressureOut">0 Pa</span><small id="pressureAtmOut">0 atm</small></div>
             <div class="readout"><b>分子數 N</b><span id="moleculesOut">0</span><small>N = nN<sub>A</sub></small></div>
-            <div class="readout"><b>平均動能 <span class="math overline">E</span><sub>k</sub></b><span id="energyOut">0 J</span><small><span class="math">3kT/2</span></small></div>
+            <div class="readout"><b>平均動能 <span class="math overline">E</span><sub>k</sub></b><span id="energyOut">0 J</span><small><span class="math">mv<sub>rms</sub>²/2 = 3kT/2</span></small></div>
             <div class="readout"><b>方均根速率 v<sub>rms</sub></b><span id="vrmsOut">0 m/s</span><small><span class="math">√(3RT/M)</span></small></div>
             <div class="readout"><b>密度 ρ</b><span id="densityOut">0 kg/m³</span><small><span class="math">ρ = nM/V</span></small></div>
             <div class="readout"><b>壓力驗算</b><span id="rhoCheckOut">0 Pa</span><small><span class="math">P = ρv<sub>rms</sub>²/3</span></small></div>
@@ -1010,7 +1010,7 @@
           </div>
           <div class="derivation" aria-label="公式代入">
             <div class="step">理想氣體方程式<span class="math" id="idealStep">P = nRT/V</span></div>
-            <div class="step">平均動能只看溫度<span class="math" id="energyStep"><span class="overline">E</span><sub>k</sub> = 3kT/2</span></div>
+            <div class="step">平均動能先由速率定義，再化成溫度公式<span class="math" id="energyStep"><span class="overline">E</span><sub>k</sub> = mv<sub>rms</sub>²/2 = 3kT/2</span></div>
             <div class="step">速率同時受溫度與分子質量影響<span class="math" id="speedStep">v<sub>rms</sub> = √(3RT/M)</span></div>
           </div>
         </aside>
@@ -1043,7 +1043,7 @@
             <div class="derivation">
               <div class="step"><span class="math">PV = nRT = NkT</span></div>
               <div class="step"><span class="math">N = nN<sub>A</sub>, k = R/N<sub>A</sub></span></div>
-              <div class="step"><span class="math"><span class="overline">E</span><sub>k</sub> = 3PV/(2N) = 3kT/2</span></div>
+              <div class="step"><span class="math"><span class="overline">E</span><sub>k</sub> = <span class="frac"><span>1</span><span>2</span></span>m<span class="overline">v²</span> = <span class="frac"><span>1</span><span>2</span></span>mv<sub>rms</sub>² = 3PV/(2N) = 3kT/2</span></div>
               <div class="step"><span class="math">v<sub>rms</sub> = √<span class="overline">v²</span> = √(3kT/m) = √(3RT/M) = √(3P/ρ)</span></div>
             </div>
           </section>
@@ -1073,9 +1073,9 @@
       },
       energy: {
         title: "分子平均動能",
-        html: "<span class=\"math\"><span class=\"overline\">E</span><sub>k</sub> = <span class=\"frac\"><span>3PV</span><span>2N</span></span> = <span class=\"frac\"><span>3nRT</span><span>2N</span></span> = <span class=\"frac\"><span>3</span><span>2</span></span>kT</span>",
-        symbols: ["Ek", "P", "V", "N", "n", "R", "T", "k"],
-        note: "對理想氣體而言，單一分子的平均動能只由絕對溫度 T 決定。"
+        html: "<span class=\"math\"><span class=\"overline\">E</span><sub>k</sub> = <span class=\"frac\"><span>1</span><span>2</span></span>m<span class=\"overline\">v²</span> = <span class=\"frac\"><span>1</span><span>2</span></span>mv<sub>rms</sub>² = <span class=\"frac\"><span>3PV</span><span>2N</span></span> = <span class=\"frac\"><span>3</span><span>2</span></span>kT</span>",
+        symbols: ["Ek", "m", "v2", "vrms", "P", "V", "N", "n", "R", "T", "k"],
+        note: "平均動能先由 E = 1/2 mv² 定義；對理想氣體代入 v_rms 後，可化成只由絕對溫度 T 決定。"
       },
       speed: {
         title: "方均根速率",
@@ -1099,7 +1099,7 @@
         units: "SI 單位 Pa，也就是 N/m²；課本常同時寫 1 atm = 101325 Pa。",
         body: "壓力是氣體分子撞擊容器壁所造成的單位面積作用力。從巨觀可用 PV = nRT，從微觀可用分子平均動能推回 P。",
         tip: "固定 n、V 時，P 與 T 成正比。",
-        formulas: ["ideal", "pressure", "speed"]
+        formulas: ["ideal", "pressure", "energy", "speed"]
       },
       V: {
         label: "V 體積",
@@ -1160,8 +1160,8 @@
         symbol: "Ēk",
         subtitle: "J",
         units: "焦耳 J，指單一分子的平均平移動能。",
-        body: "氣體分子速率不同，因此討論平均動能。理想氣體的平均動能只和絕對溫度有關。",
-        tip: "Ēk = 3kT/2 是這章的核心句。",
+        body: "氣體分子速率不同，因此討論平均動能。定義上 Ēk = 1/2 m v_rms²；對理想氣體再可化成 Ēk = 3kT/2。",
+        tip: "先記定義式 1/2 m v_rms²，再看它如何等於 3kT/2。",
         formulas: ["pressure", "energy"]
       },
       v2: {
@@ -1169,27 +1169,27 @@
         symbol: "v²",
         subtitle: "m²/s²",
         units: "速率平方的平均值，單位 m²/s²。",
-        body: "先把每個分子的速率平方後取平均，再開根號就得到 v_rms。",
-        tip: "平均平方再開根號，不是平均速率。",
-        formulas: ["pressure", "speed"]
+        body: "先把每個分子的速率平方後取平均，再開根號就得到 v_rms。平均動能也正是用這個平均平方速率定義。",
+        tip: "Ēk = 1/2 m v²平均，v_rms² = v²平均。",
+        formulas: ["pressure", "energy", "speed"]
       },
       vrms: {
         label: "v_rms 方均根速率",
         symbol: "vᵣₘₛ",
         subtitle: "m/s",
         units: "公尺每秒 m/s。",
-        body: "v_rms 是用來描述一群分子速率大小的代表值。它可由 T 與分子質量求出，也可由 P 與密度求出。",
+        body: "v_rms 是用來描述一群分子速率大小的代表值。平均動能可寫成 Ēk = 1/2 m v_rms²，它也可由 T 與分子質量求出。",
         tip: "v_rms ∝ √T，且 v_rms ∝ 1/√M。",
-        formulas: ["speed"]
+        formulas: ["energy", "speed"]
       },
       m: {
         label: "m 單一分子質量",
         symbol: "m",
         subtitle: "kg",
         units: "單一分子的質量，m = M/N_A。",
-        body: "若使用 kT 這種單一分子版本，速率公式裡要放單一分子質量 m。",
+        body: "單一分子質量會出現在平均動能定義式 Ēk = 1/2 m v_rms²。若使用 kT 這種單一分子版本，速率公式裡也要放 m。",
         tip: "m 搭配 k，M 搭配 R。",
-        formulas: ["pressure", "speed"]
+        formulas: ["pressure", "energy", "speed"]
       },
       M: {
         label: "M 莫耳質量",
@@ -1504,6 +1504,7 @@
       const n = Number(controls.moles.value);
       const M = Number(controls.gasSelect.value);
       const gasName = controls.gasSelect.selectedOptions[0].dataset.name;
+      const moleculeMass = M / NA;
       const P = n * R * T / V;
       const N = n * NA;
       const Ek = 1.5 * kB * T;
@@ -1511,7 +1512,8 @@
       const v2 = vrms * vrms;
       const rho = n * M / V;
       const pressureCheck = rho * v2 / 3;
-      return { T, volumeL, V, n, M, gasName, P, N, Ek, vrms, v2, rho, pressureCheck };
+      const EkFromSpeed = 0.5 * moleculeMass * v2;
+      return { T, volumeL, V, n, M, moleculeMass, gasName, P, N, Ek, EkFromSpeed, vrms, v2, rho, pressureCheck };
     }
 
     function updateLabOutputs() {
@@ -1530,7 +1532,7 @@
       labOut.v2.textContent = `${formatSci(m.v2, 3)} m²/s²`;
       labOut.celsius.textContent = `${formatNumber(m.T - 273.15, 1)} °C`;
       labOut.idealStep.innerHTML = `P = nRT/V = (${m.n.toFixed(2)})(8.314)(${m.T.toFixed(0)}) / ${m.V.toFixed(3)} = ${formatSci(m.P, 3)} Pa`;
-      labOut.energyStep.innerHTML = `<span class="overline">E</span><sub>k</sub> = 3kT/2 = ${formatSci(m.Ek, 3)} J`;
+      labOut.energyStep.innerHTML = `<span class="overline">E</span><sub>k</sub> = 1/2 m v<sub>rms</sub>² = 1/2(${formatSci(m.moleculeMass, 3)})(${formatNumber(m.vrms, 1)})² = ${formatSci(m.EkFromSpeed, 3)} J = 3kT/2`;
       labOut.speedStep.innerHTML = `v<sub>rms</sub> = √(3RT/M) = ${formatNumber(m.vrms, 1)} m/s`;
       return m;
     }
@@ -1762,7 +1764,7 @@
         q: "Ēk = 3kT/2 代表理想氣體單一分子的平均動能取決於什麼？",
         choices: ["只取決於絕對溫度 T", "取決於壓力 P 和體積 V，但不取決於 T", "只取決於分子質量 M", "取決於容器形狀"],
         answer: 0,
-        why: "理想氣體平移平均動能只和絕對溫度成正比。"
+        why: "定義式是 Ēk = 1/2 m v_rms²；再代入 v_rms² = 3kT/m 後，m 會抵消，所以理想氣體平移平均動能只和絕對溫度成正比。"
       },
       {
         q: "公式 v_rms = √(3P/ρ) 可以從哪個核心關係改寫而來？",
