@@ -1,0 +1,856 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>行星軌跡產生器</title>
+  <style>
+    :root {
+      --bg: #07111f;
+      --panel: rgba(247, 250, 255, .94);
+      --ink: #122033;
+      --muted: #5e7088;
+      --line: #d7e1ee;
+      --blue: #2f78dc;
+      --cyan: #11a8a1;
+      --gold: #e6a936;
+      --red: #ef5a64;
+      --green: #2d9b71;
+      --shadow: 0 18px 42px rgba(13, 28, 48, .16);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      min-width: 320px;
+      margin: 0;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 20% 8%, rgba(58, 133, 224, .17), transparent 28rem),
+        radial-gradient(circle at 80% 0%, rgba(230, 169, 54, .11), transparent 24rem),
+        linear-gradient(145deg, #edf5ff, #fbfdff 48%, #f4f8fb);
+      font-family: Arial, "Noto Sans TC", "Microsoft JhengHei", sans-serif;
+    }
+
+    a { color: inherit; text-decoration: none; }
+
+    header {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 18px;
+      width: min(1520px, calc(100% - 36px));
+      margin: 0 auto;
+      padding: 24px 0 13px;
+    }
+
+    .eyebrow {
+      margin: 0 0 6px;
+      color: var(--blue);
+      font-size: 12px;
+      font-weight: 900;
+      letter-spacing: .12em;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(28px, 3.5vw, 48px);
+      line-height: 1.08;
+    }
+
+    .subtitle {
+      max-width: 900px;
+      margin: 9px 0 0;
+      color: #53657c;
+      font-size: 15px;
+      line-height: 1.62;
+    }
+
+    .home-link {
+      flex: 0 0 auto;
+      padding: 10px 14px;
+      border: 1px solid #bfd0e6;
+      border-radius: 999px;
+      background: rgba(255,255,255,.82);
+      color: #245fa9;
+      font-size: 13px;
+      font-weight: 900;
+      box-shadow: 0 8px 20px rgba(39, 69, 104, .08);
+    }
+
+    main {
+      display: grid;
+      grid-template-columns: minmax(680px, 1fr) 365px;
+      gap: 16px;
+      width: min(1520px, calc(100% - 36px));
+      margin: 0 auto;
+      padding-bottom: 28px;
+      align-items: start;
+    }
+
+    .stage,
+    aside {
+      border: 1px solid rgba(207, 220, 236, .95);
+      border-radius: 18px;
+      background: var(--panel);
+      box-shadow: var(--shadow);
+    }
+
+    .stage {
+      overflow: auto;
+      padding: 12px;
+    }
+
+    canvas {
+      display: block;
+      width: 100%;
+      height: auto;
+      border-radius: 13px;
+    }
+
+    #spaceCanvas {
+      min-width: 680px;
+      background: var(--bg);
+      cursor: crosshair;
+      touch-action: none;
+    }
+
+    #spaceCanvas.aiming { cursor: grabbing; }
+
+    aside {
+      padding: 15px;
+    }
+
+    .section {
+      padding: 14px 0;
+      border-top: 1px solid var(--line);
+    }
+
+    .section:first-child {
+      padding-top: 0;
+      border-top: 0;
+    }
+
+    h2 {
+      margin: 0 0 9px;
+      font-size: 18px;
+    }
+
+    p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.58;
+    }
+
+    .button-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-top: 11px;
+    }
+
+    button {
+      min-height: 40px;
+      border: 1px solid #c7d4e4;
+      border-radius: 8px;
+      background: #fbfdff;
+      color: #32465f;
+      font: inherit;
+      font-size: 13px;
+      font-weight: 900;
+      cursor: pointer;
+      transition: border-color .18s ease, color .18s ease, background .18s ease;
+    }
+
+    button:hover {
+      border-color: #7aa8ed;
+      color: #1f63bd;
+    }
+
+    button.active {
+      border-color: #8cb6f4;
+      background: #eaf3ff;
+      color: #1f63bd;
+    }
+
+    .control {
+      margin-top: 12px;
+    }
+
+    label,
+    .label-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      color: #34465e;
+      font-size: 13px;
+      font-weight: 900;
+    }
+
+    output {
+      color: #2365bf;
+      font-variant-numeric: tabular-nums;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      margin: 9px 0 0;
+      accent-color: var(--blue);
+    }
+
+    .switches {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-top: 11px;
+    }
+
+    .switch {
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 8px;
+      min-height: 37px;
+      padding: 8px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #f6f9fd;
+      color: #52647b;
+      font-size: 12px;
+      font-weight: 900;
+    }
+
+    .switch input {
+      margin: 0;
+      accent-color: var(--blue);
+    }
+
+    .meters {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-top: 11px;
+    }
+
+    .meter {
+      min-height: 74px;
+      padding: 10px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #f6f9fd;
+    }
+
+    .meter b {
+      display: block;
+      margin-bottom: 7px;
+      color: #65768d;
+      font-size: 11px;
+      letter-spacing: .03em;
+    }
+
+    .meter span {
+      color: #172e4a;
+      font-size: 18px;
+      font-weight: 900;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .legend {
+      display: grid;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: #53647b;
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--blue);
+      flex: 0 0 auto;
+    }
+
+    .dot.gold { background: var(--gold); }
+    .dot.red { background: var(--red); }
+    .dot.cyan { background: var(--cyan); }
+    .dot.green { background: var(--green); }
+
+    .hint {
+      margin-top: 10px;
+      padding: 10px;
+      border: 1px solid #dbe6f2;
+      border-radius: 8px;
+      background: #f7fbff;
+      color: #586b82;
+      font-size: 12px;
+      line-height: 1.55;
+    }
+
+    @media (max-width: 1130px) {
+      header,
+      main {
+        width: min(100% - 24px, 760px);
+      }
+
+      header {
+        align-items: start;
+        flex-direction: column;
+      }
+
+      main {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 720px) {
+      header {
+        padding-top: 18px;
+      }
+
+      .subtitle {
+        font-size: 14px;
+      }
+
+      aside {
+        padding: 13px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div>
+      <p class="eyebrow">ORBIT BUILDER LAB</p>
+      <h1>行星繞日軌跡產生器</h1>
+      <p class="subtitle">在畫布上按住並拖曳：起點是行星位置，拖曳方向與長度決定初速度。拖曳時會即時計算未來 600 步預測軌跡，並用箭頭顯示此刻萬有引力朝向太陽。</p>
+    </div>
+    <a class="home-link" href="./index.html">回到模擬列表</a>
+  </header>
+
+  <main>
+    <section class="stage" aria-label="行星繞日互動畫布">
+      <canvas id="spaceCanvas" width="1120" height="720"></canvas>
+    </section>
+
+    <aside>
+      <section class="section">
+        <h2>操作</h2>
+        <p>點擊畫布建立新行星，按住並拖曳給它速度；放開後行星開始運動，預測軌跡停止重算並消失。</p>
+        <div class="button-row">
+          <button id="pauseBtn" type="button">暫停</button>
+          <button id="clearBtn" type="button">清除行星</button>
+        </div>
+        <div class="button-row">
+          <button id="demoBtn" type="button">加入範例</button>
+          <button id="trailBtn" type="button" class="active">顯示軌跡</button>
+        </div>
+      </section>
+
+      <section class="section">
+        <h2>參數</h2>
+        <div class="control">
+          <label for="timeScale">模擬速度 <output id="timeScaleOut"></output></label>
+          <input id="timeScale" type="range" min="0.35" max="3.2" step="0.05" value="1.15">
+        </div>
+        <div class="control">
+          <label for="trailLength">軌跡殘留 <output id="trailLengthOut"></output></label>
+          <input id="trailLength" type="range" min="60" max="1000" step="20" value="420">
+        </div>
+        <div class="control">
+          <label for="velocityScale">拖曳速度倍率 <output id="velocityScaleOut"></output></label>
+          <input id="velocityScale" type="range" min="0.45" max="1.6" step="0.05" value="0.95">
+        </div>
+        <div class="switches">
+          <label class="switch"><input id="showPrediction" type="checkbox" checked> 預測軌跡</label>
+          <label class="switch"><input id="showGravity" type="checkbox" checked> 重力箭頭</label>
+          <label class="switch"><input id="showGrid" type="checkbox" checked> 參考格線</label>
+          <label class="switch"><input id="fadeTrails" type="checkbox" checked> 軌跡淡出</label>
+        </div>
+      </section>
+
+      <section class="section">
+        <h2>目前狀態</h2>
+        <div class="meters">
+          <div class="meter"><b>行星數量</b><span id="planetCount">0</span></div>
+          <div class="meter"><b>預測點數</b><span id="predictionCount">0</span></div>
+          <div class="meter"><b>初速度</b><span id="draftSpeed">0.00</span></div>
+          <div class="meter"><b>距離太陽</b><span id="draftRadius">0.00</span></div>
+        </div>
+        <div class="legend" aria-label="圖例">
+          <div class="legend-item"><span class="dot gold"></span>太陽與萬有引力來源</div>
+          <div class="legend-item"><span class="dot cyan"></span>拖曳速度向量</div>
+          <div class="legend-item"><span class="dot red"></span>引力方向，永遠指向太陽</div>
+          <div class="legend-item"><span class="dot green"></span>未來 600 步預測軌跡</div>
+        </div>
+        <p class="hint">物理模型採用太陽固定、行星彼此不互相吸引的二體近似。這樣可以專注觀察初始位置與速度如何改變橢圓、拋物線或逃逸型軌跡。</p>
+      </section>
+    </aside>
+  </main>
+
+  <script>
+    const canvas = document.getElementById("spaceCanvas");
+    const ctx = canvas.getContext("2d");
+    const $ = id => document.getElementById(id);
+
+    const ui = {
+      pauseBtn: $("pauseBtn"),
+      clearBtn: $("clearBtn"),
+      demoBtn: $("demoBtn"),
+      trailBtn: $("trailBtn"),
+      timeScale: $("timeScale"),
+      trailLength: $("trailLength"),
+      velocityScale: $("velocityScale"),
+      showPrediction: $("showPrediction"),
+      showGravity: $("showGravity"),
+      showGrid: $("showGrid"),
+      fadeTrails: $("fadeTrails")
+    };
+
+    const sun = { x: canvas.width / 2, y: canvas.height / 2, mass: 9000 };
+    const baseDt = 0.022;
+    const predictionSteps = 600;
+    const predictionDt = 0.038;
+    const minLaunchDrag = 5;
+    const captureRadius = 22;
+    const planetColors = ["#7dc8ff", "#78dfb5", "#ffb666", "#c5a5ff", "#ff8e9a", "#a8d36f"];
+    const stars = buildStars(140);
+    const planets = [];
+    let draft = null;
+    let running = true;
+    let showTrails = true;
+    let lastTime = performance.now();
+
+    function buildStars(count) {
+      const result = [];
+      for (let i = 0; i < count; i++) {
+        const seed = Math.sin(i * 84.731) * 10000;
+        const seed2 = Math.sin((i + 19) * 39.113) * 10000;
+        const seed3 = Math.sin((i + 7) * 11.917) * 10000;
+        result.push({
+          x: (seed - Math.floor(seed)) * canvas.width,
+          y: (seed2 - Math.floor(seed2)) * canvas.height,
+          r: .6 + (seed3 - Math.floor(seed3)) * 1.7,
+          a: .28 + (seed - Math.floor(seed)) * .45
+        });
+      }
+      return result;
+    }
+
+    function pointerPoint(event) {
+      const rect = canvas.getBoundingClientRect();
+      return {
+        x: (event.clientX - rect.left) * canvas.width / rect.width,
+        y: (event.clientY - rect.top) * canvas.height / rect.height
+      };
+    }
+
+    function vector(from, to) {
+      return { x: to.x - from.x, y: to.y - from.y };
+    }
+
+    function length(v) {
+      return Math.hypot(v.x, v.y);
+    }
+
+    function normalize(v) {
+      const l = length(v) || 1;
+      return { x: v.x / l, y: v.y / l };
+    }
+
+    function accelerationAt(position) {
+      const dx = sun.x - position.x;
+      const dy = sun.y - position.y;
+      const r2 = dx * dx + dy * dy;
+      const r = Math.sqrt(r2);
+      const softened = Math.max(r2, 42 * 42);
+      const a = sun.mass / softened;
+      return { x: dx / (r || 1) * a, y: dy / (r || 1) * a };
+    }
+
+    function integrateBody(body, dt) {
+      const a1 = accelerationAt(body);
+      body.vx += a1.x * dt;
+      body.vy += a1.y * dt;
+      body.x += body.vx * dt;
+      body.y += body.vy * dt;
+    }
+
+    function makePrediction(start, velocity) {
+      const path = [];
+      const ghost = { x: start.x, y: start.y, vx: velocity.x, vy: velocity.y };
+      for (let i = 0; i < predictionSteps; i++) {
+        integrateBody(ghost, predictionDt);
+        if (i % 2 === 0) path.push({ x: ghost.x, y: ghost.y });
+        if (ghost.x < -260 || ghost.x > canvas.width + 260 || ghost.y < -260 || ghost.y > canvas.height + 260) break;
+      }
+      return path;
+    }
+
+    function draftVelocity() {
+      if (!draft) return { x: 0, y: 0 };
+      const drag = vector(draft.start, draft.current);
+      const scale = Number(ui.velocityScale.value) * .56;
+      return { x: drag.x * scale, y: drag.y * scale };
+    }
+
+    function createPlanet(position, velocity) {
+      const index = planets.length % planetColors.length;
+      planets.push({
+        x: position.x,
+        y: position.y,
+        vx: velocity.x,
+        vy: velocity.y,
+        color: planetColors[index],
+        radius: 5.8 + index % 3,
+        trail: [{ x: position.x, y: position.y }]
+      });
+    }
+
+    function addDemoPlanets() {
+      planets.length = 0;
+      createPlanet({ x: sun.x + 185, y: sun.y }, { x: 0, y: 150 });
+      createPlanet({ x: sun.x - 265, y: sun.y - 18 }, { x: -6, y: -111 });
+      createPlanet({ x: sun.x + 82, y: sun.y - 205 }, { x: 151, y: 58 });
+    }
+
+    function trimTrail(planet) {
+      const max = Number(ui.trailLength.value);
+      if (planet.trail.length > max) planet.trail.splice(0, planet.trail.length - max);
+    }
+
+    function update(delta) {
+      if (!running) return;
+      const steps = Math.min(5, Math.max(1, Math.ceil(delta / 18)));
+      const dt = baseDt * Number(ui.timeScale.value) / steps;
+      for (let s = 0; s < steps; s++) {
+        for (const planet of planets) {
+          integrateBody(planet, dt);
+        }
+      }
+      for (const planet of planets) {
+        const r = Math.hypot(planet.x - sun.x, planet.y - sun.y);
+        if (r > captureRadius) {
+          planet.trail.push({ x: planet.x, y: planet.y });
+          trimTrail(planet);
+        }
+      }
+    }
+
+    function drawBackground() {
+      const bg = ctx.createLinearGradient(0, 0, 0, canvas.height);
+      bg.addColorStop(0, "#07111f");
+      bg.addColorStop(.62, "#0b1728");
+      bg.addColorStop(1, "#102035");
+      ctx.fillStyle = bg;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      for (const star of stars) {
+        ctx.fillStyle = `rgba(232, 241, 255, ${star.a})`;
+        ctx.beginPath();
+        ctx.arc(star.x, star.y, star.r, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      if (!ui.showGrid.checked) return;
+      ctx.save();
+      ctx.strokeStyle = "rgba(130, 162, 200, .10)";
+      ctx.lineWidth = 1;
+      for (let x = sun.x % 60; x <= canvas.width; x += 60) {
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, canvas.height);
+        ctx.stroke();
+      }
+      for (let y = sun.y % 60; y <= canvas.height; y += 60) {
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(canvas.width, y);
+        ctx.stroke();
+      }
+      ctx.strokeStyle = "rgba(232, 241, 255, .16)";
+      ctx.beginPath();
+      ctx.moveTo(sun.x, 0);
+      ctx.lineTo(sun.x, canvas.height);
+      ctx.moveTo(0, sun.y);
+      ctx.lineTo(canvas.width, sun.y);
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    function drawSun() {
+      const glow = ctx.createRadialGradient(sun.x, sun.y, 4, sun.x, sun.y, 82);
+      glow.addColorStop(0, "rgba(255, 238, 169, .98)");
+      glow.addColorStop(.28, "rgba(241, 181, 59, .72)");
+      glow.addColorStop(1, "rgba(241, 181, 59, 0)");
+      ctx.fillStyle = glow;
+      ctx.beginPath();
+      ctx.arc(sun.x, sun.y, 82, 0, Math.PI * 2);
+      ctx.fill();
+
+      const body = ctx.createRadialGradient(sun.x - 6, sun.y - 7, 2, sun.x, sun.y, 24);
+      body.addColorStop(0, "#fff3b0");
+      body.addColorStop(.55, "#ffc854");
+      body.addColorStop(1, "#e39124");
+      ctx.fillStyle = body;
+      ctx.beginPath();
+      ctx.arc(sun.x, sun.y, 24, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    function drawTrail(planet) {
+      if (!showTrails || planet.trail.length < 2) return;
+      ctx.save();
+      ctx.lineWidth = 2.2;
+      ctx.lineCap = "round";
+      ctx.lineJoin = "round";
+      for (let i = 1; i < planet.trail.length; i++) {
+        const a = ui.fadeTrails.checked ? i / planet.trail.length : 1;
+        ctx.strokeStyle = hexToRgba(planet.color, .08 + .56 * a);
+        ctx.beginPath();
+        ctx.moveTo(planet.trail[i - 1].x, planet.trail[i - 1].y);
+        ctx.lineTo(planet.trail[i].x, planet.trail[i].y);
+        ctx.stroke();
+      }
+      ctx.restore();
+    }
+
+    function drawPlanet(planet) {
+      ctx.save();
+      ctx.fillStyle = hexToRgba(planet.color, .18);
+      ctx.beginPath();
+      ctx.arc(planet.x, planet.y, planet.radius + 9, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.fillStyle = planet.color;
+      ctx.beginPath();
+      ctx.arc(planet.x, planet.y, planet.radius, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = "rgba(255,255,255,.82)";
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    function drawArrow(from, to, color, label) {
+      const v = vector(from, to);
+      const angle = Math.atan2(v.y, v.x);
+      const head = 11;
+      ctx.save();
+      ctx.strokeStyle = color;
+      ctx.fillStyle = color;
+      ctx.lineWidth = 3;
+      ctx.lineCap = "round";
+      ctx.beginPath();
+      ctx.moveTo(from.x, from.y);
+      ctx.lineTo(to.x, to.y);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(to.x, to.y);
+      ctx.lineTo(to.x - head * Math.cos(angle - .48), to.y - head * Math.sin(angle - .48));
+      ctx.lineTo(to.x - head * Math.cos(angle + .48), to.y - head * Math.sin(angle + .48));
+      ctx.closePath();
+      ctx.fill();
+      if (label) {
+        ctx.font = '800 14px Arial, "Noto Sans TC", sans-serif';
+        ctx.textBaseline = "middle";
+        ctx.fillText(label, to.x + 9, to.y - 8);
+      }
+      ctx.restore();
+    }
+
+    function drawPrediction(points) {
+      if (!ui.showPrediction.checked || points.length < 2) return;
+      ctx.save();
+      ctx.lineWidth = 2.5;
+      ctx.lineCap = "round";
+      ctx.lineJoin = "round";
+      for (let i = 1; i < points.length; i++) {
+        const a = i / points.length;
+        ctx.strokeStyle = `rgba(63, 213, 148, ${.12 + a * .68})`;
+        ctx.beginPath();
+        ctx.moveTo(points[i - 1].x, points[i - 1].y);
+        ctx.lineTo(points[i].x, points[i].y);
+        ctx.stroke();
+      }
+      for (let i = 0; i < points.length; i += 12) {
+        ctx.fillStyle = "rgba(95, 234, 174, .78)";
+        ctx.beginPath();
+        ctx.arc(points[i].x, points[i].y, 2.3, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.restore();
+    }
+
+    function drawDraft() {
+      if (!draft) return 0;
+      const velocity = draftVelocity();
+      const prediction = makePrediction(draft.start, velocity);
+      const dragLength = Math.hypot(draft.current.x - draft.start.x, draft.current.y - draft.start.y);
+
+      drawPrediction(prediction);
+
+      ctx.save();
+      ctx.fillStyle = "rgba(125, 200, 255, .24)";
+      ctx.beginPath();
+      ctx.arc(draft.start.x, draft.start.y, 16, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = "#7dc8ff";
+      ctx.beginPath();
+      ctx.arc(draft.start.x, draft.start.y, 6.5, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+
+      if (dragLength > 1) {
+        drawArrow(draft.start, draft.current, "#4fd6d1", "初速度 v");
+      }
+
+      if (ui.showGravity.checked) {
+        const dir = normalize(vector(draft.start, sun));
+        const gravityEnd = {
+          x: draft.start.x + dir.x * 88,
+          y: draft.start.y + dir.y * 88
+        };
+        drawArrow(draft.start, gravityEnd, "#ff6671", "萬有引力 F");
+      }
+
+      return prediction.length;
+    }
+
+    function drawHud() {
+      ctx.save();
+      ctx.fillStyle = "rgba(7, 17, 31, .74)";
+      ctx.beginPath();
+      ctx.roundRect(18, 17, 345, 80, 8);
+      ctx.fill();
+      ctx.fillStyle = "#eaf4ff";
+      ctx.font = '800 18px Arial, "Noto Sans TC", sans-serif';
+      ctx.fillText("按住拖曳建立行星速度向量", 34, 45);
+      ctx.fillStyle = "rgba(218, 232, 250, .78)";
+      ctx.font = '700 13px Arial, "Noto Sans TC", sans-serif';
+      ctx.fillText("綠線是拖曳中即時計算的未來 600 步", 34, 72);
+      ctx.restore();
+    }
+
+    function render() {
+      drawBackground();
+      for (const planet of planets) drawTrail(planet);
+      drawSun();
+      for (const planet of planets) drawPlanet(planet);
+      const predictionCount = drawDraft();
+      drawHud();
+      updatePanel(predictionCount);
+    }
+
+    function updatePanel(predictionCount) {
+      $("planetCount").textContent = String(planets.length);
+      $("predictionCount").textContent = String(predictionCount);
+      $("timeScaleOut").textContent = `${Number(ui.timeScale.value).toFixed(2)}x`;
+      $("trailLengthOut").textContent = `${ui.trailLength.value} 點`;
+      $("velocityScaleOut").textContent = `${Number(ui.velocityScale.value).toFixed(2)}x`;
+      if (draft) {
+        const v = draftVelocity();
+        $("draftSpeed").textContent = length(v).toFixed(2);
+        $("draftRadius").textContent = Math.hypot(draft.start.x - sun.x, draft.start.y - sun.y).toFixed(1);
+      } else {
+        $("draftSpeed").textContent = "0.00";
+        $("draftRadius").textContent = "0.0";
+      }
+      ui.pauseBtn.textContent = running ? "暫停" : "繼續";
+      ui.pauseBtn.classList.toggle("active", !running);
+      ui.trailBtn.classList.toggle("active", showTrails);
+      ui.trailBtn.textContent = showTrails ? "顯示軌跡" : "隱藏軌跡";
+    }
+
+    function hexToRgba(hex, alpha) {
+      const raw = hex.replace("#", "");
+      const r = parseInt(raw.slice(0, 2), 16);
+      const g = parseInt(raw.slice(2, 4), 16);
+      const b = parseInt(raw.slice(4, 6), 16);
+      return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+    }
+
+    canvas.addEventListener("pointerdown", event => {
+      const point = pointerPoint(event);
+      draft = { start: point, current: point, pointerId: event.pointerId };
+      canvas.classList.add("aiming");
+      canvas.setPointerCapture(event.pointerId);
+      render();
+    });
+
+    canvas.addEventListener("pointermove", event => {
+      if (!draft || draft.pointerId !== event.pointerId) return;
+      draft.current = pointerPoint(event);
+      render();
+    });
+
+    function finishDraft(event) {
+      if (!draft || draft.pointerId !== event.pointerId) return;
+      const velocity = draftVelocity();
+      const launchVelocity = length(velocity) >= minLaunchDrag ? velocity : { x: 0, y: 0 };
+      createPlanet(draft.start, launchVelocity);
+      draft = null;
+      canvas.classList.remove("aiming");
+      if (canvas.hasPointerCapture(event.pointerId)) canvas.releasePointerCapture(event.pointerId);
+      render();
+    }
+
+    canvas.addEventListener("pointerup", finishDraft);
+    canvas.addEventListener("pointercancel", event => {
+      if (draft && draft.pointerId === event.pointerId) {
+        draft = null;
+        canvas.classList.remove("aiming");
+        render();
+      }
+    });
+
+    ui.pauseBtn.addEventListener("click", () => {
+      running = !running;
+      render();
+    });
+
+    ui.clearBtn.addEventListener("click", () => {
+      planets.length = 0;
+      draft = null;
+      render();
+    });
+
+    ui.demoBtn.addEventListener("click", () => {
+      addDemoPlanets();
+      render();
+    });
+
+    ui.trailBtn.addEventListener("click", () => {
+      showTrails = !showTrails;
+      render();
+    });
+
+    for (const control of Object.values(ui)) {
+      if (control instanceof HTMLInputElement) {
+        control.addEventListener("input", render);
+      }
+    }
+
+    function loop(now) {
+      const delta = now - lastTime;
+      lastTime = now;
+      update(delta);
+      render();
+      requestAnimationFrame(loop);
+    }
+
+    addDemoPlanets();
+    render();
+    requestAnimationFrame(loop);
+  </script>
+</body>
+</html>

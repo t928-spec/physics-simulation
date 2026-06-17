@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="高中物理互動模擬：BJT 小電流控制大電流、雙狹縫干涉，以及橢圓軌道力學能。">
+  <meta name="description" content="高中物理互動模擬與複習：BJT 小電流控制大電流、雙狹縫干涉、橢圓軌道力學能，以及氣體動力論公式關係。">
   <title>物理互動模擬實驗室</title>
   <style>
     :root {
@@ -167,7 +167,7 @@
 
     .grid {
       display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
       gap: 16px;
     }
 
@@ -332,6 +332,25 @@
       text-align: center;
     }
 
+    .orbit-lab-link {
+      position: fixed;
+      z-index: 30;
+      right: 18px;
+      top: 84px;
+      padding: 12px 15px;
+      border: 1px solid #a8c4ee;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, .94);
+      color: #1d5dbd;
+      box-shadow: 0 12px 28px rgba(37, 70, 112, .16);
+      font-size: 13px;
+      font-weight: 900;
+    }
+
+    .orbit-lab-link:hover {
+      background: #eaf3ff;
+    }
+
     @media (max-width: 1050px) {
       .hero { grid-template-columns: 1fr; gap: 17px; padding-top: 57px; }
       .hero-note { max-width: 640px; }
@@ -343,6 +362,7 @@
     @media (max-width: 720px) {
       .shell { width: min(100% - 24px, 580px); }
       header { padding-top: 18px; }
+      .orbit-lab-link { top: 62px; right: 12px; padding: 9px 11px; font-size: 11px; }
       .brand { font-size: 11px; letter-spacing: .08em; }
       .brand-mark { width: 31px; height: 31px; }
       .nav-link { padding: 8px 10px; font-size: 11px; }
@@ -358,6 +378,7 @@
   </style>
 </head>
 <body>
+  <a class="orbit-lab-link" href="./planet-orbit-builder.html">行星軌跡產生器</a>
   <header class="shell">
     <nav>
       <div class="brand">
@@ -374,7 +395,7 @@
         <div class="eyebrow">LEARN BY EXPLORING · 從操作中看見物理</div>
         <h1>把抽象公式，變成可以拉動的現象。</h1>
         <p class="hero-copy">
-          三個適合課堂投影與學生自主操作的互動模擬。調整參數、比較情境，
+          四個適合課堂投影與學生自主操作的互動模擬與複習工具。調整參數、比較情境，
           再回頭理解公式中的每一個物理量。
         </p>
       </div>
@@ -387,7 +408,7 @@
     <section id="simulations">
       <div class="section-head">
         <h2>選擇一個模擬</h2>
-        <span>3 個主題 · 電學、波動、軌道力學</span>
+        <span>4 個主題 · 電學、波動、軌道力學、熱學</span>
       </div>
 
       <div class="grid">
@@ -436,6 +457,22 @@
             <p class="description">拖曳軌道上的行星，同時比較太陽距離 r 與曲率半徑 ρ，理解萬有引力何時不能直接套用圓軌道公式。</p>
             <p class="learn"><strong>適合觀察：</strong>曲率圓、切向加速度、力學能與斜拋最高點類比。</p>
             <span class="open-link">開始模擬 <span class="arrow">→</span></span>
+          </div>
+        </a>
+
+        <a class="card" href="./gas-kinetic-theory.html">
+          <div class="preview">
+            <img src="./gas-kinetic-theory-preview.png" alt="氣體動力論公式關係互動複習預覽">
+          </div>
+          <div class="card-body">
+            <div class="tag-row">
+              <span class="tag orange">熱學</span>
+              <span class="tag cyan">互動式複習</span>
+            </div>
+            <h3>氣體動力論：公式關係複習</h3>
+            <p class="description">把理想氣體方程式、分子平均動能、方均根速率與壓力關係放在同一張圖上，點符號就能追公式來源。</p>
+            <p class="learn"><strong>適合觀察：</strong>P、V、n、T、N、k、平均動能與 v<sub>rms</sub> 之間的連結。</p>
+            <span class="open-link">開始複習 <span class="arrow">→</span></span>
           </div>
         </a>
       </div>

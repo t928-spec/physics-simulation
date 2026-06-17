@@ -1,0 +1,1829 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>氣體動力論公式關係複習</title>
+  <style>
+    :root {
+      --bg: #f3f7f5;
+      --paper: #ffffff;
+      --paper-2: #f8fbfa;
+      --ink: #17212f;
+      --muted: #667585;
+      --line: #d8e2de;
+      --line-strong: #9fb7ae;
+      --teal: #0f8f84;
+      --teal-soft: #e3f4f1;
+      --pink: #d83f9f;
+      --pink-soft: #fde8f5;
+      --gold: #d99a18;
+      --gold-soft: #fff4d8;
+      --blue: #2f6fbb;
+      --blue-soft: #e7f0fb;
+      --red: #c84343;
+      --green: #2f8a55;
+      --shadow: 0 16px 34px rgba(23, 33, 47, .08);
+      --radius: 8px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      min-width: 320px;
+      margin: 0;
+      color: var(--ink);
+      background: linear-gradient(180deg, #f7faf8 0%, var(--bg) 100%);
+      font-family: Arial, "Noto Sans TC", "Microsoft JhengHei", sans-serif;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    button,
+    input,
+    select {
+      font: inherit;
+    }
+
+    button {
+      cursor: pointer;
+    }
+
+    .app {
+      width: min(1500px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 18px 0 30px;
+    }
+
+    .topbar {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 16px;
+      align-items: center;
+      margin-bottom: 14px;
+    }
+
+    .title-block {
+      min-width: 0;
+    }
+
+    .eyebrow {
+      margin: 0 0 4px;
+      color: var(--teal);
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 0;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 30px;
+      line-height: 1.25;
+      letter-spacing: 0;
+    }
+
+    .subtitle {
+      margin: 7px 0 0;
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1.55;
+    }
+
+    .top-actions {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      justify-content: flex-end;
+      flex-wrap: wrap;
+    }
+
+    .home-link,
+    .small-btn,
+    .segmented button,
+    .choice-btn,
+    .formula-button,
+    .symbol-chip {
+      min-height: 36px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--paper);
+      color: #314155;
+      font-size: 13px;
+      font-weight: 800;
+      transition: border-color .18s ease, background .18s ease, color .18s ease, transform .18s ease;
+    }
+
+    .home-link {
+      display: inline-flex;
+      align-items: center;
+      padding: 0 12px;
+    }
+
+    .home-link:hover,
+    .small-btn:hover,
+    .choice-btn:hover,
+    .formula-button:hover,
+    .symbol-chip:hover {
+      border-color: var(--teal);
+      color: var(--teal);
+      background: var(--teal-soft);
+    }
+
+    .segmented {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--paper);
+    }
+
+    .segmented button {
+      min-width: 96px;
+      border: 0;
+      border-right: 1px solid var(--line);
+      border-radius: 0;
+      background: transparent;
+    }
+
+    .segmented button:last-child {
+      border-right: 0;
+    }
+
+    .segmented button.active {
+      background: var(--teal);
+      color: white;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(720px, 1fr) 360px;
+      gap: 14px;
+      align-items: start;
+    }
+
+    .panel {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: rgba(255, 255, 255, .94);
+      box-shadow: var(--shadow);
+    }
+
+    .panel-header {
+      display: flex;
+      align-items: start;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 14px 15px 10px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    h2,
+    h3 {
+      margin: 0;
+      letter-spacing: 0;
+    }
+
+    h2 {
+      font-size: 19px;
+      line-height: 1.35;
+    }
+
+    h3 {
+      font-size: 15px;
+      line-height: 1.35;
+    }
+
+    .panel-note {
+      margin: 4px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .map-panel {
+      min-width: 0;
+    }
+
+    .map-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 10px 15px;
+      border-bottom: 1px solid var(--line);
+      background: var(--paper-2);
+    }
+
+    .chip-strip {
+      display: flex;
+      gap: 7px;
+      overflow-x: auto;
+      padding-bottom: 2px;
+    }
+
+    .symbol-chip {
+      flex: 0 0 auto;
+      padding: 0 10px;
+      white-space: nowrap;
+    }
+
+    .symbol-chip.active {
+      border-color: var(--pink);
+      background: var(--pink-soft);
+      color: #a9277a;
+    }
+
+    .map-scroll {
+      overflow: auto;
+      padding: 12px;
+    }
+
+    .map-canvas {
+      position: relative;
+      min-width: 920px;
+      height: 610px;
+      overflow: hidden;
+      border: 1px solid #e4ebe8;
+      border-radius: var(--radius);
+      background:
+        linear-gradient(#edf4f1 1px, transparent 1px),
+        linear-gradient(90deg, #edf4f1 1px, transparent 1px),
+        #fcfefd;
+      background-size: 44px 44px;
+    }
+
+    .link-layer {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+    }
+
+    .edge {
+      fill: none;
+      stroke: #b8c8c2;
+      stroke-width: 2;
+      opacity: .62;
+      transition: stroke .18s ease, stroke-width .18s ease, opacity .18s ease;
+    }
+
+    .edge.active {
+      stroke: var(--pink);
+      stroke-width: 4;
+      opacity: .95;
+    }
+
+    .edge.related {
+      stroke: var(--teal);
+      stroke-width: 3;
+      opacity: .84;
+    }
+
+    .node {
+      position: absolute;
+      left: var(--x);
+      top: var(--y);
+      width: var(--w);
+      min-height: var(--h);
+      transform: translate(-50%, -50%);
+      border: 1px solid var(--line-strong);
+      border-radius: var(--radius);
+      background: var(--paper);
+      box-shadow: 0 8px 18px rgba(23, 33, 47, .08);
+      transition: border-color .18s ease, box-shadow .18s ease, background .18s ease, opacity .18s ease, transform .18s ease;
+    }
+
+    .node button {
+      display: block;
+      width: 100%;
+      min-height: var(--h);
+      padding: 10px;
+      border: 0;
+      border-radius: var(--radius);
+      background: transparent;
+      color: inherit;
+      text-align: left;
+    }
+
+    .node.symbol {
+      --w: 90px;
+      --h: 56px;
+      border-color: #6fa6c9;
+      background: linear-gradient(180deg, #f1f8ff 0%, #e8f3fb 100%);
+      box-shadow: 0 9px 18px rgba(67, 121, 156, .12);
+    }
+
+    .node.formula {
+      --w: 250px;
+      --h: 96px;
+      border-color: #b9cec8;
+    }
+
+    .node.constant {
+      --w: 230px;
+      --h: 92px;
+      border-color: #e2c271;
+      background: #fffaf0;
+    }
+
+    .node.active {
+      z-index: 5;
+      border-color: var(--pink);
+      background: #fff8fc;
+      box-shadow: 0 12px 26px rgba(216, 63, 159, .2);
+      transform: translate(-50%, -50%) scale(1.02);
+    }
+
+    .node.symbol.active {
+      background: linear-gradient(180deg, #fff4fb 0%, #e7f3ff 100%);
+      box-shadow: 0 12px 26px rgba(216, 63, 159, .18), 0 8px 18px rgba(47, 131, 183, .14);
+    }
+
+    .node.related {
+      z-index: 4;
+      border-color: var(--teal);
+      background: #f4fcfa;
+      box-shadow: 0 10px 22px rgba(15, 143, 132, .14);
+    }
+
+    .node.symbol.related {
+      border-color: #2f83b7;
+      background: linear-gradient(180deg, #edf7ff 0%, #dff0fb 100%);
+      box-shadow: 0 11px 22px rgba(47, 131, 183, .18);
+    }
+
+    .node.faded {
+      opacity: .36;
+    }
+
+    .node-label {
+      display: block;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 800;
+      line-height: 1.2;
+    }
+
+    .node-title {
+      display: block;
+      margin-top: 3px;
+      color: var(--ink);
+      font-size: 20px;
+      font-weight: 800;
+      line-height: 1.25;
+    }
+
+    .node.symbol .node-title {
+      color: #173a63;
+      font-size: 24px;
+      text-align: center;
+    }
+
+    .node.symbol .node-label {
+      color: #2e6389;
+    }
+
+    .node.symbol .node-desc {
+      color: #56758d;
+    }
+
+    .node-desc {
+      display: block;
+      margin-top: 5px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.35;
+    }
+
+    .math {
+      font-family: Georgia, "Times New Roman", "Noto Serif TC", serif;
+      font-style: italic;
+    }
+
+    .math sup,
+    .math sub {
+      font-size: .68em;
+    }
+
+    .overline {
+      text-decoration: overline;
+      text-decoration-thickness: 1px;
+    }
+
+    .frac {
+      display: inline-grid;
+      grid-template-rows: auto auto;
+      align-items: center;
+      margin: 0 .14em;
+      vertical-align: middle;
+      text-align: center;
+      font-style: italic;
+    }
+
+    .frac span:first-child {
+      padding: 0 .18em 2px;
+      border-bottom: 1px solid currentColor;
+    }
+
+    .frac span:last-child {
+      padding-top: 2px;
+      font-size: .86em;
+    }
+
+    .sqrt {
+      display: inline-block;
+      padding: 0 4px 0 2px;
+      border-top: 1px solid currentColor;
+      font-style: italic;
+    }
+
+    .side-panel {
+      display: grid;
+      gap: 14px;
+    }
+
+    .focus-card,
+    .path-card,
+    .quiz-card {
+      padding: 15px;
+    }
+
+    .focus-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .focus-symbol {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 54px;
+      min-height: 44px;
+      padding: 4px 10px;
+      border: 1px solid var(--pink);
+      border-radius: var(--radius);
+      background: var(--pink-soft);
+      color: #a9277a;
+      font-size: 24px;
+      font-weight: 800;
+    }
+
+    .focus-body {
+      margin: 0;
+      color: #445466;
+      font-size: 14px;
+      line-height: 1.62;
+    }
+
+    .unit-row {
+      display: grid;
+      grid-template-columns: 88px 1fr;
+      gap: 8px;
+      margin-top: 11px;
+      padding: 10px;
+      border-radius: var(--radius);
+      background: var(--paper-2);
+      color: #455669;
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .unit-row b {
+      color: var(--ink);
+    }
+
+    .formula-list {
+      display: grid;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .formula-button {
+      display: block;
+      width: 100%;
+      padding: 10px;
+      text-align: left;
+      line-height: 1.4;
+    }
+
+    .formula-button.active {
+      border-color: var(--teal);
+      background: var(--teal-soft);
+      color: #0d6f66;
+    }
+
+    .formula-button .math {
+      display: block;
+      margin-top: 4px;
+      color: var(--ink);
+      font-size: 16px;
+      line-height: 1.45;
+    }
+
+    .path-controls {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .path-controls label {
+      display: grid;
+      gap: 5px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    select {
+      min-height: 36px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--paper);
+      color: var(--ink);
+      padding: 0 8px;
+    }
+
+    .path-result {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 6px;
+      min-height: 46px;
+      margin-top: 12px;
+      padding: 9px;
+      border-radius: var(--radius);
+      background: #f5f8f7;
+    }
+
+    .path-token {
+      display: inline-flex;
+      align-items: center;
+      min-height: 28px;
+      padding: 3px 8px;
+      border: 1px solid #c9d8d3;
+      border-radius: var(--radius);
+      background: var(--paper);
+      color: #304255;
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .path-token.formula {
+      border-color: #d4bc72;
+      background: var(--gold-soft);
+      color: #8f6110;
+    }
+
+    .arrow-token {
+      color: #87968f;
+      font-weight: 800;
+    }
+
+    .lab {
+      display: grid;
+      grid-template-columns: minmax(560px, 1fr) 410px;
+      gap: 14px;
+      margin-top: 14px;
+    }
+
+    .canvas-panel {
+      min-width: 0;
+    }
+
+    .canvas-wrap {
+      padding: 12px;
+    }
+
+    #gasCanvas {
+      display: block;
+      width: 100%;
+      height: auto;
+      border: 1px solid #d2ddd9;
+      border-radius: var(--radius);
+      background: #0f1b25;
+    }
+
+    .readout-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 9px;
+      padding: 0 12px 12px;
+    }
+
+    .readout {
+      min-height: 86px;
+      padding: 10px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--paper-2);
+    }
+
+    .readout b {
+      display: block;
+      margin-bottom: 8px;
+      color: #5e6d7b;
+      font-size: 12px;
+      line-height: 1.25;
+    }
+
+    .readout span {
+      display: block;
+      color: var(--ink);
+      font-size: 18px;
+      font-weight: 800;
+      line-height: 1.25;
+      font-variant-numeric: tabular-nums;
+      overflow-wrap: anywhere;
+    }
+
+    .readout small {
+      display: block;
+      margin-top: 6px;
+      color: var(--muted);
+      font-size: 11px;
+      line-height: 1.35;
+    }
+
+    .controls-panel {
+      padding: 15px;
+    }
+
+    .control {
+      padding: 11px 0;
+      border-top: 1px solid var(--line);
+    }
+
+    .control:first-of-type {
+      border-top: 0;
+    }
+
+    .control label {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      color: #34495c;
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    output {
+      color: var(--teal);
+      font-variant-numeric: tabular-nums;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      margin-top: 9px;
+      accent-color: var(--teal);
+    }
+
+    .select-row {
+      display: grid;
+      gap: 6px;
+      margin-top: 7px;
+    }
+
+    .button-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .small-btn {
+      padding: 0 10px;
+    }
+
+    .derivation {
+      display: grid;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .step {
+      padding: 10px;
+      border-left: 4px solid var(--teal);
+      border-radius: var(--radius);
+      background: #f5fbfa;
+      color: #435467;
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .step .math {
+      display: block;
+      margin-top: 4px;
+      color: var(--ink);
+      font-size: 15px;
+    }
+
+    .quiz-question {
+      min-height: 56px;
+      margin: 10px 0;
+      color: #344457;
+      font-size: 14px;
+      line-height: 1.55;
+    }
+
+    .choices {
+      display: grid;
+      gap: 8px;
+    }
+
+    .choice-btn {
+      padding: 9px 10px;
+      text-align: left;
+      line-height: 1.4;
+    }
+
+    .choice-btn.correct {
+      border-color: var(--green);
+      background: #e8f6ee;
+      color: #226d43;
+    }
+
+    .choice-btn.wrong {
+      border-color: var(--red);
+      background: #fdecec;
+      color: #9d2c2c;
+    }
+
+    .quiz-feedback {
+      min-height: 44px;
+      margin-top: 10px;
+      padding: 9px;
+      border-radius: var(--radius);
+      background: var(--paper-2);
+      color: #536374;
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .quiz-actions {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 9px;
+    }
+
+    .hidden-view {
+      display: none;
+    }
+
+    @media (max-width: 1180px) {
+      .layout,
+      .lab {
+        grid-template-columns: 1fr;
+      }
+
+      .side-panel {
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      }
+
+      .quiz-card {
+        grid-column: 1 / -1;
+      }
+    }
+
+    @media (max-width: 760px) {
+      .app {
+        width: min(100% - 20px, 720px);
+        padding-top: 12px;
+      }
+
+      .topbar {
+        grid-template-columns: 1fr;
+      }
+
+      h1 {
+        font-size: 24px;
+      }
+
+      .top-actions {
+        justify-content: stretch;
+      }
+
+      .segmented {
+        width: 100%;
+      }
+
+      .segmented button {
+        min-width: 0;
+        font-size: 12px;
+      }
+
+      .home-link {
+        justify-content: center;
+        width: 100%;
+      }
+
+      .panel-header,
+      .map-toolbar {
+        align-items: stretch;
+        flex-direction: column;
+      }
+
+      .side-panel {
+        grid-template-columns: 1fr;
+      }
+
+      .readout-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .path-controls {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header class="topbar">
+      <div class="title-block">
+        <p class="eyebrow">高二物理 熱學</p>
+        <h1>氣體動力論公式關係複習</h1>
+        <p class="subtitle">把理想氣體方程式、平均動能、方均根速率與壓力關係放在同一張圖上，點任一符號就能追到它連著哪些公式。</p>
+      </div>
+      <div class="top-actions">
+        <div class="segmented" aria-label="切換檢視">
+          <button type="button" class="active" data-view="map">關係圖</button>
+          <button type="button" data-view="lab">動態模型</button>
+          <button type="button" data-view="quiz">小測驗</button>
+        </div>
+        <a class="home-link" href="./index.html">首頁</a>
+      </div>
+    </header>
+
+    <main>
+      <section class="layout" data-view-panel="map">
+        <article class="panel map-panel">
+          <div class="panel-header">
+            <div>
+              <h2>公式關係地圖</h2>
+              <p class="panel-note">粉紅色是目前選取，綠色是直接相連的公式或符號。</p>
+            </div>
+          </div>
+          <div class="map-toolbar">
+            <div class="chip-strip" id="symbolStrip" aria-label="常用符號"></div>
+            <button class="small-btn" type="button" id="resetMap">重設焦點</button>
+          </div>
+          <div class="map-scroll">
+            <div class="map-canvas" id="mapCanvas" aria-label="氣體動力論公式關係圖">
+              <svg class="link-layer" id="linkLayer" viewBox="0 0 920 610" preserveAspectRatio="none" aria-hidden="true"></svg>
+
+              <div class="node symbol" data-id="P" data-kind="symbol" style="--x:8%;--y:26%;"><button type="button"><span class="node-label">壓力</span><span class="node-title math">P</span><span class="node-desc">Pa, N/m²</span></button></div>
+              <div class="node symbol" data-id="V" data-kind="symbol" style="--x:8%;--y:43%;"><button type="button"><span class="node-label">體積</span><span class="node-title math">V</span><span class="node-desc">m³, L</span></button></div>
+              <div class="node symbol" data-id="n" data-kind="symbol" style="--x:8%;--y:60%;"><button type="button"><span class="node-label">莫耳數</span><span class="node-title math">n</span><span class="node-desc">mol</span></button></div>
+              <div class="node symbol" data-id="T" data-kind="symbol" style="--x:30%;--y:9%;"><button type="button"><span class="node-label">絕對溫度</span><span class="node-title math">T</span><span class="node-desc">K</span></button></div>
+              <div class="node symbol" data-id="R" data-kind="symbol" style="--x:46%;--y:9%;"><button type="button"><span class="node-label">氣體常數</span><span class="node-title math">R</span><span class="node-desc">8.314 J/(mol K)</span></button></div>
+              <div class="node symbol" data-id="N" data-kind="symbol" style="--x:64%;--y:9%;"><button type="button"><span class="node-label">分子數</span><span class="node-title math">N</span><span class="node-desc">顆</span></button></div>
+              <div class="node symbol" data-id="k" data-kind="symbol" style="--x:82%;--y:9%;"><button type="button"><span class="node-label">波茲曼常數</span><span class="node-title math">k</span><span class="node-desc">J/K</span></button></div>
+              <div class="node symbol" data-id="Ek" data-kind="symbol" style="--x:28%;--y:83%;"><button type="button"><span class="node-label">平均動能</span><span class="node-title math"><span class="overline">E</span><sub>k</sub></span><span class="node-desc">每一分子</span></button></div>
+              <div class="node symbol" data-id="v2" data-kind="symbol" style="--x:51%;--y:83%;"><button type="button"><span class="node-label">平均平方速率</span><span class="node-title math"><span class="overline">v²</span></span><span class="node-desc">m²/s²</span></button></div>
+              <div class="node symbol" data-id="vrms" data-kind="symbol" style="--x:74%;--y:83%;"><button type="button"><span class="node-label">方均根速率</span><span class="node-title math">v<sub>rms</sub></span><span class="node-desc">m/s</span></button></div>
+              <div class="node symbol" data-id="m" data-kind="symbol" style="--x:91%;--y:55%;"><button type="button"><span class="node-label">單一分子質量</span><span class="node-title math">m</span><span class="node-desc">kg</span></button></div>
+              <div class="node symbol" data-id="M" data-kind="symbol" style="--x:91%;--y:70%;"><button type="button"><span class="node-label">莫耳質量</span><span class="node-title math">M</span><span class="node-desc">kg/mol</span></button></div>
+              <div class="node symbol" data-id="rho" data-kind="symbol" style="--x:91%;--y:38%;"><button type="button"><span class="node-label">密度</span><span class="node-title math">ρ</span><span class="node-desc">kg/m³</span></button></div>
+
+              <div class="node formula" data-id="ideal" data-kind="formula" style="--x:30%;--y:32%;"><button type="button"><span class="node-label">理想氣體方程式</span><span class="node-title math">PV = nRT = NkT</span><span class="node-desc">把巨觀狀態接到分子數</span></button></div>
+              <div class="node formula" data-id="pressure" data-kind="formula" style="--x:61%;--y:34%;"><button type="button"><span class="node-label">壓力與動能</span><span class="node-title math">P = <span class="frac"><span>Nm<span class="overline">v²</span></span><span>3V</span></span> = <span class="frac"><span>2N<span class="overline">E</span><sub>k</sub></span><span>3V</span></span></span><span class="node-desc">容器壁壓力來自分子碰撞</span></button></div>
+              <div class="node formula" data-id="energy" data-kind="formula" style="--x:39%;--y:61%;"><button type="button"><span class="node-label">分子平均動能</span><span class="node-title math"><span class="overline">E</span><sub>k</sub> = <span class="frac"><span>3PV</span><span>2N</span></span> = <span class="frac"><span>3</span><span>2</span></span>kT</span><span class="node-desc">平均動能只由絕對溫度決定</span></button></div>
+              <div class="node formula" data-id="speed" data-kind="formula" style="--x:69%;--y:61%;"><button type="button"><span class="node-label">方均根速率</span><span class="node-title math">v<sub>rms</sub> = √<span class="overline">v²</span> = √<span class="frac"><span>3kT</span><span>m</span></span> = √<span class="frac"><span>3RT</span><span>M</span></span></span><span class="node-desc">溫度越高越快，分子越重越慢</span></button></div>
+              <div class="node formula" data-id="constants" data-kind="formula" style="--x:73%;--y:22%;"><button type="button"><span class="node-label">常數與換算</span><span class="node-title math">N = nN<sub>A</sub>, k = R/N<sub>A</sub></span><span class="node-desc">T(K) = 273.15 + t(°C)</span></button></div>
+            </div>
+          </div>
+        </article>
+
+        <aside class="side-panel">
+          <section class="panel focus-card">
+            <div class="focus-title">
+              <div>
+                <h2 id="focusTitle">P 壓力</h2>
+                <p class="panel-note" id="focusSubtitle">Pa = N/m²</p>
+              </div>
+              <span class="focus-symbol math" id="focusSymbol">P</span>
+            </div>
+            <p class="focus-body" id="focusBody"></p>
+            <div class="unit-row">
+              <b>單位</b>
+              <span id="focusUnits"></span>
+              <b>記憶</b>
+              <span id="focusTip"></span>
+            </div>
+            <div class="formula-list" id="focusFormulas"></div>
+          </section>
+
+          <section class="panel path-card">
+            <h2>公式路徑</h2>
+            <p class="panel-note">選兩個量，找出中間經過的公式。</p>
+            <div class="path-controls">
+              <label>起點
+                <select id="pathStart"></select>
+              </label>
+              <label>終點
+                <select id="pathEnd"></select>
+              </label>
+            </div>
+            <div class="path-result" id="pathResult"></div>
+          </section>
+
+          <section class="panel quiz-card">
+            <h2>快速檢核</h2>
+            <p class="quiz-question" id="quizQuestion"></p>
+            <div class="choices" id="quizChoices"></div>
+            <div class="quiz-feedback" id="quizFeedback">選一個答案後，這裡會顯示判斷理由。</div>
+            <div class="quiz-actions">
+              <button class="small-btn" type="button" id="nextQuestion">下一題</button>
+            </div>
+          </section>
+        </aside>
+      </section>
+
+      <section class="lab hidden-view" data-view-panel="lab">
+        <article class="panel canvas-panel">
+          <div class="panel-header">
+            <div>
+              <h2>氣體粒子動態模型</h2>
+              <p class="panel-note">調整 T、V、n、M，觀察壓力、平均動能與方均根速率如何同時改變。</p>
+            </div>
+          </div>
+          <div class="canvas-wrap">
+            <canvas id="gasCanvas" width="900" height="520" aria-label="氣體分子在容器內碰撞的動態示意"></canvas>
+          </div>
+          <div class="readout-grid" aria-label="計算結果">
+            <div class="readout"><b>壓力 P</b><span id="pressureOut">0 Pa</span><small id="pressureAtmOut">0 atm</small></div>
+            <div class="readout"><b>分子數 N</b><span id="moleculesOut">0</span><small>N = nN<sub>A</sub></small></div>
+            <div class="readout"><b>平均動能 <span class="math overline">E</span><sub>k</sub></b><span id="energyOut">0 J</span><small><span class="math">3kT/2</span></small></div>
+            <div class="readout"><b>方均根速率 v<sub>rms</sub></b><span id="vrmsOut">0 m/s</span><small><span class="math">√(3RT/M)</span></small></div>
+            <div class="readout"><b>密度 ρ</b><span id="densityOut">0 kg/m³</span><small><span class="math">ρ = nM/V</span></small></div>
+            <div class="readout"><b>壓力驗算</b><span id="rhoCheckOut">0 Pa</span><small><span class="math">P = ρv<sub>rms</sub>²/3</span></small></div>
+            <div class="readout"><b>平均平方速率</b><span id="v2Out">0</span><small><span class="math"><span class="overline">v²</span> = v<sub>rms</sub>²</span></small></div>
+            <div class="readout"><b>攝氏換算</b><span id="celsiusOut">0 °C</span><small><span class="math">T(K)=273.15+t(°C)</span></small></div>
+          </div>
+        </article>
+
+        <aside class="panel controls-panel">
+          <h2>狀態參數</h2>
+          <div class="control">
+            <label for="temperature">絕對溫度 T <output id="temperatureOut">300 K</output></label>
+            <input id="temperature" type="range" min="120" max="900" step="10" value="300">
+          </div>
+          <div class="control">
+            <label for="volume">體積 V <output id="volumeOut">20.0 L</output></label>
+            <input id="volume" type="range" min="3" max="60" step="1" value="20">
+          </div>
+          <div class="control">
+            <label for="moles">莫耳數 n <output id="molesOut">1.00 mol</output></label>
+            <input id="moles" type="range" min="0.10" max="3.00" step="0.05" value="1.00">
+          </div>
+          <div class="control">
+            <label for="gasSelect">氣體種類 M</label>
+            <div class="select-row">
+              <select id="gasSelect">
+                <option value="0.0040026" data-name="氦 He">氦 He, M = 4.00 g/mol</option>
+                <option value="0.020180" data-name="氖 Ne">氖 Ne, M = 20.18 g/mol</option>
+                <option value="0.0280134" data-name="氮 N₂" selected>氮 N₂, M = 28.02 g/mol</option>
+                <option value="0.031998" data-name="氧 O₂">氧 O₂, M = 32.00 g/mol</option>
+                <option value="0.04401" data-name="二氧化碳 CO₂">二氧化碳 CO₂, M = 44.01 g/mol</option>
+              </select>
+              <output id="gasOut">氮 N₂</output>
+            </div>
+          </div>
+          <div class="button-row">
+            <button class="small-btn" type="button" id="pauseGas">暫停</button>
+            <button class="small-btn" type="button" id="randomizeGas">重排粒子</button>
+          </div>
+          <div class="derivation" aria-label="公式代入">
+            <div class="step">理想氣體方程式<span class="math" id="idealStep">P = nRT/V</span></div>
+            <div class="step">平均動能只看溫度<span class="math" id="energyStep"><span class="overline">E</span><sub>k</sub> = 3kT/2</span></div>
+            <div class="step">速率同時受溫度與分子質量影響<span class="math" id="speedStep">v<sub>rms</sub> = √(3RT/M)</span></div>
+          </div>
+        </aside>
+      </section>
+
+      <section class="layout hidden-view" data-view-panel="quiz">
+        <article class="panel map-panel">
+          <div class="panel-header">
+            <div>
+              <h2>符號速查表</h2>
+              <p class="panel-note">把常見量、SI 單位與最容易混淆的關係整理在一起。</p>
+            </div>
+          </div>
+          <div class="map-scroll">
+            <div class="formula-list" id="symbolTable"></div>
+          </div>
+        </article>
+        <aside class="side-panel">
+          <section class="panel quiz-card">
+            <h2>快速檢核</h2>
+            <p class="quiz-question" id="quizQuestionAlt"></p>
+            <div class="choices" id="quizChoicesAlt"></div>
+            <div class="quiz-feedback" id="quizFeedbackAlt">選一個答案後，這裡會顯示判斷理由。</div>
+            <div class="quiz-actions">
+              <button class="small-btn" type="button" id="nextQuestionAlt">下一題</button>
+            </div>
+          </section>
+          <section class="panel path-card">
+            <h2>常用等價式</h2>
+            <div class="derivation">
+              <div class="step"><span class="math">PV = nRT = NkT</span></div>
+              <div class="step"><span class="math">N = nN<sub>A</sub>, k = R/N<sub>A</sub></span></div>
+              <div class="step"><span class="math"><span class="overline">E</span><sub>k</sub> = 3PV/(2N) = 3kT/2</span></div>
+              <div class="step"><span class="math">v<sub>rms</sub> = √<span class="overline">v²</span> = √(3kT/m) = √(3RT/M) = √(3P/ρ)</span></div>
+            </div>
+          </section>
+        </aside>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    const NA = 6.02214076e23;
+    const R = 8.314462618;
+    const kB = 1.380649e-23;
+    const ATM = 101325;
+
+    const formulaInfo = {
+      ideal: {
+        title: "理想氣體方程式",
+        html: "<span class=\"math\">PV = nRT = NkT</span>",
+        symbols: ["P", "V", "n", "R", "T", "N", "k"],
+        note: "同一個狀態可以用莫耳數 n 表示，也可以用分子數 N 表示。"
+      },
+      pressure: {
+        title: "容器內壓力與平均動能",
+        html: "<span class=\"math\">P = <span class=\"frac\"><span>Nm<span class=\"overline\">v²</span></span><span>3V</span></span> = <span class=\"frac\"><span>2N<span class=\"overline\">E</span><sub>k</sub></span><span>3V</span></span></span>",
+        symbols: ["P", "N", "m", "v2", "V", "Ek"],
+        note: "壓力來自分子撞擊容器壁，平均動能越大或分子越多，壓力越大。"
+      },
+      energy: {
+        title: "分子平均動能",
+        html: "<span class=\"math\"><span class=\"overline\">E</span><sub>k</sub> = <span class=\"frac\"><span>3PV</span><span>2N</span></span> = <span class=\"frac\"><span>3nRT</span><span>2N</span></span> = <span class=\"frac\"><span>3</span><span>2</span></span>kT</span>",
+        symbols: ["Ek", "P", "V", "N", "n", "R", "T", "k"],
+        note: "對理想氣體而言，單一分子的平均動能只由絕對溫度 T 決定。"
+      },
+      speed: {
+        title: "方均根速率",
+        html: "<span class=\"math\">v<sub>rms</sub> = √<span class=\"overline\">v²</span> = √<span class=\"frac\"><span>3kT</span><span>m</span></span> = √<span class=\"frac\"><span>3RT</span><span>M</span></span> = √<span class=\"frac\"><span>3P</span><span>ρ</span></span></span>",
+        symbols: ["vrms", "v2", "k", "T", "m", "R", "M", "P", "rho"],
+        note: "同溫下，分子質量越小，方均根速率越大。"
+      },
+      constants: {
+        title: "常數與溫度換算",
+        html: "<span class=\"math\">N = nN<sub>A</sub>, k = R/N<sub>A</sub>, T(K) = 273.15 + t(°C)</span>",
+        symbols: ["N", "n", "k", "R", "T"],
+        note: "用 K 代入熱學公式，不能直接代入攝氏溫度。"
+      }
+    };
+
+    const symbolInfo = {
+      P: {
+        label: "P 壓力",
+        symbol: "P",
+        subtitle: "Pa = N/m²",
+        units: "SI 單位 Pa，也就是 N/m²；課本常同時寫 1 atm = 101325 Pa。",
+        body: "壓力是氣體分子撞擊容器壁所造成的單位面積作用力。從巨觀可用 PV = nRT，從微觀可用分子平均動能推回 P。",
+        tip: "固定 n、V 時，P 與 T 成正比。",
+        formulas: ["ideal", "pressure", "speed"]
+      },
+      V: {
+        label: "V 體積",
+        symbol: "V",
+        subtitle: "m³ 或 L",
+        units: "計算時要換成 m³；1 L = 10⁻³ m³。",
+        body: "體積決定分子活動空間。分子數與溫度固定時，體積越小，碰撞越頻繁，壓力越大。",
+        tip: "固定 n、T 時，P 與 V 成反比。",
+        formulas: ["ideal", "pressure", "energy"]
+      },
+      n: {
+        label: "n 莫耳數",
+        symbol: "n",
+        subtitle: "mol",
+        units: "mol；與分子數的關係是 N = nN_A。",
+        body: "莫耳數是巨觀計數方式，方便和 R 搭配使用。若改用分子數 N，就要改搭配 k。",
+        tip: "nRT 和 NkT 是同一件事的兩種寫法。",
+        formulas: ["ideal", "energy", "constants"]
+      },
+      R: {
+        label: "R 理想氣體常數",
+        symbol: "R",
+        subtitle: "8.314 J/(mol K)",
+        units: "SI 值 R = 8.314 J/(mol K)；若用 atm 與 L，常用 0.082 atm L/(mol K)。",
+        body: "R 是每莫耳版本的氣體常數。它和波茲曼常數的關係是 R = N_A k。",
+        tip: "看到 mol 就多半用 R；看到單一分子就多半用 k。",
+        formulas: ["ideal", "energy", "speed", "constants"]
+      },
+      T: {
+        label: "T 絕對溫度",
+        symbol: "T",
+        subtitle: "K",
+        units: "T(K) = 273.15 + t(°C)。",
+        body: "熱學公式中的溫度都要用 K。溫度直接決定理想氣體單一分子的平均動能。",
+        tip: "T 加倍時，平均動能加倍，v_rms 變成 √2 倍。",
+        formulas: ["ideal", "energy", "speed", "constants"]
+      },
+      N: {
+        label: "N 分子數",
+        symbol: "N",
+        subtitle: "顆",
+        units: "沒有單位，代表分子總顆數。",
+        body: "N 是微觀計數方式。用 N 時，理想氣體方程式寫成 PV = NkT。",
+        tip: "N = nN_A，N_A 是亞佛加厥常數。",
+        formulas: ["ideal", "pressure", "energy", "constants"]
+      },
+      k: {
+        label: "k 波茲曼常數",
+        symbol: "k",
+        subtitle: "1.38 × 10⁻²³ J/K",
+        units: "J/K；k = R/N_A。",
+        body: "k 把單一分子的能量尺度和溫度連在一起，所以平均動能寫成 3kT/2。",
+        tip: "k 是微觀版的 R。",
+        formulas: ["ideal", "energy", "speed", "constants"]
+      },
+      Ek: {
+        label: "Ēk 平均動能",
+        symbol: "Ēk",
+        subtitle: "J",
+        units: "焦耳 J，指單一分子的平均平移動能。",
+        body: "氣體分子速率不同，因此討論平均動能。理想氣體的平均動能只和絕對溫度有關。",
+        tip: "Ēk = 3kT/2 是這章的核心句。",
+        formulas: ["pressure", "energy"]
+      },
+      v2: {
+        label: "v² 平均平方速率",
+        symbol: "v²",
+        subtitle: "m²/s²",
+        units: "速率平方的平均值，單位 m²/s²。",
+        body: "先把每個分子的速率平方後取平均，再開根號就得到 v_rms。",
+        tip: "平均平方再開根號，不是平均速率。",
+        formulas: ["pressure", "speed"]
+      },
+      vrms: {
+        label: "v_rms 方均根速率",
+        symbol: "vᵣₘₛ",
+        subtitle: "m/s",
+        units: "公尺每秒 m/s。",
+        body: "v_rms 是用來描述一群分子速率大小的代表值。它可由 T 與分子質量求出，也可由 P 與密度求出。",
+        tip: "v_rms ∝ √T，且 v_rms ∝ 1/√M。",
+        formulas: ["speed"]
+      },
+      m: {
+        label: "m 單一分子質量",
+        symbol: "m",
+        subtitle: "kg",
+        units: "單一分子的質量，m = M/N_A。",
+        body: "若使用 kT 這種單一分子版本，速率公式裡要放單一分子質量 m。",
+        tip: "m 搭配 k，M 搭配 R。",
+        formulas: ["pressure", "speed"]
+      },
+      M: {
+        label: "M 莫耳質量",
+        symbol: "M",
+        subtitle: "kg/mol",
+        units: "SI 單位要用 kg/mol；常見表格的 g/mol 要除以 1000。",
+        body: "莫耳質量是每 1 mol 氣體的質量。使用 R 的速率公式時，要代入 M。",
+        tip: "同溫下 He 比 CO₂ 快很多，因為 M 小。",
+        formulas: ["speed"]
+      },
+      rho: {
+        label: "ρ 密度",
+        symbol: "ρ",
+        subtitle: "kg/m³",
+        units: "ρ = 總質量 / 體積 = nM/V。",
+        body: "密度把質量與體積合在一起，因此速率公式也可寫成 v_rms = √(3P/ρ)。",
+        tip: "P = ρv_rms²/3 是壓力關係式的另一種寫法。",
+        formulas: ["speed"]
+      }
+    };
+
+    const symbolOrder = ["P", "V", "n", "R", "T", "N", "k", "Ek", "v2", "vrms", "m", "M", "rho"];
+    const formulaOrder = ["ideal", "pressure", "energy", "speed", "constants"];
+    const displayName = {
+      P: "P",
+      V: "V",
+      n: "n",
+      R: "R",
+      T: "T",
+      N: "N",
+      k: "k",
+      Ek: "Ēk",
+      v2: "v²",
+      vrms: "v_rms",
+      m: "m",
+      M: "M",
+      rho: "ρ",
+      ideal: "PV=nRT=NkT",
+      pressure: "壓力關係式",
+      energy: "平均動能",
+      speed: "方均根速率",
+      constants: "常數換算"
+    };
+
+    const mapCanvas = document.getElementById("mapCanvas");
+    const linkLayer = document.getElementById("linkLayer");
+    const symbolStrip = document.getElementById("symbolStrip");
+    const focusTitle = document.getElementById("focusTitle");
+    const focusSubtitle = document.getElementById("focusSubtitle");
+    const focusSymbol = document.getElementById("focusSymbol");
+    const focusBody = document.getElementById("focusBody");
+    const focusUnits = document.getElementById("focusUnits");
+    const focusTip = document.getElementById("focusTip");
+    const focusFormulas = document.getElementById("focusFormulas");
+    const pathStart = document.getElementById("pathStart");
+    const pathEnd = document.getElementById("pathEnd");
+    const pathResult = document.getElementById("pathResult");
+    let activeId = "P";
+
+    function setView(name) {
+      document.querySelectorAll("[data-view-panel]").forEach(panel => {
+        panel.classList.toggle("hidden-view", panel.dataset.viewPanel !== name);
+      });
+      document.querySelectorAll("[data-view]").forEach(button => {
+        button.classList.toggle("active", button.dataset.view === name);
+      });
+      if (name === "map") requestAnimationFrame(drawLinks);
+    }
+
+    document.querySelectorAll("[data-view]").forEach(button => {
+      button.addEventListener("click", () => setView(button.dataset.view));
+    });
+
+    function nodeCenter(node) {
+      const mapRect = mapCanvas.getBoundingClientRect();
+      const rect = node.getBoundingClientRect();
+      return {
+        x: rect.left - mapRect.left + rect.width / 2,
+        y: rect.top - mapRect.top + rect.height / 2
+      };
+    }
+
+    function drawLinks() {
+      linkLayer.innerHTML = "";
+      const width = mapCanvas.clientWidth;
+      const height = mapCanvas.clientHeight;
+      linkLayer.setAttribute("viewBox", `0 0 ${width} ${height}`);
+
+      formulaOrder.forEach(formulaId => {
+        const formulaNode = mapCanvas.querySelector(`[data-id="${formulaId}"]`);
+        if (!formulaNode) return;
+        const a = nodeCenter(formulaNode);
+        formulaInfo[formulaId].symbols.forEach(symbolId => {
+          const symbolNode = mapCanvas.querySelector(`[data-id="${symbolId}"]`);
+          if (!symbolNode) return;
+          const b = nodeCenter(symbolNode);
+          const midX = (a.x + b.x) / 2;
+          const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+          path.setAttribute("d", `M ${a.x} ${a.y} C ${midX} ${a.y}, ${midX} ${b.y}, ${b.x} ${b.y}`);
+          path.classList.add("edge");
+          path.dataset.formula = formulaId;
+          path.dataset.symbol = symbolId;
+          linkLayer.appendChild(path);
+        });
+      });
+      updateMapClasses();
+    }
+
+    function relatedFor(id) {
+      if (symbolInfo[id]) {
+        const formulas = symbolInfo[id].formulas;
+        const symbols = new Set([id]);
+        formulas.forEach(formulaId => formulaInfo[formulaId].symbols.forEach(symbol => symbols.add(symbol)));
+        return { formulas: new Set(formulas), symbols };
+      }
+      if (formulaInfo[id]) {
+        return { formulas: new Set([id]), symbols: new Set(formulaInfo[id].symbols) };
+      }
+      return { formulas: new Set(), symbols: new Set() };
+    }
+
+    function updateMapClasses() {
+      const related = relatedFor(activeId);
+      mapCanvas.querySelectorAll(".node").forEach(node => {
+        const id = node.dataset.id;
+        const isActive = id === activeId;
+        const isRelated = related.formulas.has(id) || related.symbols.has(id);
+        node.classList.toggle("active", isActive);
+        node.classList.toggle("related", !isActive && isRelated);
+        node.classList.toggle("faded", !isActive && !isRelated);
+      });
+
+      linkLayer.querySelectorAll(".edge").forEach(edge => {
+        const isActive = edge.dataset.formula === activeId || edge.dataset.symbol === activeId;
+        const isRelated = related.formulas.has(edge.dataset.formula) && related.symbols.has(edge.dataset.symbol);
+        edge.classList.toggle("active", isActive);
+        edge.classList.toggle("related", !isActive && isRelated);
+      });
+
+      document.querySelectorAll(".symbol-chip").forEach(chip => {
+        chip.classList.toggle("active", chip.dataset.id === activeId);
+      });
+    }
+
+    function setActive(id) {
+      activeId = id;
+      updateMapClasses();
+      renderFocus(id);
+    }
+
+    function renderFocus(id) {
+      const data = symbolInfo[id] || {
+        label: formulaInfo[id].title,
+        symbol: displayName[id],
+        subtitle: "公式",
+        units: "這是一個公式節點，不是單一物理量。",
+        body: formulaInfo[id].note,
+        tip: "從這個公式向外看，可找到所有直接相連的物理量。",
+        formulas: [id]
+      };
+      focusTitle.textContent = data.label;
+      focusSubtitle.textContent = data.subtitle;
+      focusSymbol.textContent = data.symbol;
+      focusBody.textContent = data.body;
+      focusUnits.textContent = data.units;
+      focusTip.textContent = data.tip;
+      focusFormulas.innerHTML = data.formulas.map(formulaId => `
+        <button class="formula-button${formulaId === id ? " active" : ""}" type="button" data-formula="${formulaId}">
+          ${formulaInfo[formulaId].title}
+          ${formulaInfo[formulaId].html}
+        </button>
+      `).join("");
+    }
+
+    focusFormulas.addEventListener("click", event => {
+      const button = event.target.closest("[data-formula]");
+      if (button) setActive(button.dataset.formula);
+    });
+
+    mapCanvas.addEventListener("click", event => {
+      const node = event.target.closest(".node");
+      if (node) setActive(node.dataset.id);
+    });
+
+    document.getElementById("resetMap").addEventListener("click", () => setActive("P"));
+
+    symbolOrder.forEach(id => {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "symbol-chip";
+      button.dataset.id = id;
+      button.textContent = `${displayName[id]} ${symbolInfo[id].label.replace(/^.+?\s/, "")}`;
+      button.addEventListener("click", () => setActive(id));
+      symbolStrip.appendChild(button);
+    });
+
+    function buildGraph() {
+      const graph = {};
+      [...symbolOrder, ...formulaOrder].forEach(id => graph[id] = new Set());
+      formulaOrder.forEach(formulaId => {
+        formulaInfo[formulaId].symbols.forEach(symbolId => {
+          graph[formulaId].add(symbolId);
+          graph[symbolId].add(formulaId);
+        });
+      });
+      return graph;
+    }
+
+    const relationGraph = buildGraph();
+
+    function shortestPath(start, end) {
+      const queue = [[start]];
+      const seen = new Set([start]);
+      while (queue.length) {
+        const path = queue.shift();
+        const last = path[path.length - 1];
+        if (last === end) return path;
+        [...relationGraph[last]].forEach(next => {
+          if (!seen.has(next)) {
+            seen.add(next);
+            queue.push([...path, next]);
+          }
+        });
+      }
+      return [];
+    }
+
+    function renderPath() {
+      const path = shortestPath(pathStart.value, pathEnd.value);
+      if (!path.length) {
+        pathResult.textContent = "找不到直接路徑";
+        return;
+      }
+      pathResult.innerHTML = path.map((id, index) => {
+        const cls = formulaInfo[id] ? "path-token formula" : "path-token";
+        const arrow = index === path.length - 1 ? "" : "<span class=\"arrow-token\">→</span>";
+        return `<span class="${cls}">${displayName[id]}</span>${arrow}`;
+      }).join("");
+    }
+
+    [pathStart, pathEnd].forEach(select => {
+      symbolOrder.forEach(id => {
+        const option = document.createElement("option");
+        option.value = id;
+        option.textContent = `${displayName[id]} ${symbolInfo[id].label.replace(/^.+?\s/, "")}`;
+        select.appendChild(option);
+      });
+      select.addEventListener("change", renderPath);
+    });
+    pathStart.value = "P";
+    pathEnd.value = "vrms";
+
+    const symbolTable = document.getElementById("symbolTable");
+    symbolTable.innerHTML = symbolOrder.map(id => `
+      <button class="formula-button" type="button" data-symbol-table="${id}">
+        <strong>${symbolInfo[id].label}</strong>
+        <span class="math">${displayName[id]}</span>
+        <span>${symbolInfo[id].units}</span>
+      </button>
+    `).join("");
+    symbolTable.addEventListener("click", event => {
+      const button = event.target.closest("[data-symbol-table]");
+      if (!button) return;
+      setActive(button.dataset.symbolTable);
+      setView("map");
+    });
+
+    const controls = {
+      temperature: document.getElementById("temperature"),
+      volume: document.getElementById("volume"),
+      moles: document.getElementById("moles"),
+      gasSelect: document.getElementById("gasSelect")
+    };
+
+    const labOut = {
+      temperature: document.getElementById("temperatureOut"),
+      volume: document.getElementById("volumeOut"),
+      moles: document.getElementById("molesOut"),
+      gas: document.getElementById("gasOut"),
+      pressure: document.getElementById("pressureOut"),
+      pressureAtm: document.getElementById("pressureAtmOut"),
+      molecules: document.getElementById("moleculesOut"),
+      energy: document.getElementById("energyOut"),
+      vrms: document.getElementById("vrmsOut"),
+      density: document.getElementById("densityOut"),
+      rhoCheck: document.getElementById("rhoCheckOut"),
+      v2: document.getElementById("v2Out"),
+      celsius: document.getElementById("celsiusOut"),
+      idealStep: document.getElementById("idealStep"),
+      energyStep: document.getElementById("energyStep"),
+      speedStep: document.getElementById("speedStep")
+    };
+
+    function formatSci(value, digits = 3) {
+      if (value === 0) return "0";
+      const exponent = Math.floor(Math.log10(Math.abs(value)));
+      const mantissa = value / Math.pow(10, exponent);
+      return `${mantissa.toFixed(digits - 1)} × 10^${exponent}`;
+    }
+
+    function formatNumber(value, digits = 2) {
+      return new Intl.NumberFormat("zh-Hant", {
+        maximumFractionDigits: digits,
+        minimumFractionDigits: digits
+      }).format(value);
+    }
+
+    function modelValues() {
+      const T = Number(controls.temperature.value);
+      const volumeL = Number(controls.volume.value);
+      const V = volumeL / 1000;
+      const n = Number(controls.moles.value);
+      const M = Number(controls.gasSelect.value);
+      const gasName = controls.gasSelect.selectedOptions[0].dataset.name;
+      const P = n * R * T / V;
+      const N = n * NA;
+      const Ek = 1.5 * kB * T;
+      const vrms = Math.sqrt(3 * R * T / M);
+      const v2 = vrms * vrms;
+      const rho = n * M / V;
+      const pressureCheck = rho * v2 / 3;
+      return { T, volumeL, V, n, M, gasName, P, N, Ek, vrms, v2, rho, pressureCheck };
+    }
+
+    function updateLabOutputs() {
+      const m = modelValues();
+      labOut.temperature.textContent = `${m.T.toFixed(0)} K`;
+      labOut.volume.textContent = `${m.volumeL.toFixed(1)} L`;
+      labOut.moles.textContent = `${m.n.toFixed(2)} mol`;
+      labOut.gas.textContent = `${m.gasName}, M = ${(m.M * 1000).toFixed(2)} g/mol`;
+      labOut.pressure.textContent = `${formatSci(m.P, 3)} Pa`;
+      labOut.pressureAtm.textContent = `${(m.P / ATM).toFixed(3)} atm`;
+      labOut.molecules.textContent = formatSci(m.N, 3);
+      labOut.energy.textContent = `${formatSci(m.Ek, 3)} J`;
+      labOut.vrms.textContent = `${formatNumber(m.vrms, 1)} m/s`;
+      labOut.density.textContent = `${formatNumber(m.rho, 3)} kg/m³`;
+      labOut.rhoCheck.textContent = `${formatSci(m.pressureCheck, 3)} Pa`;
+      labOut.v2.textContent = `${formatSci(m.v2, 3)} m²/s²`;
+      labOut.celsius.textContent = `${formatNumber(m.T - 273.15, 1)} °C`;
+      labOut.idealStep.innerHTML = `P = nRT/V = (${m.n.toFixed(2)})(8.314)(${m.T.toFixed(0)}) / ${m.V.toFixed(3)} = ${formatSci(m.P, 3)} Pa`;
+      labOut.energyStep.innerHTML = `<span class="overline">E</span><sub>k</sub> = 3kT/2 = ${formatSci(m.Ek, 3)} J`;
+      labOut.speedStep.innerHTML = `v<sub>rms</sub> = √(3RT/M) = ${formatNumber(m.vrms, 1)} m/s`;
+      return m;
+    }
+
+    const gasCanvas = document.getElementById("gasCanvas");
+    const gasCtx = gasCanvas.getContext("2d");
+    let particles = [];
+    let gasPaused = false;
+    let lastGasFrame = performance.now();
+
+    function randomBetween(min, max) {
+      return min + Math.random() * (max - min);
+    }
+
+    function boxForModel(m) {
+      const minW = 360;
+      const maxW = 760;
+      const width = minW + (m.volumeL - 3) / (60 - 3) * (maxW - minW);
+      const height = 300;
+      return {
+        x: (gasCanvas.width - width) / 2,
+        y: 112,
+        w: width,
+        h: height
+      };
+    }
+
+    function targetParticleCount(m) {
+      return Math.max(10, Math.min(92, Math.round(10 + m.n * 28)));
+    }
+
+    function targetSpeed(m) {
+      return Math.max(45, Math.min(270, 30 + m.vrms * .075));
+    }
+
+    function addParticle(box, speed) {
+      const angle = randomBetween(0, Math.PI * 2);
+      const factor = randomBetween(.55, 1.25);
+      particles.push({
+        x: randomBetween(box.x + 12, box.x + box.w - 12),
+        y: randomBetween(box.y + 12, box.y + box.h - 12),
+        vx: Math.cos(angle) * speed * factor,
+        vy: Math.sin(angle) * speed * factor,
+        r: randomBetween(3.2, 5.2)
+      });
+    }
+
+    function resyncParticles(force = false) {
+      const m = updateLabOutputs();
+      const box = boxForModel(m);
+      const count = targetParticleCount(m);
+      const speed = targetSpeed(m);
+      if (force) particles = [];
+      while (particles.length < count) addParticle(box, speed);
+      if (particles.length > count) particles.splice(count);
+      particles.forEach(p => {
+        p.x = Math.max(box.x + p.r, Math.min(box.x + box.w - p.r, p.x));
+        p.y = Math.max(box.y + p.r, Math.min(box.y + box.h - p.r, p.y));
+        const angle = Math.atan2(p.vy, p.vx) || randomBetween(0, Math.PI * 2);
+        const factor = randomBetween(.72, 1.15);
+        p.vx = Math.cos(angle) * speed * factor;
+        p.vy = Math.sin(angle) * speed * factor;
+      });
+      return { m, box };
+    }
+
+    function drawGasBackground() {
+      gasCtx.fillStyle = "#101c27";
+      gasCtx.fillRect(0, 0, gasCanvas.width, gasCanvas.height);
+      gasCtx.strokeStyle = "rgba(255,255,255,.07)";
+      gasCtx.lineWidth = 1;
+      for (let x = 0; x <= gasCanvas.width; x += 45) {
+        gasCtx.beginPath();
+        gasCtx.moveTo(x, 0);
+        gasCtx.lineTo(x, gasCanvas.height);
+        gasCtx.stroke();
+      }
+      for (let y = 0; y <= gasCanvas.height; y += 45) {
+        gasCtx.beginPath();
+        gasCtx.moveTo(0, y);
+        gasCtx.lineTo(gasCanvas.width, y);
+        gasCtx.stroke();
+      }
+    }
+
+    function drawGasBox(m, box) {
+      gasCtx.fillStyle = "rgba(231, 240, 251, .08)";
+      gasCtx.strokeStyle = "#c8d7df";
+      gasCtx.lineWidth = 3;
+      gasCtx.beginPath();
+      gasCtx.rect(box.x, box.y, box.w, box.h);
+      gasCtx.fill();
+      gasCtx.stroke();
+
+      gasCtx.fillStyle = "#e7f0fb";
+      gasCtx.font = "700 18px Arial, 'Noto Sans TC', sans-serif";
+      gasCtx.fillText(`${m.gasName}  T=${m.T.toFixed(0)} K  V=${m.volumeL.toFixed(1)} L  n=${m.n.toFixed(2)} mol`, 32, 42);
+      gasCtx.fillStyle = "rgba(231,240,251,.78)";
+      gasCtx.font = "700 14px Arial, 'Noto Sans TC', sans-serif";
+      gasCtx.fillText(`P = ${formatSci(m.P, 3)} Pa    v_rms = ${formatNumber(m.vrms, 1)} m/s`, 32, 70);
+
+      const pistonX = box.x + box.w;
+      gasCtx.strokeStyle = "#d99a18";
+      gasCtx.lineWidth = 5;
+      gasCtx.beginPath();
+      gasCtx.moveTo(pistonX, box.y - 18);
+      gasCtx.lineTo(pistonX, box.y + box.h + 18);
+      gasCtx.stroke();
+      gasCtx.fillStyle = "#fff4d8";
+      gasCtx.font = "700 13px Arial, 'Noto Sans TC', sans-serif";
+      gasCtx.fillText("可動活塞", pistonX - 34, box.y + box.h + 42);
+    }
+
+    function drawSpeedMeter(m) {
+      const x = 32;
+      const y = 456;
+      const w = 300;
+      const h = 16;
+      const ratio = Math.max(0, Math.min(1, (m.vrms - 250) / 1600));
+      gasCtx.fillStyle = "rgba(231,240,251,.16)";
+      gasCtx.fillRect(x, y, w, h);
+      gasCtx.fillStyle = "#0f8f84";
+      gasCtx.fillRect(x, y, w * ratio, h);
+      gasCtx.strokeStyle = "rgba(231,240,251,.58)";
+      gasCtx.strokeRect(x, y, w, h);
+      gasCtx.fillStyle = "rgba(231,240,251,.86)";
+      gasCtx.font = "700 13px Arial, 'Noto Sans TC', sans-serif";
+      gasCtx.fillText("速率尺度", x, y - 12);
+      gasCtx.fillText("慢", x, y + 36);
+      gasCtx.fillText("快", x + w - 22, y + 36);
+    }
+
+    function drawParticles(m) {
+      const hue = m.T < 260 ? "#6fb6ff" : m.T < 520 ? "#5de2ce" : "#ffcf6a";
+      particles.forEach(p => {
+        gasCtx.beginPath();
+        gasCtx.fillStyle = "rgba(255,255,255,.15)";
+        gasCtx.arc(p.x - p.vx * .018, p.y - p.vy * .018, p.r + 2, 0, Math.PI * 2);
+        gasCtx.fill();
+
+        gasCtx.beginPath();
+        gasCtx.fillStyle = hue;
+        gasCtx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        gasCtx.fill();
+      });
+    }
+
+    function updateParticles(dt, box) {
+      particles.forEach(p => {
+        p.x += p.vx * dt;
+        p.y += p.vy * dt;
+        if (p.x - p.r < box.x) {
+          p.x = box.x + p.r;
+          p.vx *= -1;
+        }
+        if (p.x + p.r > box.x + box.w) {
+          p.x = box.x + box.w - p.r;
+          p.vx *= -1;
+        }
+        if (p.y - p.r < box.y) {
+          p.y = box.y + p.r;
+          p.vy *= -1;
+        }
+        if (p.y + p.r > box.y + box.h) {
+          p.y = box.y + box.h - p.r;
+          p.vy *= -1;
+        }
+      });
+    }
+
+    function syncParticleCountOnly(m, box) {
+      const count = targetParticleCount(m);
+      const speed = targetSpeed(m);
+      while (particles.length < count) addParticle(box, speed);
+      if (particles.length > count) particles.splice(count);
+      particles.forEach(p => {
+        p.x = Math.max(box.x + p.r, Math.min(box.x + box.w - p.r, p.x));
+        p.y = Math.max(box.y + p.r, Math.min(box.y + box.h - p.r, p.y));
+      });
+    }
+
+    function drawGasFrame(now) {
+      const dt = Math.min(.04, (now - lastGasFrame) / 1000);
+      lastGasFrame = now;
+      const m = updateLabOutputs();
+      const box = boxForModel(m);
+      syncParticleCountOnly(m, box);
+      if (!gasPaused) updateParticles(dt, box);
+      drawGasBackground();
+      drawGasBox(m, box);
+      drawParticles(m);
+      drawSpeedMeter(m);
+      requestAnimationFrame(drawGasFrame);
+    }
+
+    Object.values(controls).forEach(control => {
+      control.addEventListener("input", () => resyncParticles(false));
+      control.addEventListener("change", () => resyncParticles(false));
+    });
+
+    document.getElementById("pauseGas").addEventListener("click", event => {
+      gasPaused = !gasPaused;
+      event.currentTarget.textContent = gasPaused ? "繼續" : "暫停";
+      event.currentTarget.classList.toggle("active", gasPaused);
+    });
+
+    document.getElementById("randomizeGas").addEventListener("click", () => resyncParticles(true));
+
+    const quizQuestions = [
+      {
+        q: "固定 n 與 V 時，若絕對溫度 T 變成 2 倍，壓力 P 與平均動能 Ēk 會如何改變？",
+        choices: ["P 變 2 倍，Ēk 變 2 倍", "P 變 4 倍，Ēk 變 2 倍", "P 不變，Ēk 變 2 倍", "P 變 2 倍，Ēk 變 √2 倍"],
+        answer: 0,
+        why: "PV = nRT 給出 P ∝ T；Ēk = 3kT/2 也給出 Ēk ∝ T。"
+      },
+      {
+        q: "同溫下比較 He 與 CO₂，哪一種氣體的 v_rms 較大？",
+        choices: ["He 較大", "CO₂ 較大", "兩者一樣", "要看容器體積才能判斷"],
+        answer: 0,
+        why: "v_rms = √(3RT/M)。同溫時 M 越小，v_rms 越大。"
+      },
+      {
+        q: "若題目使用分子數 N，而不是莫耳數 n，理想氣體方程式最適合寫成哪一個？",
+        choices: ["PV = NkT", "PV = NRT", "P = ρv_rms²", "Ēk = nRT"],
+        answer: 0,
+        why: "N 是分子顆數，要搭配微觀常數 k，因此 PV = NkT。"
+      },
+      {
+        q: "Ēk = 3kT/2 代表理想氣體單一分子的平均動能取決於什麼？",
+        choices: ["只取決於絕對溫度 T", "取決於壓力 P 和體積 V，但不取決於 T", "只取決於分子質量 M", "取決於容器形狀"],
+        answer: 0,
+        why: "理想氣體平移平均動能只和絕對溫度成正比。"
+      },
+      {
+        q: "公式 v_rms = √(3P/ρ) 可以從哪個核心關係改寫而來？",
+        choices: ["P = ρv_rms²/3", "PV = nRT/2", "N = kR", "T = P + V"],
+        answer: 0,
+        why: "由 P = Nm v²/(3V)，而 ρ = Nm/V，可得 P = ρv_rms²/3。"
+      }
+    ];
+
+    let quizIndex = 0;
+
+    function renderQuiz(targetSuffix = "") {
+      const questionEl = document.getElementById(`quizQuestion${targetSuffix}`);
+      const choicesEl = document.getElementById(`quizChoices${targetSuffix}`);
+      const feedbackEl = document.getElementById(`quizFeedback${targetSuffix}`);
+      const q = quizQuestions[quizIndex % quizQuestions.length];
+      questionEl.textContent = q.q;
+      feedbackEl.textContent = "選一個答案後，這裡會顯示判斷理由。";
+      choicesEl.innerHTML = q.choices.map((choice, index) => `
+        <button class="choice-btn" type="button" data-choice="${index}">${choice}</button>
+      `).join("");
+    }
+
+    function answerQuiz(event, targetSuffix = "") {
+      const button = event.target.closest("[data-choice]");
+      if (!button) return;
+      const q = quizQuestions[quizIndex % quizQuestions.length];
+      const choicesEl = document.getElementById(`quizChoices${targetSuffix}`);
+      const feedbackEl = document.getElementById(`quizFeedback${targetSuffix}`);
+      choicesEl.querySelectorAll(".choice-btn").forEach(choice => {
+        const isCorrect = Number(choice.dataset.choice) === q.answer;
+        const isPicked = choice === button;
+        choice.classList.toggle("correct", isCorrect);
+        choice.classList.toggle("wrong", isPicked && !isCorrect);
+        choice.disabled = true;
+      });
+      feedbackEl.textContent = (Number(button.dataset.choice) === q.answer ? "答對。" : "再檢查一次。") + q.why;
+    }
+
+    document.getElementById("quizChoices").addEventListener("click", event => answerQuiz(event, ""));
+    document.getElementById("quizChoicesAlt").addEventListener("click", event => answerQuiz(event, "Alt"));
+    document.getElementById("nextQuestion").addEventListener("click", () => {
+      quizIndex += 1;
+      renderQuiz("");
+      renderQuiz("Alt");
+    });
+    document.getElementById("nextQuestionAlt").addEventListener("click", () => {
+      quizIndex += 1;
+      renderQuiz("");
+      renderQuiz("Alt");
+    });
+
+    window.addEventListener("resize", () => requestAnimationFrame(drawLinks));
+
+    renderFocus(activeId);
+    renderPath();
+    renderQuiz("");
+    renderQuiz("Alt");
+    resyncParticles(true);
+    requestAnimationFrame(drawLinks);
+    requestAnimationFrame(drawGasFrame);
+  </script>
+</body>
+</html>
