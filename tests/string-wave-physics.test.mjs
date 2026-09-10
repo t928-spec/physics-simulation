@@ -5,6 +5,7 @@ import {
   createStringState,
   stepStringState,
   pulseSample,
+  normalizePlaybackSpeed,
   sanitizeDensities,
   sampleShape,
 } from '../string-wave-physics.js';
@@ -64,4 +65,11 @@ test('numerical string has absorbing layers at both ends', () => {
 test('invalid derivation densities fall back to the light-to-heavy example', () => {
   assert.deepEqual(sanitizeDensities(-1, Number.NaN), { muLeft: 1, muRight: 4 });
   assert.deepEqual(sanitizeDensities(2.5, 3.5), { muLeft: 2.5, muRight: 3.5 });
+});
+
+test('only supported playback speeds are accepted', () => {
+  assert.equal(normalizePlaybackSpeed(0.25), 0.25);
+  assert.equal(normalizePlaybackSpeed(0.5), 0.5);
+  assert.equal(normalizePlaybackSpeed(1), 1);
+  assert.equal(normalizePlaybackSpeed(3), 0.25);
 });

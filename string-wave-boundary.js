@@ -1,6 +1,7 @@
 import {
   calculateBoundary,
   createStringState,
+  normalizePlaybackSpeed,
   pulseSample,
   sampleShape,
   sanitizeDensities,
@@ -22,13 +23,13 @@ const controls = {
   timeLabel: document.querySelector('#timeLabel'),
   play: document.querySelector('#playButton'),
   reset: document.querySelector('#resetButton'),
-  slow: document.querySelector('#slowButton'),
+  speed: document.querySelector('#speedControl'),
   derivation: document.querySelector('#derivationLink'),
 };
 const state = {
   mode: 'numeric',
   playing: true,
-  slow: false,
+  speed: 0.25,
   muLeft: 1,
   muRight: 4,
   signalType: 'pulse',
@@ -58,6 +59,7 @@ function updateControls() {
   controls.shape.value = state.shape;
   controls.amplitude.value = state.amplitude;
   controls.timeControl.value = state.timeControl;
+  controls.speed.value = state.speed;
   document.querySelector('#muLeftValue').textContent = state.muLeft.toFixed(2);
   document.querySelector('#muRightValue').textContent = state.muRight.toFixed(2);
   document.querySelector('#amplitudeValue').textContent = state.amplitude.toFixed(2);
@@ -156,12 +158,11 @@ function configureEvents() {
   controls.play.addEventListener('click', () => {
     state.playing = !state.playing;
     controls.play.textContent = state.playing ? '暫停' : '播放';
+    controls.play.setAttribute('aria-pressed', String(state.playing));
   });
   controls.reset.addEventListener('click', resetEngine);
-  controls.slow.addEventListener('click', () => {
-    state.slow = !state.slow;
-    controls.slow.classList.toggle('active', state.slow);
-    controls.slow.setAttribute('aria-pressed', String(state.slow));
+  controls.speed.addEventListener('change', () => {
+    state.speed = normalizePlaybackSpeed(Number(controls.speed.value));
   });
 }
 
@@ -262,7 +263,7 @@ function renderNumeric() {
 
 function advance(delta) {
   if (!state.playing) return;
-  const speed = state.slow ? 0.25 : 1;
+  const speed = state.speed;
   const c = coefficients();
   const target = delta * speed;
   let remaining = target;

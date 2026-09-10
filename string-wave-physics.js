@@ -24,6 +24,10 @@ export function sanitizeDensities(muLeft, muRight) {
   };
 }
 
+export function normalizePlaybackSpeed(value) {
+  return [0.25, 0.5, 1].includes(value) ? value : 0.25;
+}
+
 export function sampleShape(kind, phase) {
   if (kind === 'triangle') {
     const cycle = phase / (2 * Math.PI);

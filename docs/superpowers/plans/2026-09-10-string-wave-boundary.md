@@ -239,6 +239,53 @@ git add index.html README.md
 git commit -m "docs: link string wave lessons from lab"
 ```
 
+### Task 5: 改善播放與速度控制
+
+**Files:**
+- Modify: string-wave-physics.js
+- Modify: tests/string-wave-physics.test.mjs
+- Modify: string-wave-boundary.html
+- Modify: string-wave-boundary.js
+
+**Interfaces:**
+- Produces normalizePlaybackSpeed(value)，只回傳 0.25、0.5 或 1。
+
+- [ ] **Step 1: 寫入失敗測試**
+
+```js
+import { normalizePlaybackSpeed } from '../string-wave-physics.js';
+test('only supported playback speeds are accepted', () => {
+  assert.equal(normalizePlaybackSpeed(.25), .25);
+  assert.equal(normalizePlaybackSpeed(.5), .5);
+  assert.equal(normalizePlaybackSpeed(3), .25);
+});
+```
+
+- [ ] **Step 2: 確認測試失敗**
+
+Run: node --test tests/string-wave-physics.test.mjs
+Expected: FAIL，缺少 normalizePlaybackSpeed。
+
+- [ ] **Step 3: 最小實作**
+
+```js
+export function normalizePlaybackSpeed(value) {
+  return [0.25, 0.5, 1].includes(value) ? value : 0.25;
+}
+```
+
+在頁面新增速度下拉選單（0.25×、0.5×、1×），狀態預設為 0.25；播放按鈕的文字和 aria-pressed 隨播放狀態更新；動畫步進將 delta 乘以 state.speed。
+
+- [ ] **Step 4: 驗證與提交**
+
+Run: node --test tests/string-wave-physics.test.mjs && node --check string-wave-boundary.js
+Expected: PASS，預設為 0.25×。
+
+```bash
+git add string-wave-physics.js tests/string-wave-physics.test.mjs string-wave-boundary.html string-wave-boundary.js
+git commit -m "feat: add wave playback speed controls"
+```
+
 ## Plan self-review
 
 - Spec coverage: Task 1 實作與驗證全部接點物理；Task 2 覆蓋雙模式模擬和控制；Task 3 覆蓋五步推導、URL 帶入與返回連結；Task 4 覆蓋首頁、文件、測試與雙尺寸視覺檢查。
