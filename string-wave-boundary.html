@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="調整兩段繩子的線密度，觀察繩波在交界處的反射、透射與能量守恆。">
+  <title>雙繩交界的繩波｜物理互動模擬實驗室</title>
+  <style>
+    :root { --ink:#10233d; --muted:#61738c; --line:#c7d6e9; --blue:#277be8; --purple:#7959d8; --orange:#e98628; --mint:#14a892; --panel:rgba(255,255,255,.92); }
+    * { box-sizing:border-box; } body { min-width:320px; margin:0; color:var(--ink); background:radial-gradient(circle at 5% 0%,#d9ecff 0,transparent 32rem),linear-gradient(145deg,#f4f9ff,#fbfcff 50%,#f8f5ff); font-family:Arial,"Noto Sans TC","Microsoft JhengHei",sans-serif; }
+    a { color:inherit; text-decoration:none; } button,input,select { font:inherit; } .shell { width:min(1420px,calc(100% - 40px)); margin:0 auto; }
+    nav { display:flex; justify-content:space-between; gap:12px; padding:24px 0 0; color:#35659a; font-size:14px; font-weight:800; } nav a { padding:9px 12px; border-radius:999px; } nav a:hover { background:#e9f3ff; }
+    .hero { display:flex; align-items:end; justify-content:space-between; gap:24px; padding:45px 0 26px; }.eyebrow { margin:0 0 9px; color:var(--blue); font-size:13px; font-weight:900; letter-spacing:.13em; }.hero h1 { margin:0; font-size:clamp(32px,5vw,58px); letter-spacing:-.06em; }.hero p:last-child { max-width:430px; margin:0; color:var(--muted); line-height:1.7; }
+    .workbench { display:grid; grid-template-columns:minmax(220px,.8fr) minmax(450px,2.2fr) minmax(220px,.82fr); gap:18px; padding-bottom:42px; align-items:start; }.panel { border:1px solid var(--line); border-radius:22px; background:var(--panel); box-shadow:0 18px 46px rgb(37 70 112 / 11%); }.controls,.readouts { padding:20px; }.controls h2,.readouts h2 { margin:0 0 17px; font-size:19px; letter-spacing:-.03em; }.field { display:grid; gap:7px; margin:0 0 15px; }.field label,.field-title { display:flex; justify-content:space-between; gap:10px; color:#405877; font-size:13px; font-weight:800; }.field output { color:var(--blue); }.field input { width:100%; accent-color:var(--blue); }.field select { width:100%; padding:10px; border:1px solid var(--line); border-radius:10px; background:#fff; color:var(--ink); }.controls hr { border:0; border-top:1px solid #e2ebf6; margin:18px 0; }.scenario-grid,.button-row { display:grid; grid-template-columns:repeat(3,1fr); gap:7px; }.button-row { grid-template-columns:repeat(3,1fr); margin-top:18px; }.button,button { cursor:pointer; border:1px solid #b9d0ed; border-radius:10px; background:#f5f9ff; color:#315a89; padding:10px 8px; font-size:12px; font-weight:900; }.scenario-grid button.active,.mode-switch button.active { border-color:var(--blue); background:var(--blue); color:#fff; }.button-row button:first-child { background:#eef5ff; }.button-row button.active { border-color:#8a67db; background:#f0edff; color:#6145bc; }
+    .speed-select { display:grid; align-content:center; gap:3px; padding:5px 7px; border:1px solid #b9d0ed; border-radius:10px; color:#315a89; font-size:10px; font-weight:900; }.speed-select select { width:100%; border:0; background:transparent; color:#315a89; font-size:12px; font-weight:900; outline:0; }
+    .stage { min-width:0; overflow:hidden; padding:14px; }.mode-switch { display:flex; justify-content:center; gap:8px; margin:0 0 10px; }.mode-switch button { padding:9px 14px; }.canvas-wrap { position:relative; overflow:hidden; border-radius:15px; background:linear-gradient(#fafdff,#eff7ff); }.canvas-wrap canvas { display:block; width:100%; height:auto; }.canvas-note { position:absolute; right:13px; bottom:11px; color:#7590ae; font-size:11px; font-weight:800; }.legend { display:flex; flex-wrap:wrap; justify-content:center; gap:17px; margin:12px 0 3px; font-size:12px; font-weight:900; }.legend span::before { display:inline-block; width:8px; height:8px; margin-right:5px; border-radius:50%; content:""; }.incident { color:var(--blue); }.incident::before { background:var(--blue); }.reflected { color:var(--purple); }.reflected::before { background:var(--purple); }.transmitted { color:var(--orange); }.transmitted::before { background:var(--orange); }
+    .readouts dl { margin:0; }.readouts dl div { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:10px 0; border-bottom:1px solid #e8eff7; }.readouts dt { color:#5d718b; font-size:13px; }.readouts dd { margin:0; color:#1e5faf; font-size:14px; font-weight:900; }.readouts .energy dd { color:#a55d18; }.readouts .check dd { color:var(--mint); }.hint { margin:18px 0 0; border-radius:13px; padding:12px; background:#f2f7ff; color:#4d6685; font-size:12px; line-height:1.65; }.hint b { color:#2d609b; }
+    @media (max-width:1000px) { .workbench { grid-template-columns:260px minmax(0,1fr); }.readouts { grid-column:1 / -1; }.readouts dl { display:grid; grid-template-columns:repeat(3,1fr); gap:0 18px; }.readouts dl div { min-width:0; } }
+    @media (max-width:700px) { .shell { width:min(100% - 24px,600px); }.hero { display:block; padding:30px 0 20px; }.hero p:last-child { margin-top:13px; }.workbench { grid-template-columns:1fr; }.stage { order:-1; }.readouts { grid-column:auto; }.readouts dl { grid-template-columns:1fr 1fr; }.scenario-grid { grid-template-columns:1fr; }.canvas-note { display:none; } nav { padding-top:12px; } }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <nav aria-label="頁面導覽"><a href="./index.html">← 物理互動模擬實驗室</a><a id="derivationLink" href="./string-wave-derivation.html">查看公式推導 →</a></nav>
+    <header class="hero"><div><p class="eyebrow">固定張力・無能量損失</p><h1>繩波跨越兩條繩子的交界</h1></div><p>改變左右繩的線密度，分別以「數值模擬」和「概念拆解」觀察入射、反射與透射。</p></header>
+    <section class="workbench" aria-label="雙繩交界繩波模擬器">
+      <aside class="panel controls" aria-label="模擬控制">
+        <h2>調整實驗條件</h2>
+        <div class="field"><label for="muLeft">左繩線密度 μ₁ <output id="muLeftValue"></output></label><input id="muLeft" type="range" min="0.25" max="8" step="0.05" value="1"></div>
+        <div class="field"><label for="muRight">右繩線密度 μ₂ <output id="muRightValue"></output></label><input id="muRight" type="range" min="0.25" max="8" step="0.05" value="4"></div>
+        <hr>
+        <div class="field"><label for="signalType">波的類型</label><select id="signalType"><option value="pulse">單一脈波</option><option value="continuous">連續週期波</option></select></div>
+        <div class="field"><label for="shape">波形</label><select id="shape"><option value="sine">正弦波</option><option value="triangle">三角波</option></select></div>
+        <div class="field"><label for="amplitude">振幅 <output id="amplitudeValue"></output></label><input id="amplitude" type="range" min="0.2" max="1" step="0.05" value="0.65"></div>
+        <div class="field"><label id="timeLabel" for="timeControl">脈波寬度 <output id="timeValue"></output></label><input id="timeControl" type="range" min="0.3" max="3" step="0.05" value="1.2"></div>
+        <hr>
+        <p class="field-title">快速情境</p><div class="scenario-grid"><button data-scenario="light-heavy" class="active">輕 → 重</button><button data-scenario="heavy-light">重 → 輕</button><button data-scenario="equal">相同繩</button></div>
+        <div class="button-row"><button id="playButton" aria-pressed="true">暫停</button><button id="resetButton">重設</button><label class="speed-select" for="speedControl">速度<select id="speedControl"><option value="0.25" selected>0.25×</option><option value="0.5">0.5×</option><option value="1">1×</option></select></label></div>
+      </aside>
+      <section class="panel stage" aria-label="繩波畫面">
+        <div class="mode-switch" role="group" aria-label="顯示模式"><button data-mode="numeric" class="active" aria-pressed="true">數值模擬</button><button data-mode="concept" aria-pressed="false">概念拆解</button></div>
+        <div class="canvas-wrap"><canvas id="waveCanvas" width="1080" height="520" aria-label="雙繩上的波形與交界"></canvas><span class="canvas-note">張力固定：T = 100</span></div>
+        <p class="legend"><span class="incident">入射波</span><span class="reflected">反射波</span><span class="transmitted">透射波</span></p>
+      </section>
+      <aside class="panel readouts" aria-label="即時物理讀值">
+        <h2>即時物理讀值</h2>
+        <dl>
+          <div><dt>左繩波速 v₁</dt><dd data-readout="vLeft"></dd></div><div><dt>右繩波速 v₂</dt><dd data-readout="vRight"></dd></div>
+          <div><dt>反射振幅比 r</dt><dd data-readout="r"></dd></div><div><dt>透射振幅比 t</dt><dd data-readout="t"></dd></div>
+          <div class="energy"><dt>反射能量 R</dt><dd data-readout="R"></dd></div><div class="energy"><dt>透射能量 τ</dt><dd data-readout="tau"></dd></div>
+          <div class="check"><dt>守恆檢核 R + τ</dt><dd data-readout="sum"></dd></div>
+        </dl>
+        <p class="hint"><b>觀察提示：</b>輕繩傳到重繩時，反射波會上下顛倒；重繩傳到輕繩時，反射波則不會反相。</p>
+      </aside>
+    </section>
+  </main>
+  <script type="module" src="./string-wave-boundary.js"></script>
+</body>
+</html>
