@@ -213,6 +213,21 @@
       transition: transform .35s ease;
     }
 
+    .wave-preview {
+      background:
+        linear-gradient(90deg, transparent 49.5%, rgba(41, 67, 98, .7) 49.5%, rgba(41, 67, 98, .7) 50.5%, transparent 50.5%),
+        linear-gradient(155deg, transparent 40%, #2c82e9 40.5% 46%, transparent 46.5%),
+        linear-gradient(35deg, transparent 51%, #e8892a 51.5% 57%, transparent 57.5%),
+        linear-gradient(180deg, #edf8ff, #e4effc);
+    }
+
+    .wave-preview::before {
+      position: absolute;
+      inset: 0;
+      background: repeating-linear-gradient(0deg, transparent 0 11px, rgba(255,255,255,.45) 11px 13px);
+      content: "";
+    }
+
     .card:hover img { transform: scale(1.035); }
 
     .card-body {
@@ -395,7 +410,7 @@
         <div class="eyebrow">LEARN BY EXPLORING · 從操作中看見物理</div>
         <h1>把抽象公式，變成可以拉動的現象。</h1>
         <p class="hero-copy">
-          四個適合課堂投影與學生自主操作的互動模擬與複習工具。調整參數、比較情境，
+          五個適合課堂投影與學生自主操作的互動模擬與複習工具。調整參數、比較情境，
           再回頭理解公式中的每一個物理量。
         </p>
       </div>
@@ -408,7 +423,7 @@
     <section id="simulations">
       <div class="section-head">
         <h2>選擇一個模擬</h2>
-        <span>4 個主題 · 電學、波動、軌道力學、熱學</span>
+        <span>5 個主題 · 電學、波動、軌道力學、熱學</span>
       </div>
 
       <div class="grid">
@@ -473,6 +488,20 @@
             <p class="description">把理想氣體方程式、分子平均動能、方均根速率與壓力關係放在同一張圖上，點符號就能追公式來源。</p>
             <p class="learn"><strong>適合觀察：</strong>P、V、n、T、N、k、平均動能與 v<sub>rms</sub> 之間的連結。</p>
             <span class="open-link">開始複習 <span class="arrow">→</span></span>
+          </div>
+        </a>
+
+        <a class="card" href="./string-wave-boundary.html">
+          <div class="preview wave-preview" aria-hidden="true"></div>
+          <div class="card-body">
+            <div class="tag-row">
+              <span class="tag violet">波動</span>
+              <span class="tag cyan">反射與透射</span>
+            </div>
+            <h3>雙繩交界的繩波</h3>
+            <p class="description">調整兩段繩的線密度，觀察脈波或連續波在交界的反射、透射與能量守恆。</p>
+            <p class="learn"><strong>適合觀察：</strong>波速差異、反相或同相反射、透射振幅與 R + τ = 100%。</p>
+            <span class="open-link">開始模擬 <span class="arrow">→</span></span>
           </div>
         </a>
       </div>
