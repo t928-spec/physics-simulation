@@ -5,6 +5,7 @@ import {
   createStringState,
   stepStringState,
   pulseSample,
+  sanitizeDensities,
   sampleShape,
 } from '../string-wave-physics.js';
 
@@ -48,4 +49,19 @@ test('numerical string remains finite after a CFL-safe step sequence', () => {
   state.y[25] = 1;
   for (let index = 0; index < 120; index += 1) stepStringState(state, 100);
   assert.ok([...state.y].every(Number.isFinite));
+});
+
+test('numerical string has absorbing layers at both ends', () => {
+  const state = createStringState({
+    muLeft: 1, muRight: 4, tension: 100, pointCount: 160, length: 16,
+  });
+
+  assert.equal(state.absorption[0], 0);
+  assert.ok(state.absorption[12] < 1);
+  assert.equal(state.absorption[80], 1);
+});
+
+test('invalid derivation densities fall back to the light-to-heavy example', () => {
+  assert.deepEqual(sanitizeDensities(-1, Number.NaN), { muLeft: 1, muRight: 4 });
+  assert.deepEqual(sanitizeDensities(2.5, 3.5), { muLeft: 2.5, muRight: 3.5 });
 });

@@ -15,6 +15,15 @@ export function calculateBoundary(muLeft, muRight, tension) {
   };
 }
 
+export function sanitizeDensities(muLeft, muRight) {
+  const isValid = (value) => Number.isFinite(value) && value >= 0.25 && value <= 8;
+
+  return {
+    muLeft: isValid(muLeft) ? muLeft : 1,
+    muRight: isValid(muRight) ? muRight : 4,
+  };
+}
+
 export function sampleShape(kind, phase) {
   if (kind === 'triangle') {
     const cycle = phase / (2 * Math.PI);
@@ -37,12 +46,18 @@ export function createStringState({ muLeft, muRight, tension, pointCount, length
     { length: pointCount },
     (_, index) => (index <= junctionIndex ? muLeft : muRight) * dx,
   );
+  const absorbingLayer = Math.min(16, junctionIndex - 1);
+  const absorption = Float64Array.from({ length: pointCount }, (_, index) => {
+    const distanceToEdge = Math.min(index, pointCount - 1 - index);
+    return distanceToEdge >= absorbingLayer ? 1 : distanceToEdge / absorbingLayer;
+  });
   const maximumSpeed = Math.sqrt(tension / Math.min(muLeft, muRight));
 
   return {
     y: new Float64Array(pointCount),
     previousY: new Float64Array(pointCount),
     masses,
+    absorption,
     dx,
     dt: 0.68 * dx / maximumSpeed,
     junctionIndex,
@@ -56,7 +71,8 @@ export function stepStringState(state, tension) {
   for (let index = 1; index < state.y.length - 1; index += 1) {
     const curvature = state.y[index + 1] - 2 * state.y[index] + state.y[index - 1];
     const acceleration = tension * curvature / (state.dx * state.masses[index]);
-    nextY[index] = 2 * state.y[index] - state.previousY[index] + state.dt ** 2 * acceleration;
+    nextY[index] = (2 * state.y[index] - state.previousY[index] + state.dt ** 2 * acceleration)
+      * state.absorption[index];
   }
 
   state.previousY = state.y;
