@@ -228,6 +228,23 @@
       content: "";
     }
 
+    .superposition-preview {
+      background:
+        linear-gradient(90deg, transparent 0 23%, #2c82e9 23.5% 29%, transparent 29.5%),
+        linear-gradient(90deg, transparent 0 29%, #2c82e9 29.5% 35%, transparent 35.5%),
+        linear-gradient(90deg, transparent 0 65%, #e8892a 65.5% 71%, transparent 71.5%),
+        linear-gradient(90deg, transparent 0 71%, #e8892a 71.5% 77%, transparent 77.5%),
+        linear-gradient(180deg, transparent 49.5%, rgba(41, 67, 98, .58) 49.5% 50.5%, transparent 50.5%),
+        linear-gradient(180deg, #edf8ff, #e4effc);
+    }
+
+    .superposition-preview::before {
+      position: absolute;
+      inset: 0;
+      background: repeating-linear-gradient(0deg, transparent 0 11px, rgba(255,255,255,.45) 11px 13px);
+      content: "";
+    }
+
     .card:hover img { transform: scale(1.035); }
 
     .card-body {
@@ -410,7 +427,7 @@
         <div class="eyebrow">LEARN BY EXPLORING · 從操作中看見物理</div>
         <h1>把抽象公式，變成可以拉動的現象。</h1>
         <p class="hero-copy">
-          五個適合課堂投影與學生自主操作的互動模擬與複習工具。調整參數、比較情境，
+          六個適合課堂投影與學生自主操作的互動模擬與複習工具。調整參數、比較情境，
           再回頭理解公式中的每一個物理量。
         </p>
       </div>
@@ -423,7 +440,7 @@
     <section id="simulations">
       <div class="section-head">
         <h2>選擇一個模擬</h2>
-        <span>5 個主題 · 電學、波動、軌道力學、熱學</span>
+        <span>6 個主題 · 電學、波動、軌道力學、熱學</span>
       </div>
 
       <div class="grid">
@@ -501,6 +518,20 @@
             <h3>雙繩交界的繩波</h3>
             <p class="description">調整兩段繩的線密度，觀察脈波或連續波在交界的反射、透射與能量守恆。</p>
             <p class="learn"><strong>適合觀察：</strong>波速差異、反相或同相反射、透射振幅與 R + τ = 100%。</p>
+            <span class="open-link">開始模擬 <span class="arrow">→</span></span>
+          </div>
+        </a>
+
+        <a class="card" href="./wave superposition.html">
+          <div class="preview superposition-preview" aria-hidden="true"></div>
+          <div class="card-body">
+            <div class="tag-row">
+              <span class="tag violet">波動</span>
+              <span class="tag cyan">疊加原理</span>
+            </div>
+            <h3>三角脈衝波疊加與質點振動速度</h3>
+            <p class="description">觀察兩個相向傳播的三角脈衝如何疊加，並追蹤固定位置質點的位移與振動速度。</p>
+            <p class="learn"><strong>適合觀察：</strong>疊加原理、建設性與破壞性干涉，以及質點瞬時速度。</p>
             <span class="open-link">開始模擬 <span class="arrow">→</span></span>
           </div>
         </a>
