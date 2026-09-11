@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>三角脈衝波疊加與質點振動速度模擬</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: "PingFang TC", "Microsoft JhengHei", "Noto Sans TC", sans-serif;
+        }
+        body {
+            background-color: #f0f4f8;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            margin: 0;
+            color: #333;
+        }
+        .container {
+            background: white;
+            padding: 24px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            max-width: 900px;
+            width: 100%;
+        }
+        h2 {
+            margin-top: 0;
+            color: #1a365d;
+            text-align: center;
+        }
+        canvas {
+            background: #fafafa;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            display: block;
+            margin: 0 auto 20px;
+            width: 100%;
+            max-width: 800px;
+        }
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            justify-content: center;
+            align-items: center;
+            background: #f8fafc;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+        button {
+            background-color: #3182ce;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background 0.2s;
+            font-weight: bold;
+        }
+        button:hover {
+            background-color: #2b6cb0;
+        }
+        button.highlight {
+            background-color: #e53e3e;
+        }
+        button.highlight:hover {
+            background-color: #c53030;
+        }
+        label {
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            cursor: pointer;
+        }
+        .slider-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            width: 100%;
+            max-width: 500px;
+        }
+        input[type="range"] {
+            flex: 1;
+        }
+        .info-panel {
+            background-color: #ebf8ff;
+            border-left: 4px solid #3182ce;
+            padding: 12px 16px;
+            border-radius: 4px;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+        .info-panel.overlap {
+            background-color: #fff5f5;
+            border-left-color: #e53e3e;
+            color: #9b2c2c;
+        }
+        .legend {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-bottom: 15px;
+            font-size: 13px;
+            font-weight: bold;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .color-box {
+            width: 16px;
+            height: 4px;
+            border-radius: 2px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>波的疊加原理：三角脈衝波與質點速度演示</h2>
+
+    <div class="legend">
+        <div class="legend-item"><div class="color-box" style="background:#e53e3e; height:2px; border-top:2px dashed #e53e3e;"></div> 正向波1（向右）</div>
+        <div class="legend-item"><div class="color-box" style="background:#3182ce; height:2px; border-top:2px dashed #3182ce;"></div> 反向波2（向左）</div>
+        <div class="legend-item"><div class="color-box" style="background:#805ad5; height:4px;"></div> 合成波（繩子實際形狀）</div>
+        <div class="legend-item"><div class="color-box" style="background:#276749; height:12px; width:3px;"></div> 質點速度向量（綠箭頭）</div>
+    </div>
+
+    <canvas id="simCanvas" width="800" height="350"></canvas>
+
+    <div class="controls">
+        <button id="btnPlay">播放 / 暫停</button>
+        <button id="btnReset">重置</button>
+        <button id="btnOverlap" class="highlight">⚡ 跳至完全重疊瞬間</button>
+
+        <label>
+            <input type="checkbox" id="chkShowComponents" checked> 顯示獨立子波 (紅/藍)
+        </label>
+        <label>
+            <input type="checkbox" id="chkShowVelocity" checked> 顯示質點速度向量 (綠)
+        </label>
+    </div>
+
+    <div class="controls">
+        <div class="slider-container">
+            <span>時間控制:</span>
+            <input type="range" id="timeSlider" min="0" max="6" step="0.01" value="0">
+            <span id="lblTime">t = 0.00 s</span>
+        </div>
+    </div>
+
+    <div id="infoPanel" class="info-panel">
+        <strong>觀念提示：</strong> 請觀察綠色箭頭（質點振動速度）。波向右前進時，前沿質點向上動、後沿質點向下動。當兩波完全重疊時，雖然繩子變成直線（位移為零），但除中央點外的質點速度達到最大值！
+    </div>
+</div>
+
+<script>
+    const canvas = document.getElementById('simCanvas');
+    const ctx = canvas.getContext('2d');
+
+    // UI elements
+    const btnPlay = document.getElementById('btnPlay');
+    const btnReset = document.getElementById('btnReset');
+    const btnOverlap = document.getElementById('btnOverlap');
+    const chkShowComponents = document.getElementById('chkShowComponents');
+    const chkShowVelocity = document.getElementById('chkShowVelocity');
+    const timeSlider = document.getElementById('timeSlider');
+    const lblTime = document.getElementById('lblTime');
+    const infoPanel = document.getElementById('infoPanel');
+
+    // Physical Parameters
+    const baselineY = 175; // Y coordinate of rope resting state
+    const waveSpeed = 100; // pixels per second
+    const pulseWidth = 160; // width of triangle base
+    const halfW = pulseWidth / 2;
+    const pulseAmplitude = 70; // Peak height
+    const totalTime = 6.0;
+    const overlapTime = 2.5; // t when centers coincide at x = 400
+
+    let currentTime = 0;
+    let isPlaying = false;
+    let lastAnimTime = null;
+
+    // Pulse 1: Moves Right (+x), Peak upwards (+A)
+    // Initial center at t=0: x1 = 150
+    function getWave1(x, t) {
+        let x1 = 150 + waveSpeed * t;
+        let dx = x - x1;
+        if (Math.abs(dx) >= halfW) return { y: 0, v: 0 };
+        if (Math.abs(dx) < 1e-3) return { y: pulseAmplitude, v: 0 }; // 頂點瞬時速度為 0
+
+        let slope = (dx < 0) ? (pulseAmplitude / halfW) : (-pulseAmplitude / halfW);
+        let y = (dx < 0) ? pulseAmplitude * (1 + dx / halfW) : pulseAmplitude * (1 - dx / halfW);
+        // Transverse velocity for right-moving wave: vy = -c * dy/dx
+        let v = -waveSpeed * slope; 
+        return { y, v };
+    }
+
+    // Pulse 2: Moves Left (-x), Peak downwards (-A)
+    // Initial center at t=0: x2 = 650
+    function getWave2(x, t) {
+        let x2 = 650 - waveSpeed * t;
+        let dx = x - x2;
+        if (Math.abs(dx) >= halfW) return { y: 0, v: 0 };
+        if (Math.abs(dx) < 1e-3) return { y: -pulseAmplitude, v: 0 }; // 頂點瞬時速度為 0
+
+        let slope = (dx < 0) ? (-pulseAmplitude / halfW) : (pulseAmplitude / halfW);
+        let y = (dx < 0) ? -pulseAmplitude * (1 + dx / halfW) : -pulseAmplitude * (1 - dx / halfW);
+        // Transverse velocity for left-moving wave: vy = +c * dy/dx
+        let v = waveSpeed * slope; 
+        return { y, v };
+    }
+
+    function drawArrow(x, y, vy, scale = 0.35) {
+        let len = vy * scale;
+        if (Math.abs(len) < 2) return; // Don't draw tiny arrows
+
+        let targetY = y - len; // Canvas Y goes downwards
+
+        ctx.beginPath();
+        ctx.strokeStyle = '#276749';
+        ctx.fillStyle = '#276749';
+        ctx.lineWidth = 2.5;
+        ctx.moveTo(x, y);
+        ctx.lineTo(x, targetY);
+        ctx.stroke();
+
+        // Arrow head
+        let headLen = 6;
+        let angle = len > 0 ? -Math.PI / 2 : Math.PI / 2; // Up or Down
+        ctx.beginPath();
+        ctx.moveTo(x, targetY);
+        ctx.lineTo(x - headLen * Math.cos(angle - Math.PI / 6), targetY - headLen * Math.sin(angle - Math.PI / 6));
+        ctx.lineTo(x - headLen * Math.cos(angle + Math.PI / 6), targetY - headLen * Math.sin(angle + Math.PI / 6));
+        ctx.closePath();
+        ctx.fill();
+    }
+
+    function render() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        // 1. Draw Baseline (Equilibrium position)
+        ctx.beginPath();
+        ctx.strokeStyle = '#cbd5e0';
+        ctx.setLineDash([4, 4]);
+        ctx.lineWidth = 1;
+        ctx.moveTo(0, baselineY);
+        ctx.lineTo(canvas.width, baselineY);
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        // Calculate wave profile across canvas
+        let step = 2; // pixel resolution
+        let pointsCombined = [];
+        let pointsW1 = [];
+        let pointsW2 = [];
+
+        for (let x = 0; x <= canvas.width; x += step) {
+            let w1 = getWave1(x, currentTime);
+            let w2 = getWave2(x, currentTime);
+            let totalY = w1.y + w2.y;
+            let totalV = w1.v + w2.v;
+
+            pointsW1.push({ x, y: baselineY - w1.y });
+            pointsW2.push({ x, y: baselineY - w2.y });
+            pointsCombined.push({ x, y: baselineY - totalY, v: totalV, yDisp: totalY });
+        }
+
+        // 2. Draw Wave 1 (Red dashed)
+        if (chkShowComponents.checked) {
+            ctx.beginPath();
+            ctx.strokeStyle = '#e53e3e';
+            ctx.setLineDash([6, 4]);
+            ctx.lineWidth = 1.5;
+            pointsW1.forEach((p, i) => {
+                if (i === 0) ctx.moveTo(p.x, p.y);
+                else ctx.lineTo(p.x, p.y);
+            });
+            ctx.stroke();
+
+            // Draw Wave 2 (Blue dashed)
+            ctx.beginPath();
+            ctx.strokeStyle = '#3182ce';
+            pointsW2.forEach((p, i) => {
+                if (i === 0) ctx.moveTo(p.x, p.y);
+                else ctx.lineTo(p.x, p.y);
+            });
+            ctx.stroke();
+            ctx.setLineDash([]);
+        }
+
+        // 3. Draw Combined Wave (Solid Purple line)
+        ctx.beginPath();
+        ctx.strokeStyle = '#805ad5';
+        ctx.lineWidth = 4;
+        pointsCombined.forEach((p, i) => {
+            if (i === 0) ctx.moveTo(p.x, p.y);
+            else ctx.lineTo(p.x, p.y);
+        });
+        ctx.stroke();
+
+        // 4. Draw Particle Velocity Vectors (Green arrows)
+        if (chkShowVelocity.checked) {
+            let arrowSpacing = 16; // Draw arrow every N pixels
+            for (let i = 0; i < pointsCombined.length; i += Math.round(arrowSpacing / step)) {
+                let p = pointsCombined[i];
+                if (Math.abs(p.v) > 0.1) {
+                    drawArrow(p.x, p.y, p.v);
+                }
+            }
+        }
+
+        // Check if currently near complete overlap
+        let isOverlap = Math.abs(currentTime - overlapTime) < 0.05;
+        if (isOverlap) {
+            infoPanel.className = "info-panel overlap";
+            infoPanel.innerHTML = "<strong>💥 完全重疊瞬間（t = 2.50s）：</strong><br>繩子完全呈水平直線（總位移 = 0）。請注意：<strong>中央點（x = 400）的振動速度與動能恆為 0</strong>（無箭頭）；而中央點左側質點向下高速運動，右側質點向上高速運動！證明除了中央點外，重疊區其餘質點皆在高速振動。";
+        } else {
+            infoPanel.className = "info-panel";
+            infoPanel.innerHTML = "<strong>觀念提示：</strong> 請觀察綠色箭頭（質點振動速度）。波向右前進時，前沿質點向上動、後沿質點向下動。當兩波完全重疊時，雖然繩子變成直線（位移為零），但除中央點外的質點速度達到最大值！";
+        }
+
+        // Update UI
+        lblTime.innerText = `t = ${currentTime.toFixed(2)} s`;
+        timeSlider.value = currentTime;
+    }
+
+    function animate(now) {
+        if (!lastAnimTime) lastAnimTime = now;
+        let delta = (now - lastAnimTime) / 1000;
+        lastAnimTime = now;
+
+        if (isPlaying) {
+            currentTime += delta;
+            if (currentTime > totalTime) {
+                currentTime = 0;
+            }
+            render();
+            requestAnimationFrame(animate);
+        }
+    }
+
+    // Event Listeners
+    btnPlay.addEventListener('click', () => {
+        isPlaying = !isPlaying;
+        btnPlay.innerText = isPlaying ? '暫停' : '播放';
+        if (isPlaying) {
+            lastAnimTime = null;
+            requestAnimationFrame(animate);
+        }
+    });
+
+    btnReset.addEventListener('click', () => {
+        isPlaying = false;
+        btnPlay.innerText = '播放';
+        currentTime = 0;
+        render();
+    });
+
+    btnOverlap.addEventListener('click', () => {
+        isPlaying = false;
+        btnPlay.innerText = '播放';
+        currentTime = overlapTime;
+        render();
+    });
+
+    timeSlider.addEventListener('input', (e) => {
+        currentTime = parseFloat(e.target.value);
+        render();
+    });
+
+    chkShowComponents.addEventListener('change', render);
+    chkShowVelocity.addEventListener('change', render);
+
+    // Initial render
+    render();
+</script>
+
+</body>
+</html>
