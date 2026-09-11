@@ -14,3 +14,12 @@ test('circular-wave page has canvas, accessible controls, and module controller'
   assert.match(page, /<script type="module" src="\.\/circular-standing-wave\.js"><\/script>/);
   assert.match(page, /此瀏覽器無法繪製 Canvas/);
 });
+
+test('homepage advertises and links the seventh circular standing-wave simulation', () => {
+  const home = readFileSync(new URL('../index.html', import.meta.url), 'utf8');
+
+  assert.match(home, /七個適合課堂投影/);
+  assert.match(home, /7 個主題/);
+  assert.match(home, /href="\.\/circular-standing-wave\.html"/);
+  assert.match(home, /圓形駐波：看見節線與腹部/);
+});

@@ -245,6 +245,26 @@
       content: "";
     }
 
+    .circular-wave-preview {
+      background:
+        linear-gradient(90deg, transparent 49.3%, rgba(34, 68, 111, .42) 49.3% 50.7%, transparent 50.7%),
+        linear-gradient(0deg, transparent 49.3%, rgba(34, 68, 111, .42) 49.3% 50.7%, transparent 50.7%),
+        radial-gradient(circle at center, transparent 0 29%, rgba(255,255,255,.72) 29.8% 30.8%, transparent 31.5%),
+        radial-gradient(circle at center, #e97d68 0 18%, #f6f9ff 19% 29%, #68a6f4 30% 47%, #f2f7ff 48% 62%, #dceafb 63% 100%);
+    }
+
+    .circular-wave-preview::before {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 58%;
+      aspect-ratio: 1;
+      border: 2px solid rgba(36, 74, 117, .58);
+      border-radius: 50%;
+      content: "";
+      transform: translate(-50%, -50%);
+    }
+
     .card:hover img { transform: scale(1.035); }
 
     .card-body {
@@ -427,7 +447,7 @@
         <div class="eyebrow">LEARN BY EXPLORING · 從操作中看見物理</div>
         <h1>把抽象公式，變成可以拉動的現象。</h1>
         <p class="hero-copy">
-          六個適合課堂投影與學生自主操作的互動模擬與複習工具。調整參數、比較情境，
+          七個適合課堂投影與學生自主操作的互動模擬與複習工具。調整參數、比較情境，
           再回頭理解公式中的每一個物理量。
         </p>
       </div>
@@ -440,7 +460,7 @@
     <section id="simulations">
       <div class="section-head">
         <h2>選擇一個模擬</h2>
-        <span>6 個主題 · 電學、波動、軌道力學、熱學</span>
+        <span>7 個主題 · 電學、波動、軌道力學、熱學</span>
       </div>
 
       <div class="grid">
@@ -532,6 +552,20 @@
             <h3>三角脈衝波疊加與質點振動速度</h3>
             <p class="description">觀察兩個相向傳播的三角脈衝如何疊加，並追蹤固定位置質點的位移與振動速度。</p>
             <p class="learn"><strong>適合觀察：</strong>疊加原理、建設性與破壞性干涉，以及質點瞬時速度。</p>
+            <span class="open-link">開始模擬 <span class="arrow">→</span></span>
+          </div>
+        </a>
+
+        <a class="card" href="./circular-standing-wave.html">
+          <div class="preview circular-wave-preview" aria-hidden="true"></div>
+          <div class="card-body">
+            <div class="tag-row">
+              <span class="tag violet">波動</span>
+              <span class="tag cyan">駐波</span>
+            </div>
+            <h3>圓形駐波：看見節線與腹部</h3>
+            <p class="description">切換圓形振膜的模態，觀察固定不動的節徑、節圓，以及顏色交替振動的腹部。</p>
+            <p class="learn"><strong>適合觀察：</strong>圓形邊界、節點、腹部與不同振動模態。</p>
             <span class="open-link">開始模擬 <span class="arrow">→</span></span>
           </div>
         </a>
