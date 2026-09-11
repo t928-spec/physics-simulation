@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="切換圓形振膜的駐波模態，觀察節徑、節圓與腹部的交替振動。">
+  <title>圓形駐波：看見節線與腹部｜物理互動模擬實驗室</title>
+  <style>
+    :root { --ink:#10233d; --muted:#61738c; --line:#c7d6e9; --blue:#3979e8; --violet:#7557d8; --coral:#e77761; --panel:rgba(255,255,255,.92); --shadow:0 18px 46px rgba(37,70,112,.11); }
+    * { box-sizing:border-box; }
+    body { min-width:320px; margin:0; color:var(--ink); background:radial-gradient(circle at 8% 0%,#d9ecff 0,transparent 31rem),radial-gradient(circle at 94% 12%,#eee8ff 0,transparent 29rem),linear-gradient(145deg,#f4f9ff,#fbfcff 55%,#fbf8ff); font-family:Arial,"Noto Sans TC","Microsoft JhengHei",sans-serif; }
+    a { color:inherit; text-decoration:none; }
+    button,select { font:inherit; }
+    .shell { width:min(1120px,calc(100% - 40px)); margin:0 auto; }
+    nav { display:flex; justify-content:space-between; gap:12px; padding:24px 0 0; color:#35659a; font-size:14px; font-weight:800; }
+    nav a { padding:9px 12px; border-radius:999px; }
+    nav a:hover { background:#e9f3ff; }
+    .hero { display:flex; justify-content:space-between; align-items:end; gap:26px; padding:43px 0 24px; }
+    .eyebrow { margin:0 0 9px; color:var(--blue); font-size:13px; font-weight:900; letter-spacing:.13em; }
+    h1 { margin:0; font-size:clamp(35px,5vw,62px); letter-spacing:-.065em; line-height:1.08; }
+    .hero-copy { max-width:420px; margin:0; color:var(--muted); font-size:15px; line-height:1.7; }
+    .lab { display:grid; grid-template-columns:minmax(0,1fr) 285px; gap:18px; padding-bottom:42px; align-items:start; }
+    .panel { border:1px solid var(--line); border-radius:22px; background:var(--panel); box-shadow:var(--shadow); }
+    .stage { padding:18px; }
+    .canvas-wrap { display:grid; place-items:center; min-height:300px; overflow:hidden; border-radius:16px; background:radial-gradient(circle at center,#fff 0 10%,#f1f7ff 63%,#e5eefb); }
+    canvas { display:block; max-width:100%; border-radius:50%; box-shadow:0 12px 24px rgba(42,86,133,.16); }
+    .legend { display:flex; flex-wrap:wrap; justify-content:center; gap:18px; margin:14px 0 1px; color:#566e8b; font-size:12px; font-weight:800; }
+    .legend span::before { display:inline-block; width:10px; height:10px; margin-right:6px; border-radius:50%; content:""; }
+    .legend .up::before { background:#6aa7f9; }.legend .node::before { border:1px solid #98a9bd; background:#f6f8fc; }.legend .down::before { background:var(--coral); }
+    .controls { padding:21px; }
+    h2 { margin:0 0 15px; font-size:19px; letter-spacing:-.03em; }
+    .field { display:grid; gap:7px; margin:0 0 17px; }
+    label { color:#405877; font-size:13px; font-weight:800; }
+    select,button { min-height:42px; border:1px solid #b9d0ed; border-radius:10px; background:#fff; color:#315a89; font-weight:800; }
+    select { padding:0 10px; }
+    button { cursor:pointer; padding:0 12px; }
+    button:hover { border-color:var(--blue); background:#eef5ff; }
+    .button-row { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+    #playButton { border-color:#87aceb; background:#eaf3ff; color:#1d5dbd; }
+    #playButton[aria-pressed="false"] { border-color:#d1b3a7; background:#fff3ef; color:#a95140; }
+    .summary { margin:18px 0 0; padding:14px; border-radius:13px; background:#f2f7ff; color:#4d6685; font-size:13px; line-height:1.65; }
+    .summary b { color:#2d609b; }
+    .note { margin:15px 0 0; color:#61738c; font-size:13px; line-height:1.65; }
+    #fallbackNotice { margin:14px 0 0; padding:12px; border-radius:12px; background:#fff3ef; color:#934735; font-size:13px; line-height:1.6; }
+    [hidden] { display:none !important; }
+    .canvas-unavailable .controls { display:none; }
+    @media (max-width:780px) { .shell { width:min(100% - 24px,620px); }.hero { display:block; padding:29px 0 20px; }.hero-copy { margin-top:14px; }.lab { grid-template-columns:1fr; }.controls { order:-1; }.stage { padding:12px; }.canvas-wrap { min-height:0; } nav { padding-top:12px; } }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <nav aria-label="頁面導覽"><a href="./index.html">← 物理互動模擬實驗室</a></nav>
+    <header class="hero">
+      <div><p class="eyebrow">固定圓形邊界・駐波模態</p><h1>圓形駐波：看見節線與腹部</h1></div>
+      <p class="hero-copy">切換圓形振膜的模態，找出始終靜止的節線，並觀察腹部如何在上下位移之間交替。</p>
+    </header>
+    <section class="lab" aria-label="圓形駐波模擬器">
+      <section class="panel stage" aria-label="圓形振膜畫面">
+        <div class="canvas-wrap"><canvas id="membraneCanvas" width="720" height="720" aria-label="圓形振膜的駐波動畫">此瀏覽器無法繪製 Canvas，請改用支援 Canvas 的現代瀏覽器。</canvas></div>
+        <p class="legend" aria-label="顏色圖例"><span class="up">向上位移</span><span class="node">節線：位移為零</span><span class="down">向下位移</span></p>
+        <p id="fallbackNotice" hidden>此瀏覽器無法繪製 Canvas，請改用支援 Canvas 的現代瀏覽器。</p>
+      </section>
+      <aside class="panel controls" aria-label="模擬控制">
+        <h2>調整與觀察</h2>
+        <div class="field"><label for="modeControl">選擇振動模態</label><select id="modeControl"></select></div>
+        <div class="field"><label for="speedControl">播放速度</label><select id="speedControl"><option value="0.5">0.5×</option><option value="1" selected>1×</option><option value="1.5">1.5×</option></select></div>
+        <div class="button-row"><button id="playButton" type="button" aria-pressed="true">暫停</button><button id="resetButton" type="button">重設</button></div>
+        <p id="modeSummary" class="summary" aria-live="polite"></p>
+        <p class="note"><b>觀察提示：</b>節線上的每一點都不動；兩側的腹部則會同時向相反方向振動。</p>
+      </aside>
+    </section>
+  </main>
+  <script type="module" src="./circular-standing-wave.js"></script>
+</body>
+</html>
