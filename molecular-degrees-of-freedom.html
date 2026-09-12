@@ -143,6 +143,7 @@
     let enabledModeIds = getPresetModeIds(moleculeId, 'rigid');
     let isPlaying = true;
     let startMs = performance.now();
+    let pausedAtSeconds = 0;
     let focusedModeId = null;
     let animationFrameId = null;
 
@@ -152,9 +153,9 @@
     moleculeSelect.value = moleculeId;
 
     function applyPreset(preset) { enabledModeIds = getPresetModeIds(moleculeId, preset); focusedModeId = enabledModeIds.at(-1) ?? null; renderAll(); }
-    function renderAll() { renderModeList(); renderReadout(summarizeModes(moleculeId, enabledModeIds)); renderExplanation(); }
+    function renderAll(modeIdToFocus = null) { renderModeList(modeIdToFocus); renderReadout(summarizeModes(moleculeId, enabledModeIds)); renderExplanation(); }
 
-    function renderModeList() {
+    function renderModeList(modeIdToFocus = null) {
       const modes = MOLECULES[moleculeId].modes;
       modeList.replaceChildren();
       const wrapper = document.createElement('div');
@@ -164,24 +165,26 @@
         label.className = `mode-option${mode.id === focusedModeId ? ' is-focused' : ''}`;
         const checkbox = document.createElement('input');
         checkbox.type = 'checkbox';
+        checkbox.dataset.modeId = mode.id;
         checkbox.checked = enabledModeIds.includes(mode.id);
         checkbox.setAttribute('aria-label', mode.label);
         checkbox.addEventListener('change', () => {
           enabledModeIds = checkbox.checked ? [...enabledModeIds, mode.id] : enabledModeIds.filter((id) => id !== mode.id);
           focusedModeId = mode.id;
-          renderAll();
+          renderAll(mode.id);
           drawCurrentFrame();
         });
         const text = document.createElement('span');
         const name = document.createElement('strong');
         name.textContent = mode.label;
         const detail = document.createElement('small');
-        detail.textContent = mode.description ?? `${mode.kind} 自由度。`;
+        detail.textContent = mode.description ?? `${kindName(mode.kind)}自由度。`;
         text.append(name, detail);
         label.append(checkbox, text);
         wrapper.append(label);
       }
       modeList.append(wrapper);
+      if (modeIdToFocus) modeList.querySelector(`[data-mode-id="${modeIdToFocus}"]`)?.focus();
     }
 
     function renderReadout(summary) {
@@ -234,7 +237,7 @@
       drawArrow({ x: end.x - 9, y: end.y + 4 }, end, color, label);
     }
 
-    function drawSpring(a, b) {
+    function drawSpring(a, b, label) {
       const dx = b.x - a.x; const dy = b.y - a.y; const length = Math.hypot(dx, dy) || 1;
       const nx = -dy / length; const ny = dx / length;
       ctx.strokeStyle = '#d86e22'; ctx.lineWidth = 3; ctx.setLineDash([]); ctx.beginPath();
@@ -245,7 +248,24 @@
         const y = a.y + dy * t + ny * wiggle;
         index === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
       }
-      ctx.stroke(); ctx.fillStyle = '#b65d18'; ctx.font = '700 14px Arial'; ctx.fillText('鍵長振動', (a.x + b.x) / 2 - 28, (a.y + b.y) / 2 - 18);
+      ctx.stroke(); ctx.fillStyle = '#b65d18'; ctx.font = '700 14px Arial'; ctx.fillText(label, (a.x + b.x) / 2 - 38, (a.y + b.y) / 2 - 18);
+    }
+
+    function drawStretchMarker(left, center, right, label, isAntisymmetric) {
+      const color = isAntisymmetric ? '#a75aa0' : '#d86e22';
+      const leftDirection = isAntisymmetric ? 48 : -48;
+      const rightDirection = 48;
+      drawArrow({ x: left.x, y: left.y + 52 }, { x: left.x + leftDirection, y: left.y + 52 }, color, '');
+      drawArrow({ x: right.x, y: right.y + 52 }, { x: right.x + rightDirection, y: right.y + 52 }, color, '');
+      ctx.fillStyle = color; ctx.font = '700 14px Arial'; ctx.fillText(label, center.x - 33, Math.max(left.y, center.y, right.y) + 83);
+    }
+
+    function drawBendMarker(left, center, right) {
+      ctx.strokeStyle = '#0c9eaa'; ctx.lineWidth = 3; ctx.setLineDash([7, 6]);
+      ctx.beginPath(); ctx.moveTo(left.x, left.y - 45); ctx.quadraticCurveTo(center.x, center.y - 105, right.x, right.y - 45); ctx.stroke(); ctx.setLineDash([]);
+      drawArrow({ x: center.x - 42, y: center.y - 67 }, { x: center.x - 15, y: center.y - 96 }, '#0c9eaa', '');
+      drawArrow({ x: center.x + 42, y: center.y - 67 }, { x: center.x + 15, y: center.y - 96 }, '#7657c9', '');
+      ctx.fillStyle = '#167881'; ctx.font = '700 14px Arial'; ctx.fillText('彎曲：鍵角改變（y/z）', center.x - 70, Math.min(left.y, center.y, right.y) - 118);
     }
 
     function drawLegend(summary) {
@@ -270,8 +290,10 @@
       const projected = positions.map(project);
       ctx.strokeStyle = '#6f8297'; ctx.lineWidth = 10; ctx.lineCap = 'round';
       for (let index = 0; index < projected.length - 1; index += 1) { ctx.beginPath(); ctx.moveTo(projected[index].x, projected[index].y); ctx.lineTo(projected[index + 1].x, projected[index + 1].y); ctx.stroke(); }
-      const hasVibration = summary.enabledModes.some((mode) => mode.kind === 'vibration');
-      if (hasVibration && projected.length > 1) drawSpring(projected[0], projected[1]);
+      if (enabledModeIds.includes('stretch') && projected.length === 2) drawSpring(projected[0], projected[1], '雙原子鍵長伸縮');
+      if (enabledModeIds.includes('symmetric-stretch') && projected.length === 3) drawStretchMarker(projected[0], projected[1], projected[2], '對稱伸縮', false);
+      if (enabledModeIds.includes('antisymmetric-stretch') && projected.length === 3) drawStretchMarker(projected[0], projected[1], projected[2], '非對稱伸縮', true);
+      if (enabledModeIds.includes('bend-degenerate') && projected.length === 3) drawBendMarker(projected[0], projected[1], projected[2]);
       projected.forEach((point, index) => {
         ctx.beginPath(); ctx.fillStyle = colourFor(positions[index].element); ctx.shadowColor = 'rgba(21, 53, 91, .25)'; ctx.shadowBlur = 14; ctx.arc(point.x, point.y, positions[index].element === 'C' ? 27 : 33, 0, Math.PI * 2); ctx.fill(); ctx.shadowBlur = 0;
         ctx.fillStyle = 'white'; ctx.font = '800 16px Arial'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(positions[index].element, point.x, point.y + 1);
@@ -287,17 +309,22 @@
       ctx.fillStyle = '#3e5b78'; ctx.font = '800 17px Arial'; ctx.fillText(`${MOLECULES[moleculeId].label} · 機械自由度 ${summary.visibleCount} · 熱學 f = ${summary.equipartitionF}`, 35, 43);
     }
 
-    function drawCurrentFrame() { drawCanvas(getAtomPositions(moleculeId, enabledModeIds, isPlaying ? (performance.now() - startMs) / 1000 : 0)); }
-    function frame(nowMs) { drawCanvas(getAtomPositions(moleculeId, enabledModeIds, isPlaying ? (nowMs - startMs) / 1000 : 0)); if (isPlaying) animationFrameId = requestAnimationFrame(frame); }
+    function simulationTime(nowMs = performance.now()) { return pausedAtSeconds + (isPlaying ? (nowMs - startMs) / 1000 : 0); }
+    function drawCurrentFrame() { drawCanvas(getAtomPositions(moleculeId, enabledModeIds, simulationTime())); }
+    function frame(nowMs) { drawCanvas(getAtomPositions(moleculeId, enabledModeIds, simulationTime(nowMs))); if (isPlaying) animationFrameId = requestAnimationFrame(frame); }
     function startLoop() { if (animationFrameId !== null) cancelAnimationFrame(animationFrameId); animationFrameId = requestAnimationFrame(frame); }
     function updatePlayPause() { playPause.textContent = isPlaying ? '暫停' : '播放'; playPause.setAttribute('aria-pressed', String(!isPlaying)); }
 
-    moleculeSelect.addEventListener('change', () => { moleculeId = moleculeSelect.value; applyPreset('rigid'); startMs = performance.now(); drawCurrentFrame(); });
-    document.querySelector('#presetTranslation').addEventListener('click', () => { applyPreset('translation'); startMs = performance.now(); drawCurrentFrame(); });
-    document.querySelector('#presetRigid').addEventListener('click', () => { applyPreset('rigid'); startMs = performance.now(); drawCurrentFrame(); });
-    document.querySelector('#presetVibration').addEventListener('click', () => { applyPreset('vibration'); startMs = performance.now(); drawCurrentFrame(); });
-    playPause.addEventListener('click', () => { isPlaying = !isPlaying; startMs = performance.now(); updatePlayPause(); if (isPlaying) startLoop(); else drawCurrentFrame(); });
-    document.querySelector('#resetSimulation').addEventListener('click', () => { applyPreset('rigid'); isPlaying = true; startMs = performance.now(); updatePlayPause(); startLoop(); });
+    moleculeSelect.addEventListener('change', () => { moleculeId = moleculeSelect.value; applyPreset('rigid'); drawCurrentFrame(); });
+    document.querySelector('#presetTranslation').addEventListener('click', () => { applyPreset('translation'); drawCurrentFrame(); });
+    document.querySelector('#presetRigid').addEventListener('click', () => { applyPreset('rigid'); drawCurrentFrame(); });
+    document.querySelector('#presetVibration').addEventListener('click', () => { applyPreset('vibration'); drawCurrentFrame(); });
+    playPause.addEventListener('click', () => {
+      if (isPlaying) { pausedAtSeconds = simulationTime(); isPlaying = false; drawCurrentFrame(); }
+      else { isPlaying = true; startMs = performance.now(); startLoop(); }
+      updatePlayPause();
+    });
+    document.querySelector('#resetSimulation').addEventListener('click', () => { pausedAtSeconds = 0; startMs = performance.now(); applyPreset('rigid'); isPlaying = true; updatePlayPause(); startLoop(); });
 
     renderAll();
     updatePlayPause();

@@ -64,3 +64,19 @@ test('page has required accessible interactive controls', () => {
   assert.match(page, /type=["']module["']/);
   assert.match(page, /requestAnimationFrame/);
 });
+
+test('page retains checkbox focus, preserves paused phase, and labels each vibration marker', () => {
+  const page = fs.readFileSync(path.join(projectRoot, 'molecular-degrees-of-freedom.html'), 'utf8');
+  assert.match(page, /checkbox\.dataset\.modeId = mode\.id/);
+  assert.match(page, /modeList\.querySelector\(`\[data-mode-id="\$\{modeIdToFocus\}"\]`\)\?\.focus\(\)/);
+  assert.match(page, /let pausedAtSeconds = 0/);
+  assert.match(page, /function simulationTime\(nowMs = performance\.now\(\)\)/);
+  assert.match(page, /return pausedAtSeconds \+ \(isPlaying \? \(nowMs - startMs\) \/ 1000 : 0\)/);
+  assert.match(page, /pausedAtSeconds = simulationTime\(\)/);
+  for (const label of ['雙原子鍵長伸縮', '對稱伸縮', '非對稱伸縮', '彎曲：鍵角改變（y/z）']) assert.ok(page.includes(label));
+  assert.match(page, /const leftDirection = isAntisymmetric \? 48 : -48/);
+  assert.match(page, /const rightDirection = 48/);
+  assert.doesNotMatch(page, /hasVibration && projected\.length > 1\) drawSpring/);
+  assert.match(page, /\$\{kindName\(mode\.kind\)\}自由度。/);
+  assert.doesNotMatch(page, /\$\{mode\.kind\} 自由度。/);
+});
