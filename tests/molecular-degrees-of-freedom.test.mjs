@@ -30,3 +30,25 @@ test('all preset coordinates are finite', () => {
     assert.ok(positions.every(({ x, y, z }) => [x, y, z].every(Number.isFinite)));
   }
 });
+
+test('linear triatomic antisymmetric stretch changes adjacent bond lengths in opposite directions', () => {
+  const positions = getAtomPositions('linear-triatomic', ['antisymmetric-stretch'], 0.7);
+  const leftBond = Math.hypot(positions[1].x - positions[0].x, positions[1].y - positions[0].y, positions[1].z - positions[0].z);
+  const rightBond = Math.hypot(positions[2].x - positions[1].x, positions[2].y - positions[1].y, positions[2].z - positions[1].z);
+  assert.ok((leftBond - 1.25) * (rightBond - 1.25) < 0);
+});
+
+test('linear triatomic degenerate bend produces a non-collinear bend in both perpendicular directions', () => {
+  const positions = getAtomPositions('linear-triatomic', ['bend-degenerate'], 0.6);
+  const left = positions[0];
+  const center = positions[1];
+  const right = positions[2];
+  const cross = [
+    (center.y - left.y) * (right.z - center.z) - (center.z - left.z) * (right.y - center.y),
+    (center.z - left.z) * (right.x - center.x) - (center.x - left.x) * (right.z - center.z),
+    (center.x - left.x) * (right.y - center.y) - (center.y - left.y) * (right.x - center.x),
+  ];
+  assert.ok(Math.hypot(...cross) > 1e-8);
+  assert.ok(Math.abs(left.y - center.y) > 1e-8);
+  assert.ok(Math.abs(left.z - center.z) > 1e-8);
+});

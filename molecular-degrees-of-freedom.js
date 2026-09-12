@@ -112,7 +112,7 @@ export function getAtomPositions(moleculeId, enabledIds, time) {
   const antisymmetric = enabledModes.find((item) => item.id === 'antisymmetric-stretch');
   if (antisymmetric) {
     const amount = 0.16 * Math.sin(time + 1.6);
-    positions.forEach((atom, index) => { if (index !== 1) atom.position[0] += (index === 0 ? 1 : -1) * amount; });
+    positions.forEach((atom, index) => { if (index !== 1) atom.position[0] -= amount; });
   }
   const bend = enabledModes.find((item) => item.id === 'bend-degenerate');
   if (bend) {
@@ -120,9 +120,8 @@ export function getAtomPositions(moleculeId, enabledIds, time) {
     const amountZ = 0.18 * Math.sin(time + 1.2);
     positions.forEach((atom, index) => {
       if (index !== 1) {
-        const sign = index === 0 ? -1 : 1;
-        atom.position[1] += sign * amountY;
-        atom.position[2] += sign * amountZ;
+        atom.position[1] += amountY;
+        atom.position[2] += amountZ;
       }
     });
   }
