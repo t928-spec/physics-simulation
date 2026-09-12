@@ -1,0 +1,308 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="以動畫拆解單原子、雙原子與線型三原子分子的平移、轉動和振動自由度。">
+  <title>分子自由度：把運動拆開看</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #10233d;
+      --muted: #576b84;
+      --line: #c6d7ed;
+      --panel: rgba(255, 255, 255, .94);
+      --blue: #236ed4;
+      --blue-dark: #124eaa;
+      --cyan: #0c9eaa;
+      --violet: #6952c9;
+      --orange: #dc7c20;
+      --shadow: 0 18px 45px rgba(28, 62, 104, .12);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      min-width: 320px;
+      margin: 0;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 7% 3%, rgba(79, 144, 241, .18), transparent 31rem),
+        radial-gradient(circle at 96% 9%, rgba(112, 83, 205, .14), transparent 32rem),
+        linear-gradient(145deg, #edf6ff, #fbfcff 50%, #f8f5ff);
+      font-family: Arial, "Noto Sans TC", "Microsoft JhengHei", sans-serif;
+    }
+
+    button, select { font: inherit; }
+
+    button, select, input, a { outline-offset: 3px; }
+    button:focus-visible, select:focus-visible, input:focus-visible, a:focus-visible {
+      outline: 3px solid #f09b28;
+      box-shadow: 0 0 0 6px rgba(240, 155, 40, .23);
+    }
+
+    .app { width: min(1420px, calc(100% - 42px)); margin: 0 auto; padding: 27px 0 42px; }
+
+    .topbar { display: flex; align-items: center; justify-content: space-between; gap: 22px; margin-bottom: 24px; }
+    .eyebrow { margin: 0 0 8px; color: var(--blue); font-size: 13px; font-weight: 900; letter-spacing: .15em; }
+    h1, h2 { margin: 0; letter-spacing: -.045em; }
+    h1 { font-size: clamp(31px, 4.2vw, 53px); line-height: 1.07; }
+    h2 { font-size: 19px; }
+
+    .home-link, button, select {
+      border: 1px solid var(--line);
+      border-radius: 11px;
+      background: rgba(255, 255, 255, .86);
+      color: #274766;
+      font-weight: 800;
+    }
+    .home-link { padding: 11px 15px; text-decoration: none; white-space: nowrap; }
+    .home-link:hover { color: var(--blue-dark); border-color: #8fb7ea; }
+
+    .control-bar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 9px;
+      margin-bottom: 18px;
+      padding: 13px;
+      border: 1px solid var(--line);
+      border-radius: 17px;
+      background: rgba(255,255,255,.77);
+      box-shadow: var(--shadow);
+    }
+    .control-bar label { display: flex; align-items: center; gap: 8px; color: #385775; font-size: 14px; font-weight: 900; }
+    select { min-height: 40px; padding: 0 33px 0 11px; }
+    button { min-height: 40px; padding: 0 13px; cursor: pointer; transition: background .18s ease, color .18s ease, transform .18s ease; }
+    button:hover { border-color: #91b8eb; background: #eaf3ff; color: var(--blue-dark); transform: translateY(-1px); }
+    #presetRigid { background: var(--blue); border-color: var(--blue); color: white; }
+    #presetRigid:hover { background: var(--blue-dark); }
+
+    .layout { display: grid; grid-template-columns: minmax(0, 1.7fr) minmax(285px, .8fr); gap: 18px; align-items: start; }
+    .sidebar { display: grid; gap: 18px; }
+    .panel { overflow: hidden; border: 1px solid var(--line); border-radius: 18px; background: var(--panel); box-shadow: var(--shadow); }
+    .visual-panel { padding: 14px; }
+    .sidebar .panel { padding: 18px; }
+    canvas { display: block; width: 100%; height: auto; border-radius: 12px; background: #f4f9ff; }
+    #canvasDescription { margin: 12px 4px 2px; color: var(--muted); font-size: 14px; line-height: 1.6; }
+
+    .mode-options { display: grid; gap: 7px; margin-top: 13px; }
+    .mode-option { display: grid; grid-template-columns: 20px 1fr; gap: 9px; align-items: start; padding: 9px; border-radius: 10px; cursor: pointer; }
+    .mode-option:hover { background: #f0f6ff; }
+    .mode-option.is-focused { background: #eaf3ff; box-shadow: inset 3px 0 0 var(--blue); }
+    .mode-option input { width: 17px; height: 17px; margin: 2px 0 0; accent-color: var(--blue); }
+    .mode-option strong { display: block; color: #244667; font-size: 14px; }
+    .mode-option small { display: block; margin-top: 3px; color: var(--muted); font-size: 12px; line-height: 1.45; }
+
+    .readout { display: grid; gap: 9px; margin-top: 13px; }
+    .readout-row { padding: 12px; border-radius: 11px; background: #f3f7fc; }
+    .readout-row b { display: block; color: #345575; font-size: 12px; letter-spacing: .03em; }
+    .readout-row output { display: block; margin-top: 3px; color: var(--blue-dark); font-size: 27px; font-weight: 900; }
+    .readout-detail { margin: 0; color: var(--muted); font-size: 12px; line-height: 1.55; }
+    #modeExplanation { margin: 13px 0 0; color: #455e78; font-size: 14px; line-height: 1.7; }
+
+    @media (max-width: 900px) {
+      .app { width: min(100% - 24px, 760px); padding-top: 18px; }
+      .layout { grid-template-columns: minmax(0, 1fr); }
+      .topbar { align-items: start; flex-direction: column; gap: 13px; }
+      .home-link { align-self: flex-start; }
+    }
+
+    @media (max-width: 560px) {
+      h1 { font-size: 35px; }
+      .control-bar { align-items: stretch; }
+      .control-bar label { justify-content: space-between; width: 100%; }
+      .control-bar button { flex: 1 1 42%; }
+      .visual-panel { padding: 8px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <header class="topbar"><div><p class="eyebrow">物理奧林匹亞 · 熱學</p><h1>分子自由度：把運動拆開看</h1></div><a class="home-link" href="./index.html">回到首頁</a></header>
+    <section class="control-bar" aria-label="模擬控制"><label>分子模型 <select id="moleculeSelect"></select></label><button id="presetTranslation" type="button">僅平移</button><button id="presetRigid" type="button">剛性分子</button><button id="presetVibration" type="button">加入振動</button><button id="playPause" type="button" aria-pressed="false">暫停</button><button id="resetSimulation" type="button">重設</button></section>
+    <section class="layout"><article class="panel visual-panel"><canvas id="moleculeCanvas" width="920" height="560" aria-label="顯示分子平移、轉動與振動的動畫"></canvas><p id="canvasDescription"></p></article><aside class="sidebar"><section class="panel"><h2>可獨立指定的運動</h2><div id="modeList"></div></section><section class="panel"><h2>目前計數</h2><div id="degreesReadout" aria-live="polite"></div></section><section class="panel"><h2>為何這樣計？</h2><p id="modeExplanation" aria-live="polite"></p></section></aside></section>
+  </main>
+
+  <script type="module">
+    import { MOLECULES, getPresetModeIds, summarizeModes, getAtomPositions } from './molecular-degrees-of-freedom.js';
+
+    const moleculeSelect = document.querySelector('#moleculeSelect');
+    const modeList = document.querySelector('#modeList');
+    const degreesReadout = document.querySelector('#degreesReadout');
+    const modeExplanation = document.querySelector('#modeExplanation');
+    const canvasDescription = document.querySelector('#canvasDescription');
+    const canvas = document.querySelector('#moleculeCanvas');
+    const ctx = canvas.getContext('2d');
+    const playPause = document.querySelector('#playPause');
+    let moleculeId = 'diatomic';
+    let enabledModeIds = getPresetModeIds(moleculeId, 'rigid');
+    let isPlaying = true;
+    let startMs = performance.now();
+    let focusedModeId = null;
+    let animationFrameId = null;
+
+    for (const [id, molecule] of Object.entries(MOLECULES)) {
+      moleculeSelect.add(new Option(molecule.label, id));
+    }
+    moleculeSelect.value = moleculeId;
+
+    function applyPreset(preset) { enabledModeIds = getPresetModeIds(moleculeId, preset); focusedModeId = enabledModeIds.at(-1) ?? null; renderAll(); }
+    function renderAll() { renderModeList(); renderReadout(summarizeModes(moleculeId, enabledModeIds)); renderExplanation(); }
+
+    function renderModeList() {
+      const modes = MOLECULES[moleculeId].modes;
+      modeList.replaceChildren();
+      const wrapper = document.createElement('div');
+      wrapper.className = 'mode-options';
+      for (const mode of modes) {
+        const label = document.createElement('label');
+        label.className = `mode-option${mode.id === focusedModeId ? ' is-focused' : ''}`;
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.checked = enabledModeIds.includes(mode.id);
+        checkbox.setAttribute('aria-label', mode.label);
+        checkbox.addEventListener('change', () => {
+          enabledModeIds = checkbox.checked ? [...enabledModeIds, mode.id] : enabledModeIds.filter((id) => id !== mode.id);
+          focusedModeId = mode.id;
+          renderAll();
+          drawCurrentFrame();
+        });
+        const text = document.createElement('span');
+        const name = document.createElement('strong');
+        name.textContent = mode.label;
+        const detail = document.createElement('small');
+        detail.textContent = mode.description ?? `${mode.kind} 自由度。`;
+        text.append(name, detail);
+        label.append(checkbox, text);
+        wrapper.append(label);
+      }
+      modeList.append(wrapper);
+    }
+
+    function renderReadout(summary) {
+      const detail = summary.parts.map((part) => `${kindName(part.kind)} ${part.visible}`).join('、') || '尚未選取運動';
+      degreesReadout.replaceChildren();
+      const readout = document.createElement('div');
+      readout.className = 'readout';
+      readout.innerHTML = `<div class="readout-row"><b>機械自由度（可見座標數）</b><output>${summary.visibleCount}</output></div><div class="readout-row"><b>熱學自由度 f（等分配二次項）</b><output>f = ${summary.equipartitionF}</output></div><p class="readout-detail">已選：${detail}</p>`;
+      degreesReadout.append(readout);
+    }
+
+    function renderExplanation() {
+      const molecule = MOLECULES[moleculeId];
+      const summary = summarizeModes(moleculeId, enabledModeIds);
+      const selected = summary.enabledModes.map((mode) => mode.label).join('、') || '尚未選取任何運動';
+      let text = `目前以「${molecule.label}」模型計數：${selected}。`;
+      if (moleculeId === 'monoatomic' && enabledModeIds.length === 3) text += ' 單原子沒有可改變鍵長或鍵角的內部座標，所以「加入振動」預設仍只保留三個平移。';
+      if (enabledModeIds.includes('stretch')) text += ' 一個伸縮正規模態有動能與位能兩個二次項，因此 f 增加 2。';
+      if (enabledModeIds.includes('bend-degenerate')) text += ' 彎曲可沿兩個互相垂直的方向發生，因此是雙重退化的振動。';
+      if (moleculeId === 'linear-triatomic') text += ' 線型分子繞自身分子軸的轉動慣量近乎為零，不列為獨立的剛體轉動。';
+      modeExplanation.textContent = text;
+      canvasDescription.textContent = `動畫顯示：${selected}。圖例與箭頭標示目前啟用的分子運動。`;
+    }
+
+    const kindName = (kind) => ({ translation: '平移', rotation: '轉動', vibration: '振動' }[kind]);
+    const project = ({ x, y, z }) => ({ x: 460 + x * 136 + z * 42, y: 280 - y * 136 + z * 29 });
+    const colourFor = (element) => ({ Ne: '#56a8e7', O: '#df5f57', C: '#3d4654', A: '#4c81dc', B: '#d58b36' }[element] ?? '#4c81dc');
+
+    function drawArrow(from, to, color, label) {
+      const angle = Math.atan2(to.y - from.y, to.x - from.x);
+      ctx.strokeStyle = color;
+      ctx.fillStyle = color;
+      ctx.lineWidth = 4;
+      ctx.beginPath(); ctx.moveTo(from.x, from.y); ctx.lineTo(to.x, to.y); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(to.x, to.y); ctx.lineTo(to.x - 13 * Math.cos(angle - .48), to.y - 13 * Math.sin(angle - .48)); ctx.lineTo(to.x - 13 * Math.cos(angle + .48), to.y - 13 * Math.sin(angle + .48)); ctx.closePath(); ctx.fill();
+      ctx.font = '700 15px Arial'; ctx.fillText(label, to.x + 8, to.y - 7);
+    }
+
+    function drawAxes() {
+      const origin = { x: 92, y: 464 };
+      drawArrow(origin, { x: 156, y: 464 }, '#2c7bd8', 'x');
+      drawArrow(origin, { x: 92, y: 397 }, '#0c9eaa', 'y');
+      drawArrow(origin, { x: 130, y: 437 }, '#7657c9', 'z');
+    }
+
+    function drawArc(x, y, radius, color, label) {
+      ctx.strokeStyle = color; ctx.fillStyle = color; ctx.lineWidth = 4;
+      ctx.beginPath(); ctx.arc(x, y, radius, .42, Math.PI * 1.72); ctx.stroke();
+      const end = { x: x + radius * Math.cos(Math.PI * 1.72), y: y + radius * Math.sin(Math.PI * 1.72) };
+      drawArrow({ x: end.x - 9, y: end.y + 4 }, end, color, label);
+    }
+
+    function drawSpring(a, b) {
+      const dx = b.x - a.x; const dy = b.y - a.y; const length = Math.hypot(dx, dy) || 1;
+      const nx = -dy / length; const ny = dx / length;
+      ctx.strokeStyle = '#d86e22'; ctx.lineWidth = 3; ctx.setLineDash([]); ctx.beginPath();
+      for (let index = 0; index <= 12; index += 1) {
+        const t = index / 12;
+        const wiggle = index === 0 || index === 12 ? 0 : (index % 2 ? 9 : -9);
+        const x = a.x + dx * t + nx * wiggle;
+        const y = a.y + dy * t + ny * wiggle;
+        index === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+      }
+      ctx.stroke(); ctx.fillStyle = '#b65d18'; ctx.font = '700 14px Arial'; ctx.fillText('鍵長振動', (a.x + b.x) / 2 - 28, (a.y + b.y) / 2 - 18);
+    }
+
+    function drawLegend(summary) {
+      const entries = [
+        ['#2c7bd8', '平移'], ['#7657c9', '轉動'], ['#d86e22', '振動'],
+      ].filter(([, label]) => summary.parts.some((part) => kindName(part.kind) === label));
+      ctx.fillStyle = 'rgba(255,255,255,.9)'; ctx.strokeStyle = '#c6d7ed'; ctx.lineWidth = 1;
+      ctx.roundRect(668, 35, 216, Math.max(48, entries.length * 30 + 18), 12); ctx.fill(); ctx.stroke();
+      ctx.font = '700 14px Arial';
+      entries.forEach(([color, label], index) => { ctx.fillStyle = color; ctx.fillRect(687, 51 + index * 30, 15, 15); ctx.fillStyle = '#304c6a'; ctx.fillText(label, 713, 64 + index * 30); });
+    }
+
+    function drawCanvas(positions) {
+      const summary = summarizeModes(moleculeId, enabledModeIds);
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      const glow = ctx.createRadialGradient(460, 280, 20, 460, 280, 430);
+      glow.addColorStop(0, '#ffffff'); glow.addColorStop(1, '#e8f3ff'); ctx.fillStyle = glow; ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.strokeStyle = 'rgba(104, 147, 193, .15)'; ctx.lineWidth = 1;
+      for (let x = 40; x < canvas.width; x += 48) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, canvas.height); ctx.stroke(); }
+      for (let y = 28; y < canvas.height; y += 48) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); ctx.stroke(); }
+      drawAxes();
+      const projected = positions.map(project);
+      ctx.strokeStyle = '#6f8297'; ctx.lineWidth = 10; ctx.lineCap = 'round';
+      for (let index = 0; index < projected.length - 1; index += 1) { ctx.beginPath(); ctx.moveTo(projected[index].x, projected[index].y); ctx.lineTo(projected[index + 1].x, projected[index + 1].y); ctx.stroke(); }
+      const hasVibration = summary.enabledModes.some((mode) => mode.kind === 'vibration');
+      if (hasVibration && projected.length > 1) drawSpring(projected[0], projected[1]);
+      projected.forEach((point, index) => {
+        ctx.beginPath(); ctx.fillStyle = colourFor(positions[index].element); ctx.shadowColor = 'rgba(21, 53, 91, .25)'; ctx.shadowBlur = 14; ctx.arc(point.x, point.y, positions[index].element === 'C' ? 27 : 33, 0, Math.PI * 2); ctx.fill(); ctx.shadowBlur = 0;
+        ctx.fillStyle = 'white'; ctx.font = '800 16px Arial'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(positions[index].element, point.x, point.y + 1);
+      });
+      ctx.textAlign = 'start'; ctx.textBaseline = 'alphabetic';
+      const center = projected.reduce((sum, point) => ({ x: sum.x + point.x / projected.length, y: sum.y + point.y / projected.length }), { x: 0, y: 0 });
+      if (enabledModeIds.includes('tx')) drawArrow({ x: center.x - 85, y: center.y - 90 }, { x: center.x - 20, y: center.y - 90 }, '#2c7bd8', '沿 x');
+      if (enabledModeIds.includes('ty')) drawArrow({ x: center.x + 90, y: center.y + 70 }, { x: center.x + 90, y: center.y + 8 }, '#0c9eaa', '沿 y');
+      if (enabledModeIds.includes('tz')) drawArrow({ x: center.x - 78, y: center.y + 75 }, { x: center.x - 32, y: center.y + 43 }, '#7657c9', '沿 z');
+      if (enabledModeIds.includes('ry')) drawArc(center.x, center.y, 77, '#7657c9', '繞 y');
+      if (enabledModeIds.includes('rz')) drawArc(center.x + 22, center.y - 18, 54, '#9a57bd', '繞 z');
+      drawLegend(summary);
+      ctx.fillStyle = '#3e5b78'; ctx.font = '800 17px Arial'; ctx.fillText(`${MOLECULES[moleculeId].label} · 機械自由度 ${summary.visibleCount} · 熱學 f = ${summary.equipartitionF}`, 35, 43);
+    }
+
+    function drawCurrentFrame() { drawCanvas(getAtomPositions(moleculeId, enabledModeIds, isPlaying ? (performance.now() - startMs) / 1000 : 0)); }
+    function frame(nowMs) { drawCanvas(getAtomPositions(moleculeId, enabledModeIds, isPlaying ? (nowMs - startMs) / 1000 : 0)); if (isPlaying) animationFrameId = requestAnimationFrame(frame); }
+    function startLoop() { if (animationFrameId !== null) cancelAnimationFrame(animationFrameId); animationFrameId = requestAnimationFrame(frame); }
+    function updatePlayPause() { playPause.textContent = isPlaying ? '暫停' : '播放'; playPause.setAttribute('aria-pressed', String(!isPlaying)); }
+
+    moleculeSelect.addEventListener('change', () => { moleculeId = moleculeSelect.value; applyPreset('rigid'); startMs = performance.now(); drawCurrentFrame(); });
+    document.querySelector('#presetTranslation').addEventListener('click', () => { applyPreset('translation'); startMs = performance.now(); drawCurrentFrame(); });
+    document.querySelector('#presetRigid').addEventListener('click', () => { applyPreset('rigid'); startMs = performance.now(); drawCurrentFrame(); });
+    document.querySelector('#presetVibration').addEventListener('click', () => { applyPreset('vibration'); startMs = performance.now(); drawCurrentFrame(); });
+    playPause.addEventListener('click', () => { isPlaying = !isPlaying; startMs = performance.now(); updatePlayPause(); if (isPlaying) startLoop(); else drawCurrentFrame(); });
+    document.querySelector('#resetSimulation').addEventListener('click', () => { applyPreset('rigid'); isPlaying = true; startMs = performance.now(); updatePlayPause(); startLoop(); });
+
+    renderAll();
+    updatePlayPause();
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) { isPlaying = false; updatePlayPause(); drawCurrentFrame(); }
+    else startLoop();
+  </script>
+</body>
+</html>

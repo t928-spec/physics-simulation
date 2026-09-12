@@ -52,3 +52,15 @@ test('linear triatomic degenerate bend produces a non-collinear bend in both per
   assert.ok(Math.abs(left.y - center.y) > 1e-8);
   assert.ok(Math.abs(left.z - center.z) > 1e-8);
 });
+
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+const projectRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+
+test('page has required accessible interactive controls', () => {
+  const page = fs.readFileSync(path.join(projectRoot, 'molecular-degrees-of-freedom.html'), 'utf8');
+  for (const id of ['moleculeSelect', 'presetTranslation', 'presetRigid', 'presetVibration', 'playPause', 'resetSimulation', 'modeList', 'degreesReadout', 'moleculeCanvas']) assert.match(page, new RegExp(`id=["']${id}["']`));
+  assert.match(page, /type=["']module["']/);
+  assert.match(page, /requestAnimationFrame/);
+});
