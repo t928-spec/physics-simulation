@@ -80,3 +80,11 @@ test('page retains checkbox focus, preserves paused phase, and labels each vibra
   assert.match(page, /\$\{kindName\(mode\.kind\)\}自由度。/);
   assert.doesNotMatch(page, /\$\{mode\.kind\} 自由度。/);
 });
+
+test('linear triatomic stretch markers use separate arrow and label lanes', () => {
+  const page = fs.readFileSync(path.join(projectRoot, 'molecular-degrees-of-freedom.html'), 'utf8');
+  assert.match(page, /const markerLane = isAntisymmetric \? 108 : 52/);
+  assert.match(page, /left\.y \+ markerLane/);
+  assert.match(page, /right\.y \+ markerLane/);
+  assert.match(page, /Math\.max\(left\.y, center\.y, right\.y\) \+ markerLane \+ 31/);
+});

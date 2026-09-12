@@ -255,9 +255,10 @@
       const color = isAntisymmetric ? '#a75aa0' : '#d86e22';
       const leftDirection = isAntisymmetric ? 48 : -48;
       const rightDirection = 48;
-      drawArrow({ x: left.x, y: left.y + 52 }, { x: left.x + leftDirection, y: left.y + 52 }, color, '');
-      drawArrow({ x: right.x, y: right.y + 52 }, { x: right.x + rightDirection, y: right.y + 52 }, color, '');
-      ctx.fillStyle = color; ctx.font = '700 14px Arial'; ctx.fillText(label, center.x - 33, Math.max(left.y, center.y, right.y) + 83);
+      const markerLane = isAntisymmetric ? 108 : 52;
+      drawArrow({ x: left.x, y: left.y + markerLane }, { x: left.x + leftDirection, y: left.y + markerLane }, color, '');
+      drawArrow({ x: right.x, y: right.y + markerLane }, { x: right.x + rightDirection, y: right.y + markerLane }, color, '');
+      ctx.fillStyle = color; ctx.font = '700 14px Arial'; ctx.fillText(label, center.x - 33, Math.max(left.y, center.y, right.y) + markerLane + 31);
     }
 
     function drawBendMarker(left, center, right) {
