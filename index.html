@@ -245,6 +245,24 @@
       content: "";
     }
 
+    .degrees-preview {
+      background:
+        radial-gradient(circle at 25% 48%, #f5b942 0 4%, transparent 4.5%),
+        radial-gradient(circle at 50% 48%, #f5b942 0 4%, transparent 4.5%),
+        radial-gradient(circle at 75% 48%, #f5b942 0 4%, transparent 4.5%),
+        linear-gradient(90deg, transparent 24%, rgba(111, 220, 232, .88) 24% 25%, transparent 25% 49%, rgba(111, 220, 232, .88) 49% 50%, transparent 50% 74%, rgba(111, 220, 232, .88) 74% 75%, transparent 75%),
+        radial-gradient(ellipse at center, #243b68, #0e182e 72%);
+    }
+
+    .degrees-preview::before {
+      position: absolute;
+      inset: 17% 11%;
+      border: 1px solid rgba(111, 220, 232, .25);
+      border-radius: 50%;
+      box-shadow: 0 0 0 20px rgba(111, 220, 232, .04), 0 0 0 42px rgba(111, 220, 232, .03);
+      content: "";
+    }
+
     .card:hover img { transform: scale(1.035); }
 
     .card-body {
@@ -427,7 +445,7 @@
         <div class="eyebrow">LEARN BY EXPLORING · 從操作中看見物理</div>
         <h1>把抽象公式，變成可以拉動的現象。</h1>
         <p class="hero-copy">
-          六個適合課堂投影與學生自主操作的互動模擬與複習工具。調整參數、比較情境，
+          七個適合課堂投影與學生自主操作的互動模擬與複習工具。調整參數、比較情境，
           再回頭理解公式中的每一個物理量。
         </p>
       </div>
@@ -440,7 +458,7 @@
     <section id="simulations">
       <div class="section-head">
         <h2>選擇一個模擬</h2>
-        <span>6 個主題 · 電學、波動、軌道力學、熱學</span>
+        <span>7 個主題 · 電學、波動、軌道力學、熱學</span>
       </div>
 
       <div class="grid">
@@ -535,6 +553,8 @@
             <span class="open-link">開始模擬 <span class="arrow">→</span></span>
           </div>
         </a>
+
+        <a class="card" href="./molecular-degrees-of-freedom.html"><div class="preview degrees-preview" aria-hidden="true"></div><div class="card-body"><div class="tag-row"><span class="tag orange">熱學</span><span class="tag cyan">分子運動</span></div><h3>分子自由度：把運動拆開看</h3><p class="description">逐一開關平移、轉動與振動模式，從可獨立指定的運動理解自由度與能量均分定理。</p><p class="learn"><strong>適合觀察：</strong>單原子 3、雙原子剛性 5，以及一個振動模態如何讓熱容量計數增加 2。</p><span class="open-link">開始模擬 <span class="arrow">→</span></span></div></a>
       </div>
     </section>
 

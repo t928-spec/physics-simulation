@@ -88,3 +88,11 @@ test('linear triatomic stretch markers use separate arrow and label lanes', () =
   assert.match(page, /right\.y \+ markerLane/);
   assert.match(page, /Math\.max\(left\.y, center\.y, right\.y\) \+ markerLane \+ 31/);
 });
+
+test('home page and README link to the molecular degrees simulation', () => {
+  const home = fs.readFileSync(path.join(projectRoot, 'index.html'), 'utf8');
+  const readme = fs.readFileSync(path.join(projectRoot, 'README.md'), 'utf8');
+  assert.match(home, /href=["']\.\/molecular-degrees-of-freedom\.html["']/);
+  assert.match(home, /分子自由度：把運動拆開看/);
+  assert.match(readme, /molecular-degrees-of-freedom\.html/);
+});
