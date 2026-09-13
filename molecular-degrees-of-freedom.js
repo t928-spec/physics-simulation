@@ -1,3 +1,5 @@
+// A classic script works from file://; the same implementation is exported to Node tests.
+(() => {
 const translations = [
   ['tx', '沿 x 平移', [1, 0, 0]],
   ['ty', '沿 y 平移', [0, 1, 0]],
@@ -8,7 +10,7 @@ const mode = (id, label, kind, visible, equipartition, description, axis = null)
   id, label, kind, visible, equipartition, description, axis,
 });
 
-export const MOLECULES = {
+const MOLECULES = {
   monoatomic: {
     label: '單原子',
     atoms: [{ element: 'Ne', base: [0, 0, 0] }],
@@ -26,7 +28,7 @@ export const MOLECULES = {
   },
   'linear-triatomic': {
     label: '線型三原子',
-    atoms: [{ element: 'O', base: [-1.25, 0, 0] }, { element: 'C', base: [0, 0, 0] }, { element: 'O', base: [1.25, 0, 0] }],
+    atoms: [{ element: 'O', mass: 16, base: [-1.25, 0, 0] }, { element: 'C', mass: 12, base: [0, 0, 0] }, { element: 'O', mass: 16, base: [1.25, 0, 0] }],
     modes: [
       ...translations,
       mode('ry', '繞 y 軸轉動', 'rotation', 1, 1, '線型分子的剛體轉動。', [0, 1, 0]),
@@ -38,7 +40,7 @@ export const MOLECULES = {
   },
 };
 
-export function getPresetModeIds(moleculeId, preset) {
+function getPresetModeIds(moleculeId, preset) {
   const modes = MOLECULES[moleculeId].modes;
   return modes
     .filter((item) => preset === 'translation'
@@ -47,7 +49,7 @@ export function getPresetModeIds(moleculeId, preset) {
     .map((item) => item.id);
 }
 
-export function summarizeModes(moleculeId, enabledIds) {
+function summarizeModes(moleculeId, enabledIds) {
   const enabledModes = MOLECULES[moleculeId].modes.filter((item) => enabledIds.includes(item.id));
   const parts = ['translation', 'rotation', 'vibration']
     .map((kind) => ({
@@ -79,26 +81,12 @@ function rotateZ([x, y, z], angle) {
 }
 
 /** Return deterministic atom positions after the selected normal modes evolve at time. */
-export function getAtomPositions(moleculeId, enabledIds, time) {
+function getAtomPositions(moleculeId, enabledIds, time) {
   const molecule = MOLECULES[moleculeId];
   const enabledModes = molecule.modes.filter((item) => enabledIds.includes(item.id));
   const positions = molecule.atoms.map(({ element, base }) => ({ element, position: [...base] }));
 
-  for (const item of enabledModes) {
-    const oscillation = Math.sin(time + item.id.length * 0.37);
-    if (item.kind === 'translation') {
-      for (const atom of positions) addScaled(atom.position, item.axis, 0.22 * oscillation);
-    }
-  }
-
-  const rotationModes = enabledModes.filter((item) => item.kind === 'rotation');
-  for (const item of rotationModes) {
-    const angle = 0.18 * Math.sin(time + item.id.length * 0.37);
-    for (const atom of positions) {
-      atom.position = item.id === 'ry' ? rotateY(atom.position, angle) : rotateZ(atom.position, angle);
-    }
-  }
-
+  // Internal displacements are defined in the molecular frame before rigid motion.
   const stretch = enabledModes.find((item) => item.id === 'stretch');
   if (stretch) {
     const amount = 0.2 * Math.sin(time + 1.1);
@@ -112,19 +100,41 @@ export function getAtomPositions(moleculeId, enabledIds, time) {
   const antisymmetric = enabledModes.find((item) => item.id === 'antisymmetric-stretch');
   if (antisymmetric) {
     const amount = 0.16 * Math.sin(time + 1.6);
-    positions.forEach((atom, index) => { if (index !== 1) atom.position[0] -= amount; });
+    const oxygenToCarbonMass = molecule.atoms[0].mass / molecule.atoms[1].mass;
+    // mO * (-a) + mC * (2 mO/mC a) + mO * (-a) = 0.
+    positions.forEach((atom, index) => { atom.position[0] += index === 1 ? 2 * oxygenToCarbonMass * amount : -amount; });
   }
   const bend = enabledModes.find((item) => item.id === 'bend-degenerate');
   if (bend) {
     const amountY = 0.18 * Math.sin(time + 0.4);
     const amountZ = 0.18 * Math.sin(time + 1.2);
+    const oxygenToCarbonMass = molecule.atoms[0].mass / molecule.atoms[1].mass;
     positions.forEach((atom, index) => {
-      if (index !== 1) {
-        atom.position[1] += amountY;
-        atom.position[2] += amountZ;
-      }
+      const factor = index === 1 ? -2 * oxygenToCarbonMass : 1;
+      atom.position[1] += factor * amountY;
+      atom.position[2] += factor * amountZ;
     });
+  }
+
+  for (const item of enabledModes.filter((item) => item.kind === 'rotation')) {
+    const angle = 0.18 * Math.sin(time + item.id.length * 0.37);
+    for (const atom of positions) {
+      atom.position = item.id === 'ry' ? rotateY(atom.position, angle) : rotateZ(atom.position, angle);
+    }
+  }
+
+  // Laboratory translation is applied last, so rotation cannot move the mass center.
+  for (const item of enabledModes.filter((item) => item.kind === 'translation')) {
+    const oscillation = Math.sin(time + item.id.length * 0.37);
+    for (const atom of positions) addScaled(atom.position, item.axis, 0.22 * oscillation);
   }
 
   return positions.map(({ element, position: [x, y, z] }) => ({ x, y, z, element }));
 }
+
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = { MOLECULES, getPresetModeIds, summarizeModes, getAtomPositions };
+} else {
+  globalThis.MolecularDegrees = { MOLECULES, getPresetModeIds, summarizeModes, getAtomPositions };
+}
+})();

@@ -128,8 +128,9 @@
     <section class="layout"><article class="panel visual-panel"><canvas id="moleculeCanvas" width="920" height="560" aria-label="顯示分子平移、轉動與振動的動畫"></canvas><p id="canvasDescription"></p></article><aside class="sidebar"><section class="panel"><h2>可獨立指定的運動</h2><div id="modeList"></div></section><section class="panel"><h2>目前計數</h2><div id="degreesReadout" aria-live="polite"></div></section><section class="panel"><h2>為何這樣計？</h2><p id="modeExplanation" aria-live="polite"></p></section></aside></section>
   </main>
 
-  <script type="module">
-    import { MOLECULES, getPresetModeIds, summarizeModes, getAtomPositions } from './molecular-degrees-of-freedom.js';
+  <script src="./molecular-degrees-of-freedom.js"></script>
+  <script>
+    const { MOLECULES, getPresetModeIds, summarizeModes, getAtomPositions } = globalThis.MolecularDegrees;
 
     const moleculeSelect = document.querySelector('#moleculeSelect');
     const modeList = document.querySelector('#modeList');
@@ -225,9 +226,17 @@
 
     function drawAxes() {
       const origin = { x: 92, y: 464 };
-      drawArrow(origin, { x: 156, y: 464 }, '#2c7bd8', 'x');
-      drawArrow(origin, { x: 92, y: 397 }, '#0c9eaa', 'y');
-      drawArrow(origin, { x: 130, y: 437 }, '#7657c9', 'z');
+      drawAxisArrow(origin, [1, 0, 0], 64, '#2c7bd8', 'x');
+      drawAxisArrow(origin, [0, 1, 0], 67, '#0c9eaa', 'y');
+      drawAxisArrow(origin, [0, 0, 1], 47, '#7657c9', 'z');
+    }
+
+    function drawAxisArrow(origin, [x, y, z], length, color, label) {
+      const zero = project({ x: 0, y: 0, z: 0 });
+      const unit = project({ x, y, z });
+      const dx = unit.x - zero.x; const dy = unit.y - zero.y;
+      const scale = length / Math.hypot(dx, dy);
+      drawArrow(origin, { x: origin.x + dx * scale, y: origin.y + dy * scale }, color, label);
     }
 
     function drawArc(x, y, radius, color, label) {
@@ -274,7 +283,7 @@
         ['#2c7bd8', '平移'], ['#7657c9', '轉動'], ['#d86e22', '振動'],
       ].filter(([, label]) => summary.parts.some((part) => kindName(part.kind) === label));
       ctx.fillStyle = 'rgba(255,255,255,.9)'; ctx.strokeStyle = '#c6d7ed'; ctx.lineWidth = 1;
-      ctx.roundRect(668, 35, 216, Math.max(48, entries.length * 30 + 18), 12); ctx.fill(); ctx.stroke();
+      ctx.beginPath(); ctx.roundRect(668, 35, 216, Math.max(48, entries.length * 30 + 18), 12); ctx.fill(); ctx.stroke();
       ctx.font = '700 14px Arial';
       entries.forEach(([color, label], index) => { ctx.fillStyle = color; ctx.fillRect(687, 51 + index * 30, 15, 15); ctx.fillStyle = '#304c6a'; ctx.fillText(label, 713, 64 + index * 30); });
     }
@@ -301,9 +310,9 @@
       });
       ctx.textAlign = 'start'; ctx.textBaseline = 'alphabetic';
       const center = projected.reduce((sum, point) => ({ x: sum.x + point.x / projected.length, y: sum.y + point.y / projected.length }), { x: 0, y: 0 });
-      if (enabledModeIds.includes('tx')) drawArrow({ x: center.x - 85, y: center.y - 90 }, { x: center.x - 20, y: center.y - 90 }, '#2c7bd8', '沿 x');
-      if (enabledModeIds.includes('ty')) drawArrow({ x: center.x + 90, y: center.y + 70 }, { x: center.x + 90, y: center.y + 8 }, '#0c9eaa', '沿 y');
-      if (enabledModeIds.includes('tz')) drawArrow({ x: center.x - 78, y: center.y + 75 }, { x: center.x - 32, y: center.y + 43 }, '#7657c9', '沿 z');
+      if (enabledModeIds.includes('tx')) drawAxisArrow({ x: center.x - 85, y: center.y - 90 }, [1, 0, 0], 65, '#2c7bd8', '沿 x');
+      if (enabledModeIds.includes('ty')) drawAxisArrow({ x: center.x + 90, y: center.y + 70 }, [0, 1, 0], 62, '#0c9eaa', '沿 y');
+      if (enabledModeIds.includes('tz')) drawAxisArrow({ x: center.x - 78, y: center.y + 75 }, [0, 0, 1], 56, '#7657c9', '沿 z');
       if (enabledModeIds.includes('ry')) drawArc(center.x, center.y, 77, '#7657c9', '繞 y');
       if (enabledModeIds.includes('rz')) drawArc(center.x + 22, center.y - 18, 54, '#9a57bd', '繞 z');
       drawLegend(summary);
