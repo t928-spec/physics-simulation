@@ -9,6 +9,7 @@
 - [橢圓軌道力學能：兩種半徑](./elliptical-orbit-energy.html)
 - [雙繩交界的繩波：反射、透射與能量守恆](./string-wave-boundary.html)
 - [雙繩交界繩波的公式推導](./string-wave-derivation.html)
+- [分子自由度：把運動拆開看](./molecular-degrees-of-freedom.html)
 
 ## GitHub Pages
 
