@@ -1,0 +1,353 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>水波干涉：波程差與相位差</title>
+  <style>
+    :root { --ink:#182033; --muted:#637089; --line:#dbe3ef; --blue:#3979e8; --panel:rgba(255,255,255,.93); --shadow:0 14px 32px rgba(35,55,92,.1); }
+    * { box-sizing:border-box; }
+    body { min-width:320px; margin:0; color:var(--ink); background:linear-gradient(145deg,#edf5ff,#f9fbff 52%,#faf5df); font-family:Arial,"Noto Sans TC","Microsoft JhengHei",sans-serif; }
+    .shell { width:min(1180px,calc(100% - 40px)); margin:auto; }
+    header { padding:28px 0 13px; }
+    .eyebrow { margin-bottom:7px; color:var(--blue); font-size:12px; font-weight:900; letter-spacing:.14em; }
+    h1 { margin:0; font-size:clamp(30px,5vw,51px); letter-spacing:-.055em; }
+    .intro { max-width:710px; margin:10px 0 0; color:#56657d; font-size:16px; line-height:1.65; }
+    .home-link { position:fixed; z-index:5; top:15px; right:18px; padding:9px 13px; border:1px solid #bfd0e6; border-radius:999px; background:rgba(255,255,255,.92); color:#2562ad; box-shadow:0 7px 18px rgba(35,52,86,.1); font-size:13px; font-weight:800; text-decoration:none; }
+    .home-link:hover { background:#eaf3ff; }
+    .workspace { display:grid; grid-template-columns:300px minmax(0,1fr); gap:17px; align-items:start; padding:12px 0 16px; }
+    .panel { border:1px solid var(--line); border-radius:19px; background:var(--panel); box-shadow:var(--shadow); }
+    .controls { padding:17px; }
+    h2 { margin:0; font-size:18px; letter-spacing:-.02em; }
+    .control { padding:13px 0; border-top:1px solid var(--line); }
+    .control:first-of-type { margin-top:12px; }
+    label { display:flex; align-items:center; justify-content:space-between; gap:8px; color:#3b4b65; font-size:14px; font-weight:800; }
+    label.check { justify-content:flex-start; padding:4px 0; cursor:pointer; }
+    output { color:#1d67ca; font-variant-numeric:tabular-nums; }
+    input[type="range"] { width:100%; margin-top:9px; accent-color:var(--blue); cursor:pointer; }
+    input[type="checkbox"] { width:16px; height:16px; margin:0 2px 0 0; accent-color:var(--blue); cursor:pointer; }
+    button { width:100%; min-height:43px; border:1px solid #2f73db; border-radius:11px; background:linear-gradient(135deg,#4c8cf0,#316ed2); color:#fff; font:inherit; font-size:14px; font-weight:900; cursor:pointer; box-shadow:0 8px 16px rgba(46,111,209,.2); }
+    button:hover { filter:brightness(1.05); }
+    .mode-note { margin:7px 0 0; color:#728097; font-size:12px; line-height:1.5; }
+    .stage { position:relative; min-width:0; padding:11px; overflow:hidden; }
+    #fieldCanvas { display:block; width:100%; height:auto; border-radius:12px; background:#2c2817; cursor:crosshair; touch-action:none; }
+    .canvas-tip { margin:9px 2px 0; color:#68768c; font-size:12px; text-align:center; }
+    .readouts { display:grid; grid-template-columns:repeat(6,minmax(0,1fr)); gap:10px; padding-bottom:16px; }
+    .readout { min-height:91px; padding:12px; border:1px solid var(--line); border-radius:14px; background:rgba(255,255,255,.9); box-shadow:var(--shadow); }
+    .readout b { display:block; margin-bottom:8px; color:#69778c; font-size:12px; letter-spacing:.02em; }
+    .readout output { display:block; color:#202c41; font-size:18px; font-weight:900; line-height:1.25; }
+    .readout.emphasis output { color:#b37300; }
+    .arrivals { margin:0 0 30px; padding:16px; }
+    .arrivals p { margin:6px 0 12px; color:#627189; font-size:13px; }
+    #traceCanvas { display:block; width:100%; height:auto; border-radius:11px; background:#f6f8fc; }
+    .legend { display:flex; gap:13px; margin-top:8px; color:#627189; font-size:12px; }
+    .legend span::before { display:inline-block; width:9px; height:9px; margin-right:5px; border-radius:50%; background:currentColor; content:""; }
+    .legend .first { color:#347ce5; } .legend .second { color:#e65547; }
+    .teaching { margin:0 0 34px; padding:17px; color:#55647a; line-height:1.65; }
+    .teaching strong { color:#273b58; }
+    @media (max-width:1000px) { .readouts { grid-template-columns:repeat(3,minmax(0,1fr)); } }
+    @media (max-width:900px) { .workspace { grid-template-columns:1fr; } .controls { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:0 18px; } .controls h2,.controls button,.controls .mode-note { grid-column:1 / -1; } .control { min-width:0; } }
+    @media (max-width:620px) { .shell { width:min(100% - 24px,680px); } header { padding-top:70px; } .home-link { right:12px; top:13px; } .controls { display:block; } .readouts { grid-template-columns:repeat(2,minmax(0,1fr)); } .readout { min-height:77px; } .readout output { font-size:16px; } }
+  </style>
+</head>
+<body>
+  <a class="home-link" href="./index.html">← 回到模擬首頁</a>
+  <header class="shell">
+    <div class="eyebrow">PHYSICS LAB · WAVES</div>
+    <h1>水波干涉：波程差與相位差</h1>
+    <p class="intro">兩個點波源送出的水波在每一點疊加。改變波長、波源距離與初始相位，再把觀察點 P 移到不同位置，看見程差如何決定相長或相消干涉。</p>
+  </header>
+
+  <main class="shell">
+    <section class="workspace">
+      <aside class="panel controls" aria-label="水波干涉控制">
+        <h2>調整兩個波源</h2>
+        <div class="control"><button id="playButton" type="button" aria-pressed="true">暫停</button></div>
+        <div class="control"><label for="wavelength">波長 λ <output id="wavelengthOut"></output></label><input id="wavelength" type="range" min="4" max="16" step="0.5" value="8"></div>
+        <div class="control"><label for="sourceDistance">波源距離 d <output id="sourceDistanceOut"></output></label><input id="sourceDistance" type="range" min="6" max="34" step="0.5" value="16"></div>
+        <div class="control"><label class="check"><input id="inPhase" type="checkbox" checked>波源同相</label><label class="check"><input id="antiPhase" type="checkbox">波源反相</label></div>
+        <div class="control"><label for="sourcePhase">波源相位差 θ <output id="sourcePhaseOut"></output></label><input id="sourcePhase" type="range" min="0" max="360" step="5" value="0"><p id="modeNote" class="mode-note">目前：同相振動</p></div>
+        <div class="control"><label class="check"><input id="showArrivals" type="checkbox">顯示到達觀察點 P 的波</label></div>
+      </aside>
+
+      <section class="panel stage">
+        <canvas id="fieldCanvas" width="720" height="540" aria-label="兩點波源的水波干涉圖；可點擊或拖曳設定觀察點 P"></canvas>
+        <p class="canvas-tip">在圖中點擊或拖曳，設定觀察點 P。</p>
+      </section>
+    </section>
+
+    <section class="readouts" aria-label="觀察點 P 的程差讀值">
+      <div class="readout"><b>波源距離／波長 d / λ</b><output id="ratioOut"></output></div>
+      <div class="readout"><b>到 P 的距離 r₁</b><output id="r1Out"></output></div>
+      <div class="readout"><b>到 P 的距離 r₂</b><output id="r2Out"></output></div>
+      <div class="readout"><b>程差 Δr = r₂ − r₁</b><output id="pathDifferenceOut"></output></div>
+      <div class="readout"><b>歸一化程差 Δr / λ</b><output id="normalizedDifferenceOut"></output></div>
+      <div class="readout emphasis"><b>觀察點 P 的判讀</b><output id="classificationOut"></output><small id="totalPhaseOut"></small></div>
+    </section>
+
+    <section id="arrivalPanel" class="panel arrivals" hidden>
+      <h2>到達觀察點 P 的兩個波</h2>
+      <p>藍、紅曲線分別表示兩個波源抵達 P 時的振動；最右端虛線是它們在 P 的相遇時刻。</p>
+      <canvas id="traceCanvas" width="920" height="210" aria-label="兩個波抵達觀察點 P 的波形比較"></canvas>
+      <div class="legend"><span class="first">波源 1 的波</span><span class="second">波源 2 的波</span></div>
+    </section>
+
+    <section class="panel teaching"><strong>如何判讀：</strong>若總相位差接近 0°、360° 的整數倍，兩波同方向振動，為相長干涉；若接近 180° 的奇數倍，則為相消干涉。總相位差包含「走過不同路徑造成的相位差」和「兩個波源原本的相位差」。</section>
+  </main>
+
+  <script type="module">
+    import { calculateObservation, normalizeWaveSettings, sampleInterferenceField } from './water-wave-physics.js';
+
+    const fieldCanvas = document.getElementById('fieldCanvas');
+    const fieldContext = fieldCanvas.getContext('2d');
+    const traceCanvas = document.getElementById('traceCanvas');
+    const traceContext = traceCanvas.getContext('2d');
+    const buffer = document.createElement('canvas');
+    buffer.width = 240;
+    buffer.height = 180;
+    const bufferContext = buffer.getContext('2d');
+    const playButton = document.getElementById('playButton');
+    const wavelength = document.getElementById('wavelength');
+    const sourceDistance = document.getElementById('sourceDistance');
+    const inPhase = document.getElementById('inPhase');
+    const antiPhase = document.getElementById('antiPhase');
+    const sourcePhase = document.getElementById('sourcePhase');
+    const showArrivals = document.getElementById('showArrivals');
+    const arrivalPanel = document.getElementById('arrivalPanel');
+    const state = {
+      time: 0,
+      playing: true,
+      point: { x: 25, y: -9 },
+      dragging: false,
+      previousFrame: performance.now(),
+      frameRequest: null,
+    };
+
+    const elements = Object.fromEntries([
+      'wavelengthOut', 'sourceDistanceOut', 'sourcePhaseOut', 'modeNote', 'ratioOut', 'r1Out', 'r2Out',
+      'pathDifferenceOut', 'normalizedDifferenceOut', 'totalPhaseOut', 'classificationOut',
+    ].map((id) => [id, document.getElementById(id)]));
+    const bounds = { x: 64, y: 48 };
+    const TAU = 2 * Math.PI;
+    const currentSettings = () => normalizeWaveSettings({
+      wavelength: Number(wavelength.value),
+      sourceDistance: Number(sourceDistance.value),
+      sourcePhaseDegrees: Number(sourcePhase.value),
+    });
+    const format = (value, digits = 2) => Number(value).toFixed(digits);
+    const sourcePositions = (settings) => [
+      { x: 0, y: -settings.sourceDistance / 2 },
+      { x: 0, y: settings.sourceDistance / 2 },
+    ];
+    const screenPoint = (point) => ({
+      x: (point.x / bounds.x + .5) * fieldCanvas.width,
+      y: (point.y / bounds.y + .5) * fieldCanvas.height,
+    });
+    const toWorld = (event) => {
+      const box = fieldCanvas.getBoundingClientRect();
+      return {
+        x: ((event.clientX - box.left) / box.width - .5) * bounds.x,
+        y: ((event.clientY - box.top) / box.height - .5) * bounds.y,
+      };
+    };
+
+    function updateModeNote() {
+      const phase = Number(sourcePhase.value);
+      elements.modeNote.textContent = phase === 0 ? '目前：同相振動' : phase === 180 ? '目前：反相振動' : '目前：自訂相位差';
+    }
+
+    function setPhase(degrees, mode) {
+      sourcePhase.value = degrees;
+      inPhase.checked = mode === 'in';
+      antiPhase.checked = mode === 'anti';
+      updateModeNote();
+      render();
+    }
+
+    function renderField(settings) {
+      const image = bufferContext.createImageData(buffer.width, buffer.height);
+      for (let pixelY = 0; pixelY < buffer.height; pixelY += 1) {
+        const worldY = (pixelY / (buffer.height - 1) - .5) * bounds.y;
+        for (let pixelX = 0; pixelX < buffer.width; pixelX += 1) {
+          const worldX = (pixelX / (buffer.width - 1) - .5) * bounds.x;
+          const wave = sampleInterferenceField({ x: worldX, y: worldY, time: state.time, settings });
+          const brightness = Math.max(0, Math.min(1, .5 + wave * .5));
+          const index = (pixelY * buffer.width + pixelX) * 4;
+          image.data[index] = Math.round(36 + 210 * brightness);
+          image.data[index + 1] = Math.round(31 + 198 * brightness);
+          image.data[index + 2] = Math.round(17 + 42 * brightness);
+          image.data[index + 3] = 255;
+        }
+      }
+      bufferContext.putImageData(image, 0, 0);
+      fieldContext.save();
+      fieldContext.imageSmoothingEnabled = true;
+      fieldContext.drawImage(buffer, 0, 0, fieldCanvas.width, fieldCanvas.height);
+      fieldContext.restore();
+    }
+
+    function drawCircle(point, radius, fill, outline = '#fff') {
+      fieldContext.beginPath();
+      fieldContext.arc(point.x, point.y, radius, 0, TAU);
+      fieldContext.fillStyle = fill;
+      fieldContext.fill();
+      fieldContext.lineWidth = 2;
+      fieldContext.strokeStyle = outline;
+      fieldContext.stroke();
+    }
+
+    function drawOverlay(settings, observation) {
+      const sources = sourcePositions(settings).map(screenPoint);
+      const point = screenPoint(state.point);
+      if (showArrivals.checked) {
+        fieldContext.save();
+        fieldContext.setLineDash([6, 6]);
+        fieldContext.lineWidth = 1.5;
+        ['#66b5ff', '#ff8277'].forEach((color, index) => {
+          fieldContext.beginPath();
+          fieldContext.moveTo(sources[index].x, sources[index].y);
+          fieldContext.lineTo(point.x, point.y);
+          fieldContext.strokeStyle = color;
+          fieldContext.stroke();
+        });
+        fieldContext.restore();
+      }
+      sources.forEach((source, index) => {
+        drawCircle(source, 6, '#e52921', '#ffd86f');
+        fieldContext.fillStyle = '#fff4b8';
+        fieldContext.font = '700 13px Arial';
+        fieldContext.fillText(`S${index + 1}`, source.x + 10, source.y - 9);
+      });
+      drawCircle(point, 6, '#2f84ef');
+      fieldContext.fillStyle = '#fff';
+      fieldContext.font = '800 14px Arial';
+      fieldContext.fillText('P', point.x + 10, point.y - 10);
+      if (showArrivals.checked) {
+        fieldContext.fillStyle = 'rgba(21, 28, 43, .76)';
+        fieldContext.fillRect(12, 12, 153, 44);
+        fieldContext.fillStyle = '#fff';
+        fieldContext.font = '12px Arial';
+        fieldContext.fillText(`Δr = ${format(observation.pathDifference)} 單位`, 22, 31);
+        fieldContext.fillText(`Δr / λ = ${format(observation.normalizedPathDifference)}`, 22, 47);
+      }
+    }
+
+    function drawWave(context, centerY, color, phase) {
+      const width = traceCanvas.width;
+      context.beginPath();
+      for (let x = 0; x <= width; x += 2) {
+        const localPhase = phase + (x / width - 1) * TAU * 2.5;
+        const y = centerY - Math.sin(localPhase) * 31;
+        if (x === 0) context.moveTo(x, y);
+        else context.lineTo(x, y);
+      }
+      context.lineWidth = 2.5;
+      context.strokeStyle = color;
+      context.stroke();
+    }
+
+    function renderArrivals(observation) {
+      arrivalPanel.hidden = !showArrivals.checked;
+      if (!showArrivals.checked) return;
+      traceContext.clearRect(0, 0, traceCanvas.width, traceCanvas.height);
+      traceContext.fillStyle = '#f6f8fc';
+      traceContext.fillRect(0, 0, traceCanvas.width, traceCanvas.height);
+      [55, 155].forEach((y) => {
+        traceContext.beginPath();
+        traceContext.moveTo(0, y);
+        traceContext.lineTo(traceCanvas.width, y);
+        traceContext.lineWidth = 1;
+        traceContext.strokeStyle = '#d3dbe8';
+        traceContext.stroke();
+      });
+      traceContext.setLineDash([5, 5]);
+      traceContext.beginPath();
+      traceContext.moveTo(traceCanvas.width - 12, 15);
+      traceContext.lineTo(traceCanvas.width - 12, traceCanvas.height - 15);
+      traceContext.strokeStyle = '#8a98ab';
+      traceContext.stroke();
+      traceContext.setLineDash([]);
+      drawWave(traceContext, 55, '#347ce5', observation.wavePhase1);
+      drawWave(traceContext, 155, '#e65547', observation.wavePhase2);
+      traceContext.fillStyle = '#516177';
+      traceContext.font = '700 13px Arial';
+      traceContext.fillText('波源 1 → P', 15, 25);
+      traceContext.fillText('波源 2 → P', 15, 125);
+    }
+
+    function updateReadouts(settings, observation) {
+      elements.wavelengthOut.value = `${format(settings.wavelength, 1)} 單位`;
+      elements.sourceDistanceOut.value = `${format(settings.sourceDistance, 1)} 單位`;
+      elements.sourcePhaseOut.value = `${format(settings.sourcePhaseDegrees, 0)}°`;
+      elements.ratioOut.value = `${format(settings.sourceDistance / settings.wavelength)} λ`;
+      elements.r1Out.value = `${format(observation.r1)} 單位`;
+      elements.r2Out.value = `${format(observation.r2)} 單位`;
+      elements.pathDifferenceOut.value = `${format(observation.pathDifference)} 單位`;
+      elements.normalizedDifferenceOut.value = format(observation.normalizedPathDifference);
+      elements.classificationOut.value = observation.label;
+      elements.totalPhaseOut.textContent = `總相位差 ${format(observation.totalPhase * 180 / Math.PI)}° · 相對亮度 ${format(observation.relativeIntensity * 100, 0)}%`;
+    }
+
+    function render() {
+      const settings = currentSettings();
+      const observation = calculateObservation({ ...state.point, time: state.time, settings });
+      renderField(settings);
+      drawOverlay(settings, observation);
+      renderArrivals(observation);
+      updateReadouts(settings, observation);
+    }
+
+    function animate(now) {
+      state.frameRequest = null;
+      const elapsed = Math.min(.05, (now - state.previousFrame) / 1000);
+      state.previousFrame = now;
+      if (state.playing) state.time += elapsed * TAU * 1.15;
+      render();
+      if (state.playing) state.frameRequest = requestAnimationFrame(animate);
+    }
+
+    function startAnimation() {
+      state.previousFrame = performance.now();
+      if (state.frameRequest === null) state.frameRequest = requestAnimationFrame(animate);
+    }
+
+    function stopAnimation() {
+      if (state.frameRequest !== null) cancelAnimationFrame(state.frameRequest);
+      state.frameRequest = null;
+    }
+
+    playButton.addEventListener('click', () => {
+      state.playing = !state.playing;
+      playButton.textContent = state.playing ? '暫停' : '繼續';
+      playButton.setAttribute('aria-pressed', String(state.playing));
+      if (state.playing) startAnimation();
+      else stopAnimation();
+      render();
+    });
+    inPhase.addEventListener('change', () => setPhase(0, 'in'));
+    antiPhase.addEventListener('change', () => setPhase(180, 'anti'));
+    sourcePhase.addEventListener('input', () => {
+      inPhase.checked = Number(sourcePhase.value) === 0;
+      antiPhase.checked = Number(sourcePhase.value) === 180;
+      updateModeNote();
+      render();
+    });
+    [wavelength, sourceDistance].forEach((control) => control.addEventListener('input', render));
+    showArrivals.addEventListener('change', render);
+    fieldCanvas.addEventListener('pointerdown', (event) => {
+      state.dragging = true;
+      fieldCanvas.setPointerCapture(event.pointerId);
+      state.point = toWorld(event);
+      render();
+    });
+    fieldCanvas.addEventListener('pointermove', (event) => {
+      if (state.dragging) { state.point = toWorld(event); render(); }
+    });
+    fieldCanvas.addEventListener('pointerup', () => { state.dragging = false; });
+    fieldCanvas.addEventListener('pointercancel', () => { state.dragging = false; });
+
+    updateModeNote();
+    startAnimation();
+  </script>
+</body>
+</html>
