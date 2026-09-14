@@ -15,11 +15,11 @@ test('circular-wave page has canvas, accessible controls, and module controller'
   assert.match(page, /此瀏覽器無法繪製 Canvas/);
 });
 
-test('homepage advertises and links both newly merged simulations', () => {
+test('homepage advertises and links all newly merged simulations', () => {
   const home = readFileSync(new URL('../index.html', import.meta.url), 'utf8');
 
-  assert.match(home, /八個適合課堂投影/);
-  assert.match(home, /8 個主題/);
+  assert.match(home, /九個適合課堂投影/);
+  assert.match(home, /9 個主題/);
   assert.match(home, /href="\.\/circular-standing-wave\.html"/);
   assert.match(home, /圓形駐波：看見節線與腹部/);
   assert.match(home, /href="\.\/molecular-degrees-of-freedom\.html"/);

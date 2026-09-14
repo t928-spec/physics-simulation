@@ -57,6 +57,8 @@ export function calculateObservation({ x, y, time = 0, settings = {} }) {
     totalPhase,
     relativeIntensity: (1 + Math.cos(totalPhase)) / 2,
     label: classifyInterference(totalPhase),
+    wavePhase1: phase1,
+    wavePhase2: phase2,
     displacement1,
     displacement2,
     displacement: displacement1 + displacement2,
