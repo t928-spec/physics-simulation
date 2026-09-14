@@ -21,3 +21,14 @@ test('首頁連結水波干涉模擬並更新主題數', () => {
   assert.match(home, /水波干涉：波程差與相位差/);
   assert.match(home, /9 個主題/);
 });
+
+test('暫停時取消動畫迴圈，控制操作仍可直接重繪', () => {
+  assert.match(html, /cancelAnimationFrame\(state\.frameRequest\)/);
+  assert.match(html, /if \(state\.playing\) state\.frameRequest = requestAnimationFrame\(animate\);/);
+  assert.match(html, /showArrivals\.addEventListener\('change', render\)/);
+});
+
+test('波場 Canvas 使用相同的水平與垂直物理比例', () => {
+  assert.match(html, /id="fieldCanvas" width="720" height="540"/);
+  assert.match(html, /buffer\.height = 180/);
+});

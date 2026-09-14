@@ -71,7 +71,7 @@
       </aside>
 
       <section class="panel stage">
-        <canvas id="fieldCanvas" width="720" height="560" aria-label="兩點波源的水波干涉圖；可點擊或拖曳設定觀察點 P"></canvas>
+        <canvas id="fieldCanvas" width="720" height="540" aria-label="兩點波源的水波干涉圖；可點擊或拖曳設定觀察點 P"></canvas>
         <p class="canvas-tip">在圖中點擊或拖曳，設定觀察點 P。</p>
       </section>
     </section>
@@ -104,7 +104,7 @@
     const traceContext = traceCanvas.getContext('2d');
     const buffer = document.createElement('canvas');
     buffer.width = 240;
-    buffer.height = 187;
+    buffer.height = 180;
     const bufferContext = buffer.getContext('2d');
     const playButton = document.getElementById('playButton');
     const wavelength = document.getElementById('wavelength');
@@ -114,7 +114,14 @@
     const sourcePhase = document.getElementById('sourcePhase');
     const showArrivals = document.getElementById('showArrivals');
     const arrivalPanel = document.getElementById('arrivalPanel');
-    const state = { time: 0, playing: true, point: { x: 25, y: -9 }, dragging: false, previousFrame: performance.now() };
+    const state = {
+      time: 0,
+      playing: true,
+      point: { x: 25, y: -9 },
+      dragging: false,
+      previousFrame: performance.now(),
+      frameRequest: null,
+    };
 
     const elements = Object.fromEntries([
       'wavelengthOut', 'sourceDistanceOut', 'sourcePhaseOut', 'modeNote', 'ratioOut', 'r1Out', 'r2Out',
@@ -291,17 +298,31 @@
     }
 
     function animate(now) {
+      state.frameRequest = null;
       const elapsed = Math.min(.05, (now - state.previousFrame) / 1000);
       state.previousFrame = now;
       if (state.playing) state.time += elapsed * TAU * 1.15;
       render();
-      requestAnimationFrame(animate);
+      if (state.playing) state.frameRequest = requestAnimationFrame(animate);
+    }
+
+    function startAnimation() {
+      state.previousFrame = performance.now();
+      if (state.frameRequest === null) state.frameRequest = requestAnimationFrame(animate);
+    }
+
+    function stopAnimation() {
+      if (state.frameRequest !== null) cancelAnimationFrame(state.frameRequest);
+      state.frameRequest = null;
     }
 
     playButton.addEventListener('click', () => {
       state.playing = !state.playing;
       playButton.textContent = state.playing ? '暫停' : '繼續';
       playButton.setAttribute('aria-pressed', String(state.playing));
+      if (state.playing) startAnimation();
+      else stopAnimation();
+      render();
     });
     inPhase.addEventListener('change', () => setPhase(0, 'in'));
     antiPhase.addEventListener('change', () => setPhase(180, 'anti'));
@@ -326,7 +347,7 @@
     fieldCanvas.addEventListener('pointercancel', () => { state.dragging = false; });
 
     updateModeNote();
-    requestAnimationFrame(animate);
+    startAnimation();
   </script>
 </body>
 </html>
