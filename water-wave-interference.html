@@ -196,6 +196,41 @@
       fieldContext.stroke();
     }
 
+    function drawPathWave(start, end, wavelength, endpointPhase, color) {
+      const dx = end.x - start.x;
+      const dy = end.y - start.y;
+      const length = Math.hypot(dx, dy);
+      if (length < 1) return;
+      const tangent = { x: dx / length, y: dy / length };
+      const normal = { x: -tangent.y, y: tangent.x };
+      const pixelsPerUnit = fieldCanvas.width / bounds.x;
+
+      fieldContext.save();
+      fieldContext.lineCap = 'round';
+      fieldContext.lineWidth = 6;
+      fieldContext.strokeStyle = 'rgba(20, 26, 38, .5)';
+      fieldContext.beginPath();
+      fieldContext.moveTo(start.x, start.y);
+      fieldContext.lineTo(end.x, end.y);
+      fieldContext.stroke();
+
+      fieldContext.beginPath();
+      for (let distance = 0; distance < length; distance += 2) {
+        const distanceFromEnd = (length - distance) / pixelsPerUnit;
+        const displacement = Math.sin(endpointPhase - distanceFromEnd * TAU / wavelength) * 12;
+        const x = start.x + tangent.x * distance + normal.x * displacement;
+        const y = start.y + tangent.y * distance + normal.y * displacement;
+        if (distance === 0) fieldContext.moveTo(x, y);
+        else fieldContext.lineTo(x, y);
+      }
+      const endDisplacement = Math.sin(endpointPhase) * 12;
+      fieldContext.lineTo(end.x + normal.x * endDisplacement, end.y + normal.y * endDisplacement);
+      fieldContext.lineWidth = 2.5;
+      fieldContext.strokeStyle = color;
+      fieldContext.stroke();
+      fieldContext.restore();
+    }
+
     function drawOverlay(settings, observation) {
       const sources = sourcePositions(settings).map(screenPoint);
       const point = screenPoint(state.point);
@@ -211,6 +246,8 @@
           fieldContext.stroke();
         });
         fieldContext.restore();
+        drawPathWave(sources[0], point, settings.wavelength, observation.wavePhase1, '#66b5ff');
+        drawPathWave(sources[1], point, settings.wavelength, observation.wavePhase2, '#ff8277');
       }
       sources.forEach((source, index) => {
         drawCircle(source, 6, '#e52921', '#ffd86f');

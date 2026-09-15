@@ -32,3 +32,10 @@ test('波場 Canvas 使用相同的水平與垂直物理比例', () => {
   assert.match(html, /id="fieldCanvas" width="720" height="540"/);
   assert.match(html, /buffer\.height = 180/);
 });
+
+test('觀察點路徑以與抵達相位一致的正弦波呈現', () => {
+  assert.match(html, /function drawPathWave\(start, end, wavelength, endpointPhase, color\)/);
+  assert.match(html, /Math\.sin\(endpointPhase - distanceFromEnd \* TAU \/ wavelength\)/);
+  assert.match(html, /drawPathWave\(sources\[0\], point, settings\.wavelength, observation\.wavePhase1, '#66b5ff'\)/);
+  assert.match(html, /drawPathWave\(sources\[1\], point, settings\.wavelength, observation\.wavePhase2, '#ff8277'\)/);
+});
