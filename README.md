@@ -10,6 +10,7 @@
 - [雙繩交界的繩波：反射、透射與能量守恆](./string-wave-boundary.html)
 - [雙繩交界繩波的公式推導](./string-wave-derivation.html)
 - [分子自由度：把運動拆開看](./molecular-degrees-of-freedom.html)
+- [聲音偵探：從頻譜推論振動系統](./air-column-spectrum.html)
 
 ## GitHub Pages
 

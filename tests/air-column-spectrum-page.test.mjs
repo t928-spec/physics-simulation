@@ -1,0 +1,47 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { existsSync, readFileSync, statSync } from 'node:fs';
+
+for (const file of ['sample-a.wav', 'sample-b.flac', 'sample-c.flac']) {
+  test(`${file} is a non-empty bundled audio asset`, () => {
+    const path = new URL(`../assets/air-column-spectrum/${file}`, import.meta.url);
+    assert.equal(existsSync(path), true);
+    assert.ok(statSync(path).size > 4096);
+  });
+}
+
+test('credits preserve source and CC0 information', () => {
+  const credits = readFileSync(new URL('../assets/air-column-spectrum/CREDITS.md', import.meta.url), 'utf8');
+  assert.match(credits, /FreePats/);
+  assert.match(credits, /CC0 1\.0/);
+  assert.match(credits, /Clarinet/);
+  assert.match(credits, /Recorder/);
+  assert.match(credits, /Spanish classical guitar/);
+});
+
+test('page begins with three anonymous samples and accessible spectrum canvases', () => {
+  const page = readFileSync(new URL('../air-column-spectrum.html', import.meta.url), 'utf8');
+  for (const id of ['sample-a', 'sample-b', 'sample-c']) assert.match(page, new RegExp(`id="${id}"`));
+  assert.match(page, /src="\.\/assets\/air-column-spectrum\/sample-a\.wav"/);
+  assert.match(page, /src="\.\/assets\/air-column-spectrum\/sample-b\.flac"/);
+  assert.match(page, /src="\.\/assets\/air-column-spectrum\/sample-c\.flac"/);
+  assert.match(page, /aria-label="樣本 A 的即時頻譜"/);
+  assert.match(page, /<script type="module" src="\.\/air-column-spectrum\.js"><\/script>/);
+});
+
+test('listening stage does not reveal instruments or boundary models', () => {
+  const page = readFileSync(new URL('../air-column-spectrum.html', import.meta.url), 'utf8');
+  const listening = page.match(/<section id="listening"[\s\S]*?<\/section>/)[0];
+  assert.doesNotMatch(listening, /單簧管|直笛|吉他|開管|閉管|弦/);
+  assert.match(page, /data-stage="listen"/);
+  assert.match(page, /class="stage extension-stage"/);
+});
+
+test('home page and README link to the activity', () => {
+  const home = readFileSync(new URL('../index.html', import.meta.url), 'utf8');
+  const readme = readFileSync(new URL('../README.md', import.meta.url), 'utf8');
+  assert.match(home, /10 個主題/);
+  assert.match(home, /href="\.\/air-column-spectrum\.html"/);
+  assert.match(home, /聲音偵探：從頻譜推論振動系統/);
+  assert.match(readme, /\[聲音偵探：從頻譜推論振動系統\]\(\.\/air-column-spectrum\.html\)/);
+});

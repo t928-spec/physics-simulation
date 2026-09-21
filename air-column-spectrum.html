@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="以匿名聲音與即時頻譜探索駐波、空氣柱與弦振動。">
+  <title>聲音偵探｜物理互動實驗室</title>
+  <style>
+    :root { --ink:#10233d; --muted:#58708d; --line:#cfdeef; --blue:#3979e8; --violet:#7658db; --panel:#fff; }
+    * { box-sizing:border-box; } body { margin:0; color:var(--ink); background:linear-gradient(145deg,#eff7ff,#fbfcff 55%,#f7f3ff); font-family:Arial,"Noto Sans TC","Microsoft JhengHei",sans-serif; }
+    .shell { width:min(1120px,calc(100% - 32px)); margin:auto; } header { padding:24px 0 8px; } a { color:#1d5dbd; } .back { font-weight:800; text-decoration:none; }
+    .eyebrow { color:var(--blue); font-size:13px; font-weight:900; letter-spacing:.12em; margin:42px 0 10px; } h1 { font-size:clamp(38px,6vw,68px); letter-spacing:-.07em; line-height:1; margin:0; } .lead { max-width:720px; color:var(--muted); line-height:1.75; font-size:17px; }
+    .mission { margin:28px 0; padding:18px 20px; background:#eef5ff; border:1px solid var(--line); border-radius:16px; line-height:1.7; } .mission b { color:#1d5dbd; }
+    .samples { display:grid; gap:20px; grid-template-columns:repeat(3,minmax(0,1fr)); padding:8px 0 42px; } .sample-card { border:1px solid var(--line); border-radius:20px; overflow:hidden; background:var(--panel); box-shadow:0 15px 35px rgba(35,72,114,.10); }
+    .card-head { padding:19px 19px 13px; background:linear-gradient(130deg,#edf5ff,#f6f2ff); } .sample-kicker { color:var(--blue); font-size:12px; font-weight:900; letter-spacing:.12em; margin:0 0 6px; } h2 { margin:0; font-size:25px; } .card-body { padding:18px; } audio { width:100%; margin:0 0 14px; } .stage-prompt,.peak-summary { color:var(--muted); font-size:14px; line-height:1.65; min-height:45px; }
+    .stage { border-top:1px solid #e1ebf6; margin-top:14px; padding-top:15px; } .stage h3 { font-size:16px; margin:0 0 8px; } canvas { width:100%; height:auto; display:block; background:#10233d; border-radius:10px; } .model-grid { display:grid; grid-template-columns:1fr; gap:8px; } .model { padding:10px; border-radius:10px; border:1px solid #dce8f7; background:#f7faff; color:#405c7b; font-size:13px; line-height:1.5; } .answer { background:#f2efff; border-color:#d6cafa; } .extension { background:#effaf8; border-color:#c7ede7; }
+    .next-step { width:100%; margin-top:16px; padding:12px; border:0; border-radius:10px; background:var(--blue); color:white; font:inherit; font-weight:900; cursor:pointer; } .next-step:hover { background:#1d5dbd; } .notice { color:#9a4e1b; font-size:13px; line-height:1.55; } .compare { margin:0 0 36px; padding:22px; border:1px solid var(--line); border-radius:18px; background:rgba(255,255,255,.74); } .compare h2 { margin-bottom:9px; } .compare p { color:var(--muted); line-height:1.7; } footer { padding:20px 0 36px; color:#71849b; font-size:12px; }
+    @media (max-width:850px) { .samples { grid-template-columns:1fr; } .sample-card { max-width:620px; } } @media (max-width:520px) { .shell { width:min(100% - 22px,620px); } .eyebrow { margin-top:28px; } }
+  </style>
+</head>
+<body>
+  <header class="shell"><a class="back" href="./index.html">← 回到物理互動實驗室</a></header>
+  <main class="shell">
+    <p class="eyebrow">SOUND DETECTIVE · 聲音偵探</p>
+    <h1>從聲音，找出振動的線索。</h1>
+    <p class="lead">三個未知樣本各自藏著一種振動系統。請先聽，再讀頻譜，最後才打開答案。每一張卡的進度互不影響。</p>
+    <section id="listening" class="mission">
+      <b>第一步：盲聽</b><br>依序播放樣本 A、B、C。先記下你聽到的特徵與猜想；暫時不要急著替它命名。準備好後，按該樣本的「顯示下一步」。
+    </section>
+    <section class="samples" aria-label="三個未知聲音樣本">
+      <article class="sample-card" data-sample="a" data-stage="listen">
+        <div class="card-head"><p class="sample-kicker">未知聲音</p><h2>樣本 A</h2></div><div class="card-body">
+          <audio id="sample-a" controls preload="metadata" src="./assets/air-column-spectrum/sample-a.wav"></audio><p class="stage-prompt">先完整聽一次，記下你想檢查的聲音特徵。</p>
+          <section class="stage spectrum-stage" hidden><h3>第二步：看頻譜</h3><canvas class="spectrum-canvas" width="720" height="300" aria-label="樣本 A 的即時頻譜">此瀏覽器無法繪製 Canvas。</canvas><p class="peak-summary" aria-live="polite">播放後會顯示主要頻率峰值。</p></section>
+          <section class="stage models-stage" hidden><h3>第三步：配對規律</h3><div class="model-grid"><div class="model">規律甲：(f_0, 2f_0, 3f_0, …)</div><div class="model">規律乙：(f_0, 3f_0, 5f_0, …)</div><div class="model">規律丙：大致是整數倍，但高次峰可能略微偏移。</div></div><p class="stage-prompt">哪一張規律卡最接近你看到的峰值？</p></section>
+          <section class="stage answer-stage" hidden><h3>第四步：揭曉</h3><p class="answer">樣本 A 是<strong>單簧管</strong>，可近似為<strong>一端閉、一端開的空氣柱</strong>。因此奇次諧波常較突出；按孔、簧片與喇叭口會使真實頻譜不完全理想。</p></section>
+          <section class="stage extension-stage" hidden><h3>延伸：時間線索</h3><p class="extension">吹奏時可持續把能量送進系統，所以起音後可能有相對穩定的聲音段。這是演奏方式的線索，不是所有樂器家族的絕對特徵。</p></section><button class="next-step" type="button">顯示下一步</button>
+        </div>
+      </article>
+      <article class="sample-card" data-sample="b" data-stage="listen">
+        <div class="card-head"><p class="sample-kicker">未知聲音</p><h2>樣本 B</h2></div><div class="card-body">
+          <audio id="sample-b" controls preload="metadata" src="./assets/air-column-spectrum/sample-b.flac"></audio><p class="stage-prompt">先完整聽一次，記下你想檢查的聲音特徵。</p>
+          <section class="stage spectrum-stage" hidden><h3>第二步：看頻譜</h3><canvas class="spectrum-canvas" width="720" height="300" aria-label="樣本 B 的即時頻譜">此瀏覽器無法繪製 Canvas。</canvas><p class="peak-summary" aria-live="polite">播放後會顯示主要頻率峰值。</p></section>
+          <section class="stage models-stage" hidden><h3>第三步：配對規律</h3><div class="model-grid"><div class="model">規律甲：(f_0, 2f_0, 3f_0, …)</div><div class="model">規律乙：(f_0, 3f_0, 5f_0, …)</div><div class="model">規律丙：大致是整數倍，但高次峰可能略微偏移。</div></div><p class="stage-prompt">哪一張規律卡最接近你看到的峰值？</p></section>
+          <section class="stage answer-stage" hidden><h3>第四步：揭曉</h3><p class="answer">樣本 B 是<strong>直笛</strong>，可近似為<strong>兩端開放的空氣柱</strong>。頻率成分通常可看到較完整的整數倍序列；吹口與指孔會改變有效管長與頻譜。</p></section>
+          <section class="stage extension-stage" hidden><h3>延伸：時間線索</h3><p class="extension">這個樣本也由持續氣流維持振動。比較它與樣本 A 的穩定段，可再討論音色何以不同。</p></section><button class="next-step" type="button">顯示下一步</button>
+        </div>
+      </article>
+      <article class="sample-card" data-sample="c" data-stage="listen">
+        <div class="card-head"><p class="sample-kicker">未知聲音</p><h2>樣本 C</h2></div><div class="card-body">
+          <audio id="sample-c" controls preload="metadata" src="./assets/air-column-spectrum/sample-c.flac"></audio><p class="stage-prompt">先完整聽一次，記下你想檢查的聲音特徵。</p>
+          <section class="stage spectrum-stage" hidden><h3>第二步：看頻譜</h3><canvas class="spectrum-canvas" width="720" height="300" aria-label="樣本 C 的即時頻譜">此瀏覽器無法繪製 Canvas。</canvas><p class="peak-summary" aria-live="polite">播放後會顯示主要頻率峰值。</p></section>
+          <section class="stage models-stage" hidden><h3>第三步：配對規律</h3><div class="model-grid"><div class="model">規律甲：(f_0, 2f_0, 3f_0, …)</div><div class="model">規律乙：(f_0, 3f_0, 5f_0, …)</div><div class="model">規律丙：大致是整數倍，但高次峰可能略微偏移。</div></div><p class="stage-prompt">哪一張規律卡最接近你看到的峰值？</p></section>
+          <section class="stage answer-stage" hidden><h3>第四步：揭曉</h3><p class="answer">樣本 C 是<strong>古典吉他</strong>，可近似為<strong>兩端固定的張緊弦</strong>。它也有近整數倍諧波，但弦剛性與共鳴箱會使高次成分偏移或被加強。</p></section>
+          <section class="stage extension-stage" hidden><h3>延伸：時間線索</h3><p class="extension">撥弦後通常不再持續輸入能量，振幅會逐步衰減。若改為拉弓，弦同樣可以被持續供能。</p></section><button class="next-step" type="button">顯示下一步</button>
+        </div>
+      </article>
+    </section>
+    <section class="compare"><h2>最後再比一比</h2><p>最高的峰不一定就是基音。請用峰值間距與整數倍關係交叉檢查；真實樂器只是在某些條件下接近理想模型。</p><p class="notice" hidden id="audioFallback">瀏覽器無法啟用即時頻譜；仍可依聽覺與後續模型進行活動。</p></section>
+  </main>
+  <footer class="shell">素材：FreePats · CC0 1.0（完整來源見 <a href="./assets/air-column-spectrum/CREDITS.md">CREDITS.md</a>）</footer>
+  <script type="module" src="./air-column-spectrum.js"></script>
+</body>
+</html>
