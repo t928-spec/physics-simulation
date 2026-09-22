@@ -57,3 +57,13 @@ test('home page and README link to the activity', () => {
   assert.match(home, /聲音偵探：從頻譜推論振動系統/);
   assert.match(readme, /\[聲音偵探：從頻譜推論振動系統\]\(\.\/air-column-spectrum\.html\)/);
 });
+
+test('Fourier extension follows the comparison and connects maths to applications', () => {
+  const page = readFileSync(new URL('../air-column-spectrum.html', import.meta.url), 'utf8');
+  const fourierIndex = page.indexOf('id="fourier-extension"');
+  const compareIndex = page.indexOf('class="compare"');
+  assert.ok(fourierIndex > compareIndex);
+  for (const phrase of ['正交', 'aₘ', 'Xₖ', 'DFT', 'FFT', '手機調音器', '等化器', 'MRI']) {
+    assert.match(page, new RegExp(phrase));
+  }
+});
