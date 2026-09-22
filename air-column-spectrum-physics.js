@@ -1,4 +1,13 @@
 export const REVEAL_STAGES = ['listen', 'spectrum', 'models', 'answer', 'extension'];
+export const SPECTRUM_AXIS_MAX_HZ = 1800;
+export const SPECTRUM_AXIS_TICK_HZ = 300;
+
+export function averageSpectrumFrames(frames) {
+  if (!frames.length) return [];
+  return frames[0].map((_, index) => Math.round(
+    frames.reduce((sum, frame) => sum + frame[index], 0) / frames.length,
+  ));
+}
 
 export function findProminentPeaks(magnitudes, threshold = 0.28) {
   const floor = Math.max(...magnitudes, 0) * threshold;

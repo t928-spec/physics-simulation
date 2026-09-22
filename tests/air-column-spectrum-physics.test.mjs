@@ -2,11 +2,24 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
   REVEAL_STAGES,
+  SPECTRUM_AXIS_MAX_HZ,
+  SPECTRUM_AXIS_TICK_HZ,
+  averageSpectrumFrames,
   findProminentPeaks,
   estimateFundamentalHz,
   classifyPeakSpacing,
   nextRevealStage,
 } from '../air-column-spectrum-physics.js';
+
+test('spectrum display has a fixed teaching range and tick spacing', () => {
+  assert.equal(SPECTRUM_AXIS_MAX_HZ, 1800);
+  assert.equal(SPECTRUM_AXIS_TICK_HZ, 300);
+});
+
+test('averaging frames stabilises one spectrum per frequency bin', () => {
+  assert.deepEqual(averageSpectrumFrames([[10, 20, 30], [20, 40, 50]]), [15, 30, 40]);
+  assert.deepEqual(averageSpectrumFrames([]), []);
+});
 
 test('peaks are local maxima above the relative threshold', () => {
   assert.deepEqual(findProminentPeaks([0, 4, 1, 8, 2, 3, 0], 0.4), [1, 3]);
