@@ -29,6 +29,16 @@ test('page begins with three anonymous samples and accessible spectrum canvases'
   assert.match(page, /<script type="module" src="\.\/air-column-spectrum\.js"><\/script>/);
 });
 
+test('each anonymous spectrum offers a stable one-second lock and fixed axis', () => {
+  const page = readFileSync(new URL('../air-column-spectrum.html', import.meta.url), 'utf8');
+  const script = readFileSync(new URL('../air-column-spectrum.js', import.meta.url), 'utf8');
+  assert.equal((page.match(/class="spectrum-lock"/g) || []).length, 3);
+  assert.match(page, /鎖定 1 秒平均/);
+  assert.match(script, /SPECTRUM_AXIS_MAX_HZ/);
+  assert.match(script, /SPECTRUM_AXIS_TICK_HZ/);
+  assert.match(script, /averageSpectrumFrames/);
+});
+
 test('listening stage does not reveal instruments or boundary models', () => {
   const page = readFileSync(new URL('../air-column-spectrum.html', import.meta.url), 'utf8');
   const listening = page.match(/<section id="listening"[\s\S]*?<\/section>/)[0];
