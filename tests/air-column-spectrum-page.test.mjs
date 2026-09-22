@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { existsSync, readFileSync, statSync } from 'node:fs';
 
-for (const file of ['sample-a.wav', 'sample-b.flac', 'sample-c.flac']) {
+for (const file of ['sample-a.wav', 'sample-b.mp3', 'sample-c.flac']) {
   test(`${file} is a non-empty bundled audio asset`, () => {
     const path = new URL(`../assets/air-column-spectrum/${file}`, import.meta.url);
     assert.equal(existsSync(path), true);
@@ -15,7 +15,9 @@ test('credits preserve source and CC0 information', () => {
   assert.match(credits, /FreePats/);
   assert.match(credits, /CC0 1\.0/);
   assert.match(credits, /Clarinet/);
-  assert.match(credits, /Recorder/);
+  assert.match(credits, /Alto Recorder D5/);
+  assert.match(credits, /sgossner/);
+  assert.match(credits, /freesound\.org\/people\/sgossner\/sounds\/242028/);
   assert.match(credits, /Spanish classical guitar/);
 });
 
@@ -23,7 +25,7 @@ test('page begins with three anonymous samples and accessible spectrum canvases'
   const page = readFileSync(new URL('../air-column-spectrum.html', import.meta.url), 'utf8');
   for (const id of ['sample-a', 'sample-b', 'sample-c']) assert.match(page, new RegExp(`id="${id}"`));
   assert.match(page, /src="\.\/assets\/air-column-spectrum\/sample-a\.wav"/);
-  assert.match(page, /src="\.\/assets\/air-column-spectrum\/sample-b\.flac"/);
+  assert.match(page, /src="\.\/assets\/air-column-spectrum\/sample-b\.mp3"/);
   assert.match(page, /src="\.\/assets\/air-column-spectrum\/sample-c\.flac"/);
   assert.match(page, /aria-label="樣本 A 的即時頻譜"/);
   assert.match(page, /<script type="module" src="\.\/air-column-spectrum\.js"><\/script>/);

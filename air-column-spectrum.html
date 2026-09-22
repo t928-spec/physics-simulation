@@ -39,7 +39,7 @@
       </article>
       <article class="sample-card" data-sample="b" data-stage="listen">
         <div class="card-head"><p class="sample-kicker">未知聲音</p><h2>樣本 B</h2></div><div class="card-body">
-          <audio id="sample-b" controls preload="metadata" src="./assets/air-column-spectrum/sample-b.flac"></audio><p class="stage-prompt">先完整聽一次，記下你想檢查的聲音特徵。</p>
+          <audio id="sample-b" controls preload="metadata" src="./assets/air-column-spectrum/sample-b.mp3"></audio><p class="stage-prompt">先完整聽一次，記下你想檢查的聲音特徵。</p>
           <section class="stage spectrum-stage" hidden><h3>第二步：看頻譜</h3><canvas class="spectrum-canvas" width="720" height="300" aria-label="樣本 B 的即時頻譜">此瀏覽器無法繪製 Canvas。</canvas><button class="spectrum-lock" type="button">鎖定 1 秒平均</button><p class="peak-summary" aria-live="polite">播放後會顯示主要頻率峰值。</p></section>
           <section class="stage models-stage" hidden><h3>第三步：配對規律</h3><div class="model-grid"><div class="model">規律甲：(f_0, 2f_0, 3f_0, …)</div><div class="model">規律乙：(f_0, 3f_0, 5f_0, …)</div><div class="model">規律丙：大致是整數倍，但高次峰可能略微偏移。</div></div><p class="stage-prompt">哪一張規律卡最接近你看到的峰值？</p></section>
           <section class="stage answer-stage" hidden><h3>第四步：揭曉</h3><p class="answer">樣本 B 是<strong>直笛</strong>，可近似為<strong>兩端開放的空氣柱</strong>。頻率成分通常可看到較完整的整數倍序列；吹口與指孔會改變有效管長與頻譜。</p></section>
@@ -58,7 +58,7 @@
     </section>
     <section class="compare"><h2>最後再比一比</h2><p>最高的峰不一定就是基音。請用峰值間距與整數倍關係交叉檢查；真實樂器只是在某些條件下接近理想模型。</p><p class="notice" hidden id="audioFallback">瀏覽器無法啟用即時頻譜；仍可依聽覺與後續模型進行活動。</p></section>
   </main>
-  <footer class="shell">素材：FreePats · CC0 1.0（完整來源見 <a href="./assets/air-column-spectrum/CREDITS.md">CREDITS.md</a>）</footer>
+  <footer class="shell">素材：CC0 1.0（完整來源見 <a href="./assets/air-column-spectrum/CREDITS.md">CREDITS.md</a>）</footer>
   <script type="module" src="./air-column-spectrum.js"></script>
 </body>
 </html>
