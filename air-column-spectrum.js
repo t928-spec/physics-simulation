@@ -188,7 +188,7 @@ function setupCard(card) {
     else if (lockState === 'live') startCapture();
   });
   button.addEventListener('click', () => updateStage(nextRevealStage(card.dataset.stage)));
-  updateStage('listen');
+  updateStage(card.dataset.startStage || 'listen');
 }
 
 document.querySelectorAll('.sample-card').forEach(setupCard);

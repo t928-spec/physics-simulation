@@ -14,7 +14,7 @@
     .samples { display:grid; gap:20px; grid-template-columns:repeat(3,minmax(0,1fr)); padding:8px 0 42px; } .sample-card { border:1px solid var(--line); border-radius:20px; overflow:hidden; background:var(--panel); box-shadow:0 15px 35px rgba(35,72,114,.10); }
     .card-head { padding:19px 19px 13px; background:linear-gradient(130deg,#edf5ff,#f6f2ff); } .sample-kicker { color:var(--blue); font-size:12px; font-weight:900; letter-spacing:.12em; margin:0 0 6px; } h2 { margin:0; font-size:25px; } .card-body { padding:18px; } audio { width:100%; margin:0 0 14px; } .stage-prompt,.peak-summary { color:var(--muted); font-size:14px; line-height:1.65; min-height:45px; }
     .stage { border-top:1px solid #e1ebf6; margin-top:14px; padding-top:15px; } .stage h3 { font-size:16px; margin:0 0 8px; } canvas { width:100%; height:auto; display:block; background:#10233d; border-radius:10px; } .model-grid { display:grid; grid-template-columns:1fr; gap:8px; } .model { padding:10px; border-radius:10px; border:1px solid #dce8f7; background:#f7faff; color:#405c7b; font-size:13px; line-height:1.5; } .answer { background:#f2efff; border-color:#d6cafa; } .extension { background:#effaf8; border-color:#c7ede7; }
-    .spectrum-lock { width:100%; margin-top:10px; padding:10px; border:1px solid #8eafe1; border-radius:10px; background:#f5f9ff; color:#1d5dbd; font:inherit; font-weight:800; cursor:pointer; } .spectrum-lock:disabled { cursor:wait; opacity:.75; } .next-step { width:100%; margin-top:16px; padding:12px; border:0; border-radius:10px; background:var(--blue); color:white; font:inherit; font-weight:900; cursor:pointer; } .next-step:hover { background:#1d5dbd; } .notice { color:#9a4e1b; font-size:13px; line-height:1.55; } .compare { margin:0 0 36px; padding:22px; border:1px solid var(--line); border-radius:18px; background:rgba(255,255,255,.74); } .compare h2 { margin-bottom:9px; } .compare p { color:var(--muted); line-height:1.7; } .fourier-extension { border-color:#cfc6f5; background:linear-gradient(135deg,#faf9ff,#f3f8ff); } .fourier-extension h3 { margin:22px 0 8px; font-size:18px; } .fourier-grid,.application-grid { display:grid; gap:12px; grid-template-columns:repeat(2,minmax(0,1fr)); } .fourier-card,.application-card { padding:15px; border:1px solid #d9e2f2; border-radius:13px; background:rgba(255,255,255,.78); } .fourier-card p,.application-card p { margin:7px 0 0; font-size:14px; } .signal-pair { display:grid; gap:8px; grid-template-columns:1fr 1fr; margin-top:10px; } .signal-pair figure { margin:0; padding:8px; border-radius:9px; background:#f6f9fe; } .signal-pair figcaption { color:#58708d; font-size:12px; font-weight:800; } .signal-pair svg { width:100%; height:auto; display:block; margin-top:5px; } .formula { overflow:auto; padding:10px; border-radius:9px; background:#10233d; color:#f2f8ff !important; font-family:"Cambria Math",Consolas,monospace; font-size:14px !important; line-height:1.65 !important; white-space:nowrap; } .application-grid { grid-template-columns:repeat(3,minmax(0,1fr)); margin-top:12px; } .application-card h4 { margin:0; font-size:15px; } footer { padding:20px 0 36px; color:#71849b; font-size:12px; }
+    .spectrum-lock { width:100%; margin-top:10px; padding:10px; border:1px solid #8eafe1; border-radius:10px; background:#f5f9ff; color:#1d5dbd; font:inherit; font-weight:800; cursor:pointer; } .spectrum-lock:disabled { cursor:wait; opacity:.75; } .next-step { width:100%; margin-top:16px; padding:12px; border:0; border-radius:10px; background:var(--blue); color:white; font:inherit; font-weight:900; cursor:pointer; } .next-step:hover { background:#1d5dbd; } .notice { color:#9a4e1b; font-size:13px; line-height:1.55; } .compare { margin:0 0 36px; padding:22px; border:1px solid var(--line); border-radius:18px; background:rgba(255,255,255,.74); } .compare h2 { margin-bottom:9px; } .compare p { color:var(--muted); line-height:1.7; } .fourier-extension { border-color:#cfc6f5; background:linear-gradient(135deg,#faf9ff,#f3f8ff); } .fourier-extension h3 { margin:22px 0 8px; font-size:18px; } .fourier-grid,.application-grid { display:grid; gap:12px; grid-template-columns:repeat(2,minmax(0,1fr)); } .fourier-card,.application-card { padding:15px; border:1px solid #d9e2f2; border-radius:13px; background:rgba(255,255,255,.78); } .fourier-card p,.application-card p { margin:7px 0 0; font-size:14px; } .signal-pair { display:grid; gap:8px; grid-template-columns:1fr 1fr; margin-top:10px; } .signal-pair figure { margin:0; padding:8px; border-radius:9px; background:#f6f9fe; } .signal-pair figcaption { color:#58708d; font-size:12px; font-weight:800; } .signal-pair svg { width:100%; height:auto; display:block; margin-top:5px; } .formula { overflow:auto; padding:10px; border-radius:9px; background:#10233d; color:#f2f8ff !important; font-family:"Cambria Math",Consolas,monospace; font-size:14px !important; line-height:1.65 !important; white-space:nowrap; } .application-grid { grid-template-columns:repeat(3,minmax(0,1fr)); margin-top:12px; } .application-card h4 { margin:0; font-size:15px; } .reveal-image { display:block; width:min(100%,220px); height:160px; margin:12px auto 0; object-fit:contain; } #clarinet-comparison { margin:0 0 36px; max-width:620px; } #clarinet-comparison .card-head { display:flex; align-items:center; justify-content:space-between; gap:12px; } #clarinet-comparison .reveal-image { width:112px; height:92px; margin:0; } footer { padding:20px 0 36px; color:#71849b; font-size:12px; }
     @media (max-width:850px) { .samples { grid-template-columns:1fr; } .sample-card { max-width:620px; } } @media (max-width:520px) { .shell { width:min(100% - 22px,620px); } .eyebrow { margin-top:28px; } }
   </style>
 </head>
@@ -30,11 +30,11 @@
     <section class="samples" aria-label="三個未知聲音樣本">
       <article class="sample-card" data-sample="a" data-stage="listen">
         <div class="card-head"><p class="sample-kicker">未知聲音</p><h2>樣本 A</h2></div><div class="card-body">
-          <audio id="sample-a" controls preload="metadata" src="./assets/air-column-spectrum/sample-a.wav"></audio><p class="stage-prompt">先完整聽一次，記下你想檢查的聲音特徵。</p>
+          <audio id="sample-a" controls preload="metadata" src="./assets/air-column-spectrum/sample-a-ideal-closed-pipe.wav"></audio><p class="stage-prompt">先完整聽一次，記下你想檢查的聲音特徵。</p>
           <section class="stage spectrum-stage" hidden><h3>第二步：看頻譜</h3><canvas class="spectrum-canvas" width="720" height="300" aria-label="樣本 A 的即時頻譜">此瀏覽器無法繪製 Canvas。</canvas><button class="spectrum-lock" type="button">鎖定 1 秒平均</button><p class="peak-summary" aria-live="polite">播放後會顯示主要頻率峰值。</p></section>
           <section class="stage models-stage" hidden><h3>第三步：配對規律</h3><div class="model-grid"><div class="model">規律甲：(f_0, 2f_0, 3f_0, …)</div><div class="model">規律乙：(f_0, 3f_0, 5f_0, …)</div><div class="model">規律丙：大致是整數倍，但高次峰可能略微偏移。</div></div><p class="stage-prompt">哪一張規律卡最接近你看到的峰值？</p></section>
-          <section class="stage answer-stage" hidden><h3>第四步：揭曉</h3><p class="answer">樣本 A 是<strong>單簧管</strong>，可近似為<strong>一端閉、一端開的空氣柱</strong>。因此奇次諧波常較突出；按孔、簧片與喇叭口會使真實頻譜不完全理想。</p></section>
-          <section class="stage extension-stage" hidden><h3>延伸：時間線索</h3><p class="extension">吹奏時可持續把能量送進系統，所以起音後可能有相對穩定的聲音段。這是演奏方式的線索，不是所有樂器家族的絕對特徵。</p></section><button class="next-step" type="button">顯示下一步</button>
+          <section class="stage answer-stage" hidden><h3>第四步：揭曉</h3><p class="answer">樣本 A 是<strong>理想一端閉管模型聲</strong>，不是實際樂器錄音。它刻意只放入 300 Hz、900 Hz、1500 Hz 三個成分，也就是 f、3f、5f；因此可清楚觀察一端閉、一端開管柱的奇次諧波規律。</p><img class="reveal-image" src="./assets/air-column-spectrum/reveals/closed-pipe.png" alt="一端封閉、一端開放的管柱示意圖"></section>
+          <section class="stage extension-stage" hidden><h3>延伸：從模型走向真實</h3><p class="extension">這個模型刻意排除了吹奏起音、按孔、簧片與喇叭口等因素。頁面下方保留原本的真實單簧管錄音，請比較它為何不會只剩奇次諧波。</p></section><button class="next-step" type="button">顯示下一步</button>
         </div>
       </article>
       <article class="sample-card" data-sample="b" data-stage="listen">
@@ -42,7 +42,7 @@
           <audio id="sample-b" controls preload="metadata" src="./assets/air-column-spectrum/sample-b.mp3"></audio><p class="stage-prompt">先完整聽一次，記下你想檢查的聲音特徵。</p>
           <section class="stage spectrum-stage" hidden><h3>第二步：看頻譜</h3><canvas class="spectrum-canvas" width="720" height="300" aria-label="樣本 B 的即時頻譜">此瀏覽器無法繪製 Canvas。</canvas><button class="spectrum-lock" type="button">鎖定 1 秒平均</button><p class="peak-summary" aria-live="polite">播放後會顯示主要頻率峰值。</p></section>
           <section class="stage models-stage" hidden><h3>第三步：配對規律</h3><div class="model-grid"><div class="model">規律甲：(f_0, 2f_0, 3f_0, …)</div><div class="model">規律乙：(f_0, 3f_0, 5f_0, …)</div><div class="model">規律丙：大致是整數倍，但高次峰可能略微偏移。</div></div><p class="stage-prompt">哪一張規律卡最接近你看到的峰值？</p></section>
-          <section class="stage answer-stage" hidden><h3>第四步：揭曉</h3><p class="answer">樣本 B 是<strong>直笛</strong>，可近似為<strong>兩端開放的空氣柱</strong>。頻率成分通常可看到較完整的整數倍序列；吹口與指孔會改變有效管長與頻譜。</p></section>
+          <section class="stage answer-stage" hidden><h3>第四步：揭曉</h3><p class="answer">樣本 B 是<strong>直笛</strong>，可近似為<strong>兩端開放的空氣柱</strong>。頻率成分通常可看到較完整的整數倍序列；吹口與指孔會改變有效管長與頻譜。</p><img class="reveal-image" src="./assets/air-column-spectrum/reveals/recorder.png" alt="直笛插圖"></section>
           <section class="stage extension-stage" hidden><h3>延伸：時間線索</h3><p class="extension">這個樣本也由持續氣流維持振動。比較它與樣本 A 的穩定段，可再討論音色何以不同。</p></section><button class="next-step" type="button">顯示下一步</button>
         </div>
       </article>
@@ -51,11 +51,22 @@
           <audio id="sample-c" controls preload="metadata" src="./assets/air-column-spectrum/sample-c.flac"></audio><p class="stage-prompt">先完整聽一次，記下你想檢查的聲音特徵。</p>
           <section class="stage spectrum-stage" hidden><h3>第二步：看頻譜</h3><canvas class="spectrum-canvas" width="720" height="300" aria-label="樣本 C 的即時頻譜">此瀏覽器無法繪製 Canvas。</canvas><button class="spectrum-lock" type="button">鎖定 1 秒平均</button><p class="peak-summary" aria-live="polite">播放後會顯示主要頻率峰值。</p></section>
           <section class="stage models-stage" hidden><h3>第三步：配對規律</h3><div class="model-grid"><div class="model">規律甲：(f_0, 2f_0, 3f_0, …)</div><div class="model">規律乙：(f_0, 3f_0, 5f_0, …)</div><div class="model">規律丙：大致是整數倍，但高次峰可能略微偏移。</div></div><p class="stage-prompt">哪一張規律卡最接近你看到的峰值？</p></section>
-          <section class="stage answer-stage" hidden><h3>第四步：揭曉</h3><p class="answer">樣本 C 是<strong>古典吉他</strong>，可近似為<strong>兩端固定的張緊弦</strong>。它也有近整數倍諧波，但弦剛性與共鳴箱會使高次成分偏移或被加強。</p></section>
+          <section class="stage answer-stage" hidden><h3>第四步：揭曉</h3><p class="answer">樣本 C 是<strong>古典吉他</strong>，可近似為<strong>兩端固定的張緊弦</strong>。它也有近整數倍諧波，但弦剛性與共鳴箱會使高次成分偏移或被加強。</p><img class="reveal-image" src="./assets/air-column-spectrum/reveals/guitar.png" alt="古典吉他插圖"></section>
           <section class="stage extension-stage" hidden><h3>延伸：時間線索</h3><p class="extension">撥弦後通常不再持續輸入能量，振幅會逐步衰減。若改為拉弓，弦同樣可以被持續供能。</p></section><button class="next-step" type="button">顯示下一步</button>
         </div>
       </article>
     </section>
+
+    <article id="clarinet-comparison" class="sample-card" data-sample="clarinet-real" data-stage="spectrum" data-start-stage="spectrum" aria-label="實測對照：單簧管 D5">
+      <div class="card-head"><div><p class="sample-kicker">實測對照</p><h2>原本的單簧管 D5</h2></div><img class="reveal-image" src="./assets/air-column-spectrum/reveals/clarinet.png" alt="單簧管插圖"></div><div class="card-body">
+        <audio id="sample-clarinet-real" controls preload="metadata" src="./assets/air-column-spectrum/sample-a.wav"></audio><p class="stage-prompt">這是實際單簧管的長音。播放較穩定的一段，觀察它與理想模型有何不同。</p>
+        <section class="stage spectrum-stage" hidden><h3>實測頻譜</h3><canvas class="spectrum-canvas" width="720" height="300" aria-label="實測單簧管的即時頻譜">此瀏覽器無法繪製 Canvas。</canvas><button class="spectrum-lock" type="button">鎖定 1 秒平均</button><p class="peak-summary" aria-live="polite">播放後會顯示主要頻率峰值。</p></section>
+        <section class="stage models-stage" hidden><h3>為什麼不只剩奇次峰？</h3><div class="model-grid"><div class="model">簧片、按孔與喇叭口都會改變共鳴條件。</div><div class="model">音域、指法與錄音位置也會改變各諧波的強弱。</div></div></section>
+        <section class="stage answer-stage" hidden><h3>對照結論</h3><p class="answer">真實單簧管可在某些條件下接近一端閉管，但不是「只允許奇次諧波」的完美裝置。理想模型用來辨識規律；實測頻譜用來看見模型的限制。</p></section>
+        <section class="stage extension-stage" hidden><h3>延伸提問</h3><p class="extension">找出最接近 587 Hz 的峰，再比較 2f、3f、4f 附近峰值的強弱：哪些成分是理想模型沒有預測到的？</p></section><button class="next-step" type="button">顯示下一步</button>
+      </div>
+    </article>
+
     <section class="compare"><h2>最後再比一比</h2><p>最高的峰不一定就是基音。請用峰值間距與整數倍關係交叉檢查；真實樂器只是在某些條件下接近理想模型。</p><p class="notice" hidden id="audioFallback">瀏覽器無法啟用即時頻譜；仍可依聽覺與後續模型進行活動。</p></section>
 
     <section id="fourier-extension" class="compare fourier-extension" aria-labelledby="fourier-title">
@@ -65,7 +76,7 @@
       <div class="fourier-grid">
         <article class="fourier-card">
           <h3>先建立直覺：複雜波形是很多簡單波的和</h3>
-          <p>一段複雜聲音可看成許多不同頻率的正弦／餘弦波疊加。本活動三個 D5 樣本的基音都約 587 Hz，但其他頻率峰的強弱不同，所以音色不同。</p>
+          <p>一段複雜聲音可看成許多不同頻率的正弦／餘弦波疊加。理想閉管模型以 300 Hz 為基音；實測的單簧管、直笛與吉他 D5 則都約為 587 Hz，但其他頻率峰的強弱不同，所以音色不同。</p>
           <div class="signal-pair" aria-label="時間波形轉換成頻譜的示意圖">
             <figure><figcaption>時間圖：波形</figcaption><svg viewBox="0 0 180 68" role="img" aria-label="多種振動疊成的複雜波形"><path d="M0 34H180M0 8V60" stroke="#b8c8df" fill="none"/><path d="M0 34 C8 8 16 8 24 34 S40 60 48 34 S64 8 72 34 S88 58 96 34 S112 15 120 34 S136 55 144 34 S160 4 168 34 S176 58 180 34" stroke="#3979e8" stroke-width="3" fill="none"/></svg></figure>
             <figure><figcaption>頻譜：各頻率強度</figcaption><svg viewBox="0 0 180 68" role="img" aria-label="三個頻率成分強度不同的頻譜"><path d="M0 60H180M0 8V60" stroke="#b8c8df" fill="none"/><path d="M40 60V18M88 60V38M136 60V11" stroke="#7658db" stroke-width="8"/><text x="34" y="67" fill="#58708d" font-size="8">f₀</text><text x="78" y="67" fill="#58708d" font-size="8">2f₀</text><text x="126" y="67" fill="#58708d" font-size="8">3f₀</text></svg></figure>
@@ -93,7 +104,7 @@
       </div>
     </section>
   </main>
-  <footer class="shell">素材：CC0 1.0（完整來源見 <a href="./assets/air-column-spectrum/CREDITS.md">CREDITS.md</a>）</footer>
+  <footer class="shell">素材：自製理想模型與 CC0 1.0 實錄（完整來源見 <a href="./assets/air-column-spectrum/CREDITS.md">CREDITS.md</a>）</footer>
   <script type="module" src="./air-column-spectrum.js"></script>
 </body>
 </html>
