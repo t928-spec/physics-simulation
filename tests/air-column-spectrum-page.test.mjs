@@ -10,6 +10,43 @@ for (const file of ['sample-a.wav', 'sample-b.mp3', 'sample-c.flac']) {
   });
 }
 
+for (const file of [
+  'sample-a-ideal-closed-pipe.wav',
+  'reveals/closed-pipe.png',
+  'reveals/recorder.png',
+  'reveals/guitar.png',
+  'reveals/clarinet.png',
+]) {
+  test(`${file} is a non-empty model or reveal asset`, () => {
+    const path = new URL(`../assets/air-column-spectrum/${file}`, import.meta.url);
+    assert.equal(existsSync(path), true);
+    assert.ok(statSync(path).size > 4096);
+  });
+}
+
+test('ideal closed-pipe audio contains the intended odd harmonics and suppresses even harmonics', () => {
+  const audio = readFileSync(new URL('../assets/air-column-spectrum/sample-a-ideal-closed-pipe.wav', import.meta.url));
+  const sampleRate = audio.readUInt32LE(24);
+  const start = sampleRate;
+  const count = sampleRate * 4;
+  const magnitudeAt = (frequency) => {
+    let sine = 0;
+    let cosine = 0;
+    for (let index = 0; index < count; index += 1) {
+      const sample = audio.readInt16LE(44 + (start + index) * 2) / 32768;
+      const angle = (2 * Math.PI * frequency * index) / sampleRate;
+      sine += sample * Math.sin(angle);
+      cosine += sample * Math.cos(angle);
+    }
+    return (2 * Math.hypot(sine, cosine)) / count;
+  };
+
+  assert.ok(magnitudeAt(300) > 0.5);
+  assert.ok(magnitudeAt(900) > 0.2);
+  assert.ok(magnitudeAt(1500) > 0.1);
+  for (const frequency of [600, 1200, 1800]) assert.ok(magnitudeAt(frequency) < 0.001);
+});
+
 test('credits preserve source and CC0 information', () => {
   const credits = readFileSync(new URL('../assets/air-column-spectrum/CREDITS.md', import.meta.url), 'utf8');
   assert.match(credits, /FreePats/);
@@ -24,17 +61,17 @@ test('credits preserve source and CC0 information', () => {
 test('page begins with three anonymous samples and accessible spectrum canvases', () => {
   const page = readFileSync(new URL('../air-column-spectrum.html', import.meta.url), 'utf8');
   for (const id of ['sample-a', 'sample-b', 'sample-c']) assert.match(page, new RegExp(`id="${id}"`));
-  assert.match(page, /src="\.\/assets\/air-column-spectrum\/sample-a\.wav"/);
+  assert.match(page, /src="\.\/assets\/air-column-spectrum\/sample-a-ideal-closed-pipe\.wav"/);
   assert.match(page, /src="\.\/assets\/air-column-spectrum\/sample-b\.mp3"/);
   assert.match(page, /src="\.\/assets\/air-column-spectrum\/sample-c\.flac"/);
   assert.match(page, /aria-label="樣本 A 的即時頻譜"/);
   assert.match(page, /<script type="module" src="\.\/air-column-spectrum\.js"><\/script>/);
 });
 
-test('each anonymous spectrum offers a stable one-second lock and fixed axis', () => {
+test('each anonymous sample and the clarinet comparison offer a stable one-second lock and fixed axis', () => {
   const page = readFileSync(new URL('../air-column-spectrum.html', import.meta.url), 'utf8');
   const script = readFileSync(new URL('../air-column-spectrum.js', import.meta.url), 'utf8');
-  assert.equal((page.match(/class="spectrum-lock"/g) || []).length, 3);
+  assert.equal((page.match(/class="spectrum-lock"/g) || []).length, 4);
   assert.match(page, /鎖定 1 秒平均/);
   assert.match(script, /SPECTRUM_AXIS_MAX_HZ/);
   assert.match(script, /SPECTRUM_AXIS_TICK_HZ/);
@@ -66,4 +103,15 @@ test('Fourier extension follows the comparison and connects maths to application
   for (const phrase of ['正交', 'aₘ', 'Xₖ', 'DFT', 'FFT', '手機調音器', '等化器', 'MRI']) {
     assert.match(page, new RegExp(phrase));
   }
+});
+
+test('ideal closed-pipe model and clarinet comparison are explicitly separated', () => {
+  const page = readFileSync(new URL('../air-column-spectrum.html', import.meta.url), 'utf8');
+  assert.match(page, /id="sample-a"[^>]*sample-a-ideal-closed-pipe\.wav/);
+  assert.match(page, /理想一端閉管模型聲/);
+  assert.match(page, /300 Hz.*900 Hz.*1500 Hz/s);
+  assert.match(page, /id="clarinet-comparison"/);
+  assert.match(page, /id="sample-clarinet-real"[^>]*sample-a\.wav/);
+  assert.match(page, /data-start-stage="spectrum"/);
+  assert.equal((page.match(/class="reveal-image"/g) || []).length, 4);
 });
