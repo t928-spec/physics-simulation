@@ -68,3 +68,21 @@ test('particle field points use stable scattered positions instead of diagonal l
   }
   assert.notDeepEqual(offsets[0], offsets[1]);
 });
+
+test('particle field fills the full two-dimensional area without a shared coordinate pattern', () => {
+  const columns = 8;
+  const rows = 8;
+  const particleTop = 38 + 78;
+  const particleHeight = 225 - 38 - 90;
+  const points = Array.from(
+    { length: 560 },
+    (_, index) => physics.particleFieldPoint(index, 874, 38, 225),
+  );
+  const occupiedCells = new Set(points.map((point) => {
+    const column = Math.min(columns - 1, Math.floor(point.equilibrium / 874 * columns));
+    const row = Math.min(rows - 1, Math.floor((point.y - particleTop) / particleHeight * rows));
+    return `${column}:${row}`;
+  }));
+
+  assert.equal(occupiedCells.size, columns * rows);
+});

@@ -50,8 +50,13 @@ export function sampleProbe(x, time, config = DEFAULT_WAVE) {
 }
 
 function scatteredFraction(index, seed) {
-  const value = Math.sin((index + 1) * 12.9898 + seed * 78.233) * 43758.5453;
-  return value - Math.floor(value);
+  let value = (Math.imul(index + 1, 0x9e3779b1) + Math.imul(seed, 0x85ebca6b)) >>> 0;
+  value ^= value >>> 16;
+  value = Math.imul(value, 0x7feb352d);
+  value ^= value >>> 15;
+  value = Math.imul(value, 0x846ca68b);
+  value ^= value >>> 16;
+  return (value >>> 0) / 0x100000000;
 }
 
 export function particleFieldPoint(index, width, top, bottom) {
