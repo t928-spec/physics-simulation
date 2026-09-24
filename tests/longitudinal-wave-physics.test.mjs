@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import * as physics from '../longitudinal-wave-physics.js';
 import {
   DEFAULT_WAVE,
   densityMarkers,
@@ -40,4 +41,30 @@ test('density markers are finite and remain inside the viewport', () => {
   assert.ok(compression.length > 1);
   assert.ok(rarefaction.length > 1);
   for (const x of [...compression, ...rarefaction]) assert.ok(x >= 0 && x <= 720);
+});
+
+test('density guides align with the longitudinal wave compression and rarefaction extrema', () => {
+  const { compression, rarefaction } = densityMarkers(720, 0);
+
+  assert.deepEqual(compression.slice(0, 3), [120, 360, 600]);
+  assert.deepEqual(rarefaction.slice(0, 4), [0, 240, 480, 720]);
+});
+
+test('particle field points use stable scattered positions instead of diagonal lattice rows', () => {
+  assert.equal(typeof physics.particleFieldPoint, 'function');
+
+  const points = Array.from(
+    { length: 5 },
+    (_, index) => physics.particleFieldPoint(index, 874, 38, 225),
+  );
+  const offsets = points.slice(1).map((point, index) => ({
+    x: point.equilibrium - points[index].equilibrium,
+    y: point.y - points[index].y,
+  }));
+
+  for (const point of points) {
+    assert.ok(point.equilibrium >= 0 && point.equilibrium <= 874);
+    assert.ok(point.y >= 116 && point.y <= 225);
+  }
+  assert.notDeepEqual(offsets[0], offsets[1]);
 });

@@ -49,6 +49,23 @@ export function sampleProbe(x, time, config = DEFAULT_WAVE) {
   };
 }
 
+function scatteredFraction(index, seed) {
+  const value = Math.sin((index + 1) * 12.9898 + seed * 78.233) * 43758.5453;
+  return value - Math.floor(value);
+}
+
+export function particleFieldPoint(index, width, top, bottom) {
+  const safeIndex = Math.max(0, Math.floor(Number(index) || 0));
+  const safeWidth = Math.max(1, Number(width) || 1);
+  const particleTop = Number(top) + 78;
+  const particleHeight = Math.max(1, Number(bottom) - Number(top) - 90);
+
+  return {
+    equilibrium: scatteredFraction(safeIndex, 1) * safeWidth,
+    y: particleTop + scatteredFraction(safeIndex, 2) * particleHeight,
+  };
+}
+
 function markerSeries(width, start, wavelength) {
   const markers = [];
   const first = start - Math.ceil(start / wavelength) * wavelength;
@@ -67,6 +84,6 @@ export function densityMarkers(width, time, config = DEFAULT_WAVE) {
 
   return {
     compression: markerSeries(safeWidth, wave.wavelength / 2 + phaseShift, wave.wavelength),
-    rarefaction: markerSeries(safeWidth, wave.wavelength / 4 + phaseShift, wave.wavelength),
+    rarefaction: markerSeries(safeWidth, phaseShift, wave.wavelength),
   };
 }

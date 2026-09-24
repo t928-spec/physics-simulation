@@ -2,6 +2,7 @@ import {
   DEFAULT_WAVE,
   densityMarkers,
   displacementAt,
+  particleFieldPoint,
   particlePosition,
   pressureAt,
   sampleProbe,
@@ -149,10 +150,9 @@ function drawParticleField(context2d, left, right, top, bottom, time, showWavefo
 
   context2d.fillStyle = '#eaf8ff';
   for (let index = 0; index < 560; index += 1) {
-    const equilibrium = (index * 37) % Math.ceil(width);
-    const x = left + particlePosition(equilibrium, time);
-    const y = top + 78 + ((index * 29) % Math.max(1, Math.floor(bottom - top - 90)));
-    context2d.fillRect(x, y, 1.6, 1.6);
+    const point = particleFieldPoint(index, width, top, bottom);
+    const x = left + particlePosition(point.equilibrium, time);
+    context2d.fillRect(x, point.y, 1.6, 1.6);
   }
   context2d.restore();
 }
