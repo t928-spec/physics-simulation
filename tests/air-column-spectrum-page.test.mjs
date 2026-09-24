@@ -89,7 +89,7 @@ test('listening stage does not reveal instruments or boundary models', () => {
 test('home page and README link to the activity', () => {
   const home = readFileSync(new URL('../index.html', import.meta.url), 'utf8');
   const readme = readFileSync(new URL('../README.md', import.meta.url), 'utf8');
-  assert.match(home, /10 個主題/);
+  assert.match(home, /11 個主題/);
   assert.match(home, /href="\.\/air-column-spectrum\.html"/);
   assert.match(home, /聲音偵探：從頻譜推論振動系統/);
   assert.match(readme, /\[聲音偵探：從頻譜推論振動系統\]\(\.\/air-column-spectrum\.html\)/);

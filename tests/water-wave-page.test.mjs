@@ -19,7 +19,7 @@ test('水波頁面提供所有必要控制與 Canvas', () => {
 test('首頁連結水波干涉模擬並更新主題數', () => {
   assert.match(home, /href=["']\.\/water-wave-interference\.html["']/);
   assert.match(home, /水波干涉：波程差與相位差/);
-  assert.match(home, /10 個主題/);
+  assert.match(home, /11 個主題/);
 });
 
 test('暫停時取消動畫迴圈，控制操作仍可直接重繪', () => {

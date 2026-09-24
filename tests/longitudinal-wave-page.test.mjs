@@ -26,3 +26,17 @@ test('homepage advertises the longitudinal wave simulation', () => {
   assert.match(home, /十一個適合課堂投影/);
   assert.match(home, /11 個主題/);
 });
+
+test('renderer uses shared modules and supports dragging and help dialog', () => {
+  const controller = readFileSync(
+    new URL('../longitudinal-wave-displacement-pressure.js', import.meta.url),
+    'utf8',
+  );
+
+  assert.match(controller, /from '\.\/longitudinal-wave-physics\.js'/);
+  assert.match(controller, /from '\.\/longitudinal-wave-state\.js'/);
+  assert.match(controller, /requestAnimationFrame/);
+  assert.match(controller, /pointerdown/);
+  assert.match(controller, /pointermove/);
+  assert.match(controller, /showModal\(\)/);
+});
