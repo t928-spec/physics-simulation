@@ -104,6 +104,31 @@ function drawCross(context2d, x, y, color = palette.yellow) {
   context2d.restore();
 }
 
+function drawRangeBracket(context2d, centerX, centerY, halfRange, orientation) {
+  const cap = 9;
+  context2d.save();
+  context2d.strokeStyle = palette.coral;
+  context2d.lineWidth = 2.5;
+  context2d.beginPath();
+  if (orientation === 'horizontal') {
+    context2d.moveTo(centerX - halfRange, centerY);
+    context2d.lineTo(centerX + halfRange, centerY);
+    context2d.moveTo(centerX - halfRange, centerY - cap);
+    context2d.lineTo(centerX - halfRange, centerY + cap);
+    context2d.moveTo(centerX + halfRange, centerY - cap);
+    context2d.lineTo(centerX + halfRange, centerY + cap);
+  } else {
+    context2d.moveTo(centerX, centerY - halfRange);
+    context2d.lineTo(centerX, centerY + halfRange);
+    context2d.moveTo(centerX - cap, centerY - halfRange);
+    context2d.lineTo(centerX + cap, centerY - halfRange);
+    context2d.moveTo(centerX - cap, centerY + halfRange);
+    context2d.lineTo(centerX + cap, centerY + halfRange);
+  }
+  context2d.stroke();
+  context2d.restore();
+}
+
 function drawParticleField(context2d, left, right, top, bottom, time, showWaveform) {
   const width = right - left;
   context2d.save();
@@ -197,8 +222,12 @@ function draw(stateToDraw) {
   if (stateToDraw.layers.probe) {
     line(context, probeX, 18, probeX, height - 18, palette.cyan, 3);
     label(context, '可拖曳觀察點', probeX, 18, palette.ink, 'center', 13);
+    drawRangeBracket(context, probeX, fieldTop + 112, DEFAULT_WAVE.amplitude, 'horizontal');
     drawCross(context, left + probe.particleX, fieldTop + 112);
-    if (stateToDraw.layers.displacement) drawCross(context, probeX, displacementY - probe.displacement * graphScale);
+    if (stateToDraw.layers.displacement) {
+      drawRangeBracket(context, probeX, displacementY, DEFAULT_WAVE.amplitude * graphScale, 'vertical');
+      drawCross(context, probeX, displacementY - probe.displacement * graphScale);
+    }
     if (stateToDraw.layers.pressure) drawCross(context, probeX, pressureY - probe.pressure * graphScale);
   }
 

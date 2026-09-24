@@ -40,3 +40,16 @@ test('renderer uses shared modules and supports dragging and help dialog', () =>
   assert.match(controller, /pointermove/);
   assert.match(controller, /showModal\(\)/);
 });
+
+test('renderer draws red horizontal and vertical displacement range brackets', () => {
+  const controller = readFileSync(
+    new URL('../longitudinal-wave-displacement-pressure.js', import.meta.url),
+    'utf8',
+  );
+
+  assert.match(controller, /function drawRangeBracket/);
+  assert.match(controller, /DEFAULT_WAVE\.amplitude/);
+  assert.match(controller, /'horizontal'/);
+  assert.match(controller, /'vertical'/);
+  assert.match(controller, /stateToDraw\.layers\.probe/);
+});
