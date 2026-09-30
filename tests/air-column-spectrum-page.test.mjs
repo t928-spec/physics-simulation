@@ -41,10 +41,10 @@ test('ideal closed-pipe audio contains the intended odd harmonics and suppresses
     return (2 * Math.hypot(sine, cosine)) / count;
   };
 
-  assert.ok(magnitudeAt(300) > 0.5);
-  assert.ok(magnitudeAt(900) > 0.2);
-  assert.ok(magnitudeAt(1500) > 0.1);
-  for (const frequency of [600, 1200, 1800]) assert.ok(magnitudeAt(frequency) < 0.001);
+  assert.ok(magnitudeAt(587) > 0.5);
+  assert.ok(magnitudeAt(1761) > 0.2);
+  assert.ok(magnitudeAt(2935) > 0.1);
+  for (const frequency of [1174, 2348, 3522]) assert.ok(magnitudeAt(frequency) < 0.001);
 });
 
 test('credits preserve source and CC0 information', () => {
@@ -76,6 +76,10 @@ test('each anonymous sample and the clarinet comparison offer a stable one-secon
   assert.match(script, /SPECTRUM_AXIS_MAX_HZ/);
   assert.match(script, /SPECTRUM_AXIS_TICK_HZ/);
   assert.match(script, /averageSpectrumFrames/);
+  assert.match(page, /data-sample="a"[^>]*data-spectrum-axis-max-hz="3200"/);
+  assert.match(page, /data-sample="a"[^>]*data-spectrum-axis-tick-hz="400"/);
+  assert.match(script, /card\.dataset\.spectrumAxisMaxHz/);
+  assert.match(script, /card\.dataset\.spectrumAxisTickHz/);
 });
 
 test('listening stage does not reveal instruments or boundary models', () => {
@@ -109,7 +113,7 @@ test('ideal closed-pipe model and clarinet comparison are explicitly separated',
   const page = readFileSync(new URL('../air-column-spectrum.html', import.meta.url), 'utf8');
   assert.match(page, /id="sample-a"[^>]*sample-a-ideal-closed-pipe\.wav/);
   assert.match(page, /理想一端閉管模型聲/);
-  assert.match(page, /300 Hz.*900 Hz.*1500 Hz/s);
+  assert.match(page, /587 Hz.*1761 Hz.*2935 Hz/s);
   assert.match(page, /id="clarinet-comparison"/);
   assert.match(page, /id="sample-clarinet-real"[^>]*sample-a\.wav/);
   assert.match(page, /data-start-stage="spectrum"/);
