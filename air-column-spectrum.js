@@ -16,7 +16,13 @@ const prompts = {
   extension: '把時間變化當作延伸線索：它不是本活動的主要判準。',
 };
 
-function drawSpectrum(canvas, values, hertzPerBin) {
+function drawSpectrum(
+  canvas,
+  values,
+  hertzPerBin,
+  axisMaxHz = SPECTRUM_AXIS_MAX_HZ,
+  axisTickHz = SPECTRUM_AXIS_TICK_HZ,
+) {
   const context = canvas.getContext('2d');
   const { width, height } = canvas;
   context.clearRect(0, 0, width, height);
@@ -35,14 +41,14 @@ function drawSpectrum(canvas, values, hertzPerBin) {
   context.font = '13px Arial';
   context.textAlign = 'center';
   context.fillStyle = 'rgba(255,255,255,.82)';
-  for (let hertz = 0; hertz <= SPECTRUM_AXIS_MAX_HZ; hertz += SPECTRUM_AXIS_TICK_HZ) {
-    const x = plot.left + (hertz / SPECTRUM_AXIS_MAX_HZ) * plotWidth;
+  for (let hertz = 0; hertz <= axisMaxHz; hertz += axisTickHz) {
+    const x = plot.left + (hertz / axisMaxHz) * plotWidth;
     context.strokeStyle = 'rgba(255,255,255,.22)';
     context.beginPath(); context.moveTo(x, plot.top); context.lineTo(x, baseline); context.stroke();
     context.fillText(String(hertz), x, height - 20);
   }
   context.fillText('頻率（Hz）', plot.left + plotWidth / 2, height - 5);
-  const visible = Math.min(values.length, Math.floor(SPECTRUM_AXIS_MAX_HZ / hertzPerBin) + 1);
+  const visible = Math.min(values.length, Math.floor(axisMaxHz / hertzPerBin) + 1);
   const barWidth = plotWidth / visible;
   for (let index = 0; index < visible; index += 1) {
     const barHeight = (values[index] / 255) * plotHeight;
@@ -72,6 +78,8 @@ function setupCard(card) {
   const prompt = card.querySelector('.stage-prompt');
   const button = card.querySelector('.next-step');
   const lockButton = card.querySelector('.spectrum-lock');
+  const spectrumAxisMaxHz = Number(card.dataset.spectrumAxisMaxHz) || SPECTRUM_AXIS_MAX_HZ;
+  const spectrumAxisTickHz = Number(card.dataset.spectrumAxisTickHz) || SPECTRUM_AXIS_TICK_HZ;
   let audioContext;
   let analyser;
   let source;
@@ -119,7 +127,7 @@ function setupCard(card) {
     } else {
       summary.textContent = describePeaks(displayValues, hertzPerBin);
     }
-    drawSpectrum(canvas, displayValues, hertzPerBin);
+    drawSpectrum(canvas, displayValues, hertzPerBin, spectrumAxisMaxHz, spectrumAxisTickHz);
     animationFrame = requestAnimationFrame(animate);
   }
 
@@ -151,7 +159,7 @@ function setupCard(card) {
       audioContext = new Context();
       source = audioContext.createMediaElementSource(audio);
       analyser = audioContext.createAnalyser();
-      analyser.fftSize = 4096;
+      analyser.fftSize = 8192;
       analyser.smoothingTimeConstant = 0.72;
       source.connect(analyser);
       analyser.connect(audioContext.destination);
