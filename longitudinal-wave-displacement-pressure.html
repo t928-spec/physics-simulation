@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="拖曳觀察點，同步比較縱波中的粒子位移、空氣密疏與壓力變化。">
+  <title>縱波：位移、密疏與壓力｜物理互動模擬實驗室</title>
+  <style>
+    :root { --ink:#10233d; --muted:#61738c; --line:#c7d6e9; --panel:rgba(255,255,255,.92); --blue:#3979e8; --cyan:#11a8b1; --orange:#e58c2b; --violet:#7557d8; --shadow:0 18px 46px rgba(37,70,112,.11); }
+    * { box-sizing:border-box; }
+    body { min-width:320px; margin:0; color:var(--ink); background:radial-gradient(circle at 8% 0%,#d9ecff 0,transparent 31rem),radial-gradient(circle at 94% 12%,#eee8ff 0,transparent 29rem),linear-gradient(145deg,#f4f9ff,#fbfcff 55%,#fbf8ff); font-family:Arial,"Noto Sans TC","Microsoft JhengHei",sans-serif; }
+    button,input { font:inherit; }
+    .shell { width:min(1180px,calc(100% - 40px)); margin:0 auto; }
+    nav { display:flex; justify-content:space-between; gap:12px; padding:24px 0 0; color:#35659a; font-size:14px; font-weight:800; }
+    nav a { padding:9px 12px; border-radius:999px; color:inherit; text-decoration:none; }
+    nav a:hover { background:#e9f3ff; }
+    .hero { display:grid; grid-template-columns:minmax(0,1fr) 360px; gap:24px; align-items:end; padding:44px 0 25px; }
+    .eyebrow { margin:0 0 9px; color:var(--blue); font-size:13px; font-weight:900; letter-spacing:.13em; }
+    h1 { margin:0; font-size:clamp(35px,5vw,62px); letter-spacing:-.065em; line-height:1.08; }
+    .hero-copy { margin:0; color:var(--muted); font-size:15px; line-height:1.7; }
+    .lab { display:grid; grid-template-columns:minmax(0,1fr) 290px; gap:18px; padding-bottom:42px; align-items:start; }
+    .panel { border:1px solid var(--line); border-radius:22px; background:var(--panel); box-shadow:var(--shadow); }
+    .stage { padding:16px; }
+    .canvas-wrap { overflow:hidden; border-radius:16px; background:linear-gradient(145deg,#eff7ff,#fbfcff); }
+    canvas { display:block; width:100%; height:auto; touch-action:none; }
+    .caption { margin:13px 4px 1px; color:#526983; font-size:13px; line-height:1.65; }
+    .caption b { color:#176b8f; }
+    .controls { padding:21px; }
+    h2 { margin:0 0 15px; font-size:19px; letter-spacing:-.03em; }
+    .field { display:grid; gap:8px; margin-bottom:18px; }
+    label, legend { color:#405877; font-size:13px; font-weight:800; }
+    .speed-label { display:flex; justify-content:space-between; align-items:center; }
+    output { color:#157a84; font-variant-numeric:tabular-nums; }
+    input[type="range"] { width:100%; accent-color:var(--cyan); }
+    button { min-height:42px; border:1px solid #b9d0ed; border-radius:10px; background:#fff; color:#315a89; font-weight:800; cursor:pointer; }
+    button:hover { border-color:var(--blue); background:#eef5ff; }
+    .button-row { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+    #playButton { border-color:#88d0d4; background:#e9fbfb; color:#14737c; }
+    #playButton[aria-pressed="false"] { border-color:#d4b4a9; background:#fff3ef; color:#a95140; }
+    fieldset { display:grid; gap:10px; margin:19px 0; padding:14px 13px; border:1px solid #d2e0f0; border-radius:13px; }
+    fieldset label { display:flex; align-items:center; gap:8px; cursor:pointer; }
+    fieldset input { width:17px; height:17px; accent-color:var(--cyan); }
+    .help { width:100%; border-color:#b8d4f2; background:#eff6ff; color:#2765ae; }
+    .tip { margin:17px 0 0; padding:13px; border-radius:13px; background:#f2f7ff; color:#506986; font-size:13px; line-height:1.62; }
+    .tip b { color:#26699d; }
+    dialog { width:min(560px,calc(100% - 32px)); border:1px solid var(--line); border-radius:20px; box-shadow:0 24px 70px rgba(20,43,75,.3); color:var(--ink); }
+    dialog::backdrop { background:rgba(16,35,61,.36); }
+    dialog p { color:#536983; line-height:1.7; }
+    dialog button { min-width:110px; }
+    @media (max-width:780px) { .shell { width:min(100% - 24px,620px); }.hero { display:block; padding:29px 0 20px; }.hero-copy { margin-top:14px; }.lab { grid-template-columns:1fr; }.controls { order:-1; }.stage { padding:12px; } nav { padding-top:12px; } }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <nav aria-label="頁面導覽"><a href="./index.html">← 物理互動模擬實驗室</a></nav>
+    <header class="hero">
+      <div><p class="eyebrow">行進縱波・同步觀察</p><h1>縱波：位移、密疏與壓力</h1></div>
+      <p class="hero-copy">拖曳青色觀察線，追蹤同一個粒子的來回振動，並比較它周圍的空氣密疏與壓力如何同步改變。</p>
+    </header>
+    <section class="lab" aria-label="縱波模擬器">
+      <section class="panel stage" aria-label="縱波觀察畫面">
+        <div class="canvas-wrap"><canvas id="longitudinalWaveCanvas" width="960" height="640" aria-label="縱波中粒子位移與壓力的同步動畫">此瀏覽器無法繪製 Canvas，請改用支援 Canvas 的現代瀏覽器。</canvas></div>
+        <p class="caption"><b>觀察提示：</b>青色線標出所選粒子的平衡位置；黃色正字記號則跟著這一粒子實際左右振動。</p>
+      </section>
+      <aside class="panel controls" aria-label="模擬控制">
+        <h2>調整與觀察</h2>
+        <div class="field"><label class="speed-label" for="speedControl"><span>播放速度</span><output id="speedOutput">1.0×</output></label><input id="speedControl" type="range" min="0.25" max="2" step="0.25" value="1"></div>
+        <div class="button-row"><button id="playButton" type="button" aria-pressed="true">暫停</button><button id="resetButton" type="button">重來</button></div>
+        <fieldset><legend>顯示圖層</legend>
+          <label><input id="waveformToggle" type="checkbox" checked>波形</label>
+          <label><input id="displacementToggle" type="checkbox" checked>位移</label>
+          <label><input id="pressureToggle" type="checkbox" checked>壓力</label>
+          <label><input id="probeToggle" type="checkbox" checked>位移線</label>
+          <label><input id="guidesToggle" type="checkbox" checked>輔助線</label>
+        </fieldset>
+        <button id="helpButton" class="help" type="button">說明：密疏與壓力</button>
+        <p class="tip"><b>先預測：</b>位移最大的地方，壓力變化是最大還是最小？移動觀察線來驗證。</p>
+      </aside>
+    </section>
+  </main>
+  <dialog id="helpDialog" aria-labelledby="helpTitle">
+    <h2 id="helpTitle">縱波的位移與壓力</h2>
+    <p>空氣粒子只在自己的平衡位置附近左右振動，波形則向前傳播。粒子靠得較近的密處壓力較高；較分散的疏處壓力較低。位移為零時，壓力變化量最大；位移最大或最小時，壓力剛好回到平衡值。</p>
+    <button id="closeHelpButton" type="button">關閉說明</button>
+  </dialog>
+  <script type="module" src="./longitudinal-wave-displacement-pressure.js"></script>
+</body>
+</html>
