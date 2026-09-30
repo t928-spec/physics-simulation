@@ -80,6 +80,7 @@ test('each anonymous sample and the clarinet comparison offer a stable one-secon
   assert.match(page, /data-sample="a"[^>]*data-spectrum-axis-tick-hz="400"/);
   assert.match(script, /card\.dataset\.spectrumAxisMaxHz/);
   assert.match(script, /card\.dataset\.spectrumAxisTickHz/);
+  assert.match(script, /analyser\.fftSize = 8192/);
 });
 
 test('listening stage does not reveal instruments or boundary models', () => {
