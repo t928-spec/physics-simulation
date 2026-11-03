@@ -6,6 +6,7 @@
 
 - [BJT：小電流控制大電流](./BJT.html)
 - [雙狹縫干涉：旋轉狹縫與屏幕](./double-slit-interference.html)
+- [雙狹縫：兩道光為什麼近似平行？](./double-slit-parallel-rays.html)
 - [橢圓軌道力學能：兩種半徑](./elliptical-orbit-energy.html)
 - [雙繩交界的繩波：反射、透射與能量守恆](./string-wave-boundary.html)
 - [雙繩交界繩波的公式推導](./string-wave-derivation.html)

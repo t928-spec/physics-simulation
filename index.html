@@ -238,6 +238,14 @@
         linear-gradient(180deg, #edf8ff, #e4effc);
     }
 
+    .parallel-rays-preview {
+      background:
+        linear-gradient(90deg, transparent 17%, rgba(41, 67, 98, .65) 17% 18%, transparent 18%),
+        linear-gradient(168deg, transparent 37%, #3979e8 37.5% 38.5%, transparent 39%),
+        linear-gradient(166deg, transparent 57%, #e58c2b 57.5% 58.5%, transparent 59%),
+        linear-gradient(180deg, #edf8ff, #e4effc);
+    }
+
     .superposition-preview::before {
       position: absolute;
       inset: 0;
@@ -465,7 +473,7 @@
         <div class="eyebrow">LEARN BY EXPLORING · 從操作中看見物理</div>
         <h1>把抽象公式，變成可以拉動的現象。</h1>
         <p class="hero-copy">
-          十一個適合課堂投影與學生自主操作的互動模擬與複習工具。調整參數、比較情境，
+          十二個適合課堂投影與學生自主操作的互動模擬與複習工具。調整參數、比較情境，
           再回頭理解公式中的每一個物理量。
         </p>
       </div>
@@ -478,7 +486,7 @@
     <section id="simulations">
       <div class="section-head">
         <h2>選擇一個模擬</h2>
-        <span>11 個主題 · 電學、波動、軌道力學、熱學</span>
+        <span>12 個主題 · 電學、波動、軌道力學、熱學</span>
       </div>
 
       <div class="grid">
@@ -510,6 +518,20 @@
             <h3>雙狹縫干涉：旋轉狹縫與屏幕</h3>
             <p class="description">拖動入射角、狹縫與屏幕角度，觀察光程差、中央亮紋位置與局部亮紋間距如何改變。</p>
             <p class="learn"><strong>適合觀察：</strong>光程差、相位差、屏幕寬度與標準模式比較。</p>
+            <span class="open-link">開始模擬 <span class="arrow">→</span></span>
+          </div>
+        </a>
+
+        <a class="card" href="./double-slit-parallel-rays.html">
+          <div class="preview parallel-rays-preview" aria-hidden="true"></div>
+          <div class="card-body">
+            <div class="tag-row">
+              <span class="tag violet">光學</span>
+              <span class="tag cyan">遠距離近似</span>
+            </div>
+            <h3>雙狹縫：兩道光為什麼近似平行？</h3>
+            <p class="description">把螢幕逐漸拉遠，再將兩道光的方向箭頭平移到同一起點，直接比較它們如何逐漸重合。</p>
+            <p class="learn"><strong>適合觀察：</strong>距離比 L/d、兩道光的方向差，以及近似平行的幾何意義。</p>
             <span class="open-link">開始模擬 <span class="arrow">→</span></span>
           </div>
         </a>
