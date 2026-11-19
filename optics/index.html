@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>光學實驗室</title>
+  <link rel="stylesheet" href="./style.css">
+  <script type="module" src="./lab.js"></script>
+  <script type="module" src="./classroom.js"></script>
+</head>
+<body>
+  <header><a href="../index.html">物理互動模擬實驗室</a><button id="classroom-toggle">班級與測驗</button></header>
+  <main>
+    <h1>光學實驗室</h1>
+    <section id="classroom" hidden aria-label="班級與測驗"></section>
+    <div id="lab">
+      <nav id="experiments" aria-label="選擇實驗">
+        <button data-lab="refraction">折射率的測定</button>
+        <button data-lab="lens">薄透鏡成像</button>
+        <button data-lab="slit">光的干涉與繞射</button>
+      </nav>
+      <div class="bench">
+        <section id="workbench">
+          <h2 id="task"></h2>
+          <div class="bench-toolbar">
+            <div id="view-controls" class="controls" role="group" aria-label="實驗台視角"></div>
+            <button id="expand-bench" type="button" aria-controls="bench" aria-pressed="false">放大實驗畫面</button>
+            <a class="mobile-bench-link" href="#instructions">查看操作指引</a>
+          </div>
+          <canvas id="bench" width="720" height="300" tabindex="0" aria-label="量測工作區"></canvas>
+          <div id="pin-view" hidden>
+            <strong>從人眼看出去</strong>
+            <div class="pin-track" aria-hidden="true"><span id="pin-reference"></span><span id="pin-image"></span></div>
+            <p id="pin-caption"></p>
+          </div>
+          <p id="readout" aria-live="polite"></p>
+          <div id="tools" class="controls"></div>
+        </section>
+        <aside id="instructions">
+          <h2>操作指引</h2>
+          <a class="mobile-bench-link" href="#workbench">返回實驗台</a>
+          <ol id="steps"></ol>
+          <div id="reading" class="controls"></div>
+          <button id="record" class="primary">記下這次量測</button>
+          <p id="feedback" role="status"></p>
+          <details id="feedback-reason" hidden>
+            <summary>原因？</summary>
+            <p id="feedback-explanation"></p>
+          </details>
+        </aside>
+      </div>
+      <section>
+        <h2>量測紀錄</h2>
+        <div id="table" class="scroll"></div>
+        <p id="stats"></p>
+      </section>
+      <section>
+        <h2>散布圖與趨勢線</h2>
+        <div id="graph-settings" class="controls"></div>
+        <canvas id="graph" width="720" height="350" aria-label="量測數據散布圖"></canvas>
+        <p id="fit" role="status"></p>
+        <details id="analysis-guide" hidden>
+          <summary>數據分析方法與示範</summary>
+          <p>以下是示範資料。寫結論時，請代入你自己量到的數值。</p>
+          <div id="analysis-examples"></div>
+        </details>
+        <label>分析與結論<textarea id="analysis" maxlength="5000" rows="4" placeholder="說明選軸理由、趨勢線的物理意義及可能的量測偏差。"></textarea></label>
+      </section>
+    </div>
+  </main>
+</body>
+</html>
