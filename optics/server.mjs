@@ -9,7 +9,7 @@ const labs = new Set(['refraction', 'lens', 'slit']);
 const root = new URL('../', import.meta.url);
 const labAssets = new Set(['index.html', 'style.css', 'lab.js', 'physics.js', 'classroom.js', 'scene.js']);
 const simulationAssets = new Set([
-  'index.html', 'BJT.html', 'double-slit-interference.html', 'elliptical-orbit-energy.html',
+  'index.html', 'BJT.html', 'double-slit-interference.html', 'double-slit-parallel-rays.html', 'elliptical-orbit-energy.html',
   'gas-kinetic-theory.html', 'string-wave-boundary.html', 'string-wave-derivation.html',
   'water-wave-interference.html', 'longitudinal-wave-displacement-pressure.html',
   'molecular-degrees-of-freedom.html', 'circular-standing-wave.html', 'air-column-spectrum.html',
@@ -303,7 +303,7 @@ export function createPlatform({ database, origin, teachers = [], clientId, clie
 
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
   const port = Number(process.env.PORT || 3000);
-  const origin = process.env.OPTICS_ORIGIN || 'http://localhost:' + port;
+  const origin = process.env.OPTICS_ORIGIN || process.env.RENDER_EXTERNAL_URL || 'http://localhost:' + port;
   const app = createPlatform({
     database: process.env.OPTICS_DB || fileURLToPath(new URL('../optics-data.sqlite', import.meta.url)),
     origin,

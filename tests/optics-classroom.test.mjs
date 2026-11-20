@@ -1,18 +1,27 @@
 import assert from 'node:assert/strict';
 import { once } from 'node:events';
+import { mkdtemp, rm, rmdir } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import test from 'node:test';
 import { createPlatform } from '../optics/server.mjs';
 
 test('classroom enrollment, assessment drafting, locked submission and published grades', async t => {
-  const app = createPlatform({ database: ':memory:', origin: 'http://localhost:3000', teachers: ['teacher@school.test'] });
+  const directory = await mkdtemp(join(tmpdir(), 'optics-classroom-'));
+  const config = { database: join(directory, 'responses.sqlite'), origin: 'http://localhost:3000', teachers: ['teacher@school.test'] };
+  let app = createPlatform(config);
+  t.after(async () => {
+    if (app.server.listening) await app.close();
+    for (const suffix of ['', '-wal', '-shm']) await rm(config.database + suffix, { force: true });
+    await rmdir(directory);
+  });
   app.server.listen(0, '127.0.0.1');
   await once(app.server, 'listening');
-  t.after(() => app.close());
-  const address = 'http://127.0.0.1:' + app.server.address().port;
   const teacher = app.sessionFor({ sub: 'teacher', email: 'teacher@school.test', name: '老師', hd: 'school.test' });
   const student = app.sessionFor({ sub: 'student', email: 'student@school.test', name: '學生', hd: 'school.test' });
   const outsider = app.sessionFor({ sub: 'other', email: 'other@example.test', name: '另一位學生' });
   const request = async (cookie, path, body) => {
+    const address = 'http://127.0.0.1:' + app.server.address().port;
     const response = await fetch(address + '/optics/api/' + path, {
       method: body === undefined ? 'GET' : 'POST',
       headers: { cookie, origin: 'http://localhost:3000', 'content-type': 'application/json' },
@@ -44,4 +53,13 @@ test('classroom enrollment, assessment drafting, locked submission and published
   assert.equal((await request(student, 'exams/' + exam.id))[1].attempt.grade, null);
   assert.equal((await request(teacher, 'submissions/' + submitted.id + '/grade', { ...grading, publish: true }))[0], 200);
   assert.equal((await request(student, 'exams/' + exam.id))[1].attempt.grade.comment, grading.comment);
+  await app.close();
+  app = createPlatform(config);
+  app.server.listen(0, '127.0.0.1');
+  await once(app.server, 'listening');
+  const [restored, data] = await request(student, 'exams/' + exam.id);
+  assert.equal(restored, 200);
+  assert.equal(data.attempt.id, submitted.id);
+  assert.deepEqual(data.attempt.snapshot, snapshot);
+  assert.deepEqual(data.attempt.grade, { scores: grading.scores, comment: grading.comment });
 });

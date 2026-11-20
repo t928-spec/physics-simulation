@@ -1,0 +1,23 @@
+services:
+  - type: web
+    name: physics-optics-assessments
+    runtime: node
+    plan: starter
+    buildCommand: node --check optics/server.mjs
+    startCommand: node optics/server.mjs
+    healthCheckPath: /optics/api/me
+    disk:
+      name: optics-responses
+      mountPath: /var/data
+      sizeGB: 1
+    envVars:
+      - key: NODE_VERSION
+        value: "24.22.1"
+      - key: SKIP_INSTALL_DEPS
+        value: "true"
+      - key: OPTICS_HOST
+        value: "0.0.0.0"
+      - key: OPTICS_DB
+        value: /var/data/optics-data.sqlite
+      - key: OPTICS_TEACHERS
+        sync: false
