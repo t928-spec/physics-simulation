@@ -8,7 +8,7 @@
 2. 從 Supabase 管理介面建立已確認的教師帳號，或選用該教師既有且已確認的 Auth 帳號。在 SQL Editor 以其 Auth 使用者 ID、Email 與姓名建立對應的 `public.profiles`，並設 `is_teacher` 為 `true`。
 3. 在 `optics/supabase-config.js` 填專案 URL 與 publishable key（或舊版 anon key），發布前端。Edge Function 部署 `supabase/functions/optics-invite`，設定 `OPTICS_SITE_URL` 為完整 HTTPS 光學實驗室網址（結尾為 `/optics/`），`OPTICS_SCHOOL_DOMAINS` 為學校信箱網域，若有多個用逗號分隔。將同一 HTTPS 網址加到 Supabase Auth 的 Site URL 和允許的重新導向網址。管理金鑰僅由 Edge Function 使用。
 4. 在教師專用試算表中開啟「擴充功能 → Apps Script」，貼上 `supabase/optics-invite-mail.gs`。在 Apps Script 的「專案設定 → 指令碼屬性」新增 `OPTICS_SUPABASE_URL` 和 `OPTICS_SUPABASE_PUBLISHABLE_KEY`。填入與網頁相同的公開設定。
-5. 重新開啟試算表，從「光學實驗室」選單建立名單工作表。填班級代碼、學號、姓名、學校信箱。班級代碼是教師在網站建班後看到的邀請代碼。點「寄送班級邀請」，自行登入實驗室教師帳號並授權 Google 寄信。
+5. 重新開啟試算表，從「光學實驗室」選單建立名單工作表。填班級代碼、學號、姓名、學校信箱。班級代碼可在網站教師班級卡片點「複製班級代碼」取得。點「寄送班級邀請」，自行登入實驗室教師帳號並授權 Google 寄信。
 
 寄送狀態記錄 Google 接受寄送或失敗。成功的列會跳過；要重寄時可清空該列的狀態。每次最多處理 30 筆，剩餘名單可再執行。啟用連結由系統寄給個別學生，試算表不存密碼、管理金鑰或連結。
 

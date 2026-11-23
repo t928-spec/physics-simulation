@@ -100,6 +100,17 @@ function share(parent, type, value, caption) {
     catch { output.textContent = anchor.href; }
   });
 }
+function classInvitation(parent, code) {
+  const row = append(parent, 'div', '', { className: 'controls' });
+  const label = append(row, 'span', '班級代碼 ');
+  append(label, 'code', code);
+  const output = status(parent);
+  button(row, '複製班級代碼', async () => {
+    try { await navigator.clipboard.writeText(code); output.textContent = '已複製班級代碼。'; }
+    catch { output.textContent = '請手動複製班級代碼：' + code; }
+  });
+  append(parent, 'p', '把這個代碼填入教師試算表的「班級代碼」欄，再從試算表寄送邀請。學生從學校信箱啟用後會自動加入。');
+}
 function accountControls() {
   const toolbar = append(area, 'div', '', { className: 'controls' });
   append(toolbar, 'span', `${identity.user.name}（${identity.user.label}）`);
@@ -157,7 +168,7 @@ async function dashboard() {
     if (!identity.user) return loginPanel();
     if (query.has('exam')) return await showExam(query.get('exam'));
     accountControls();
-    if (query.has('join')) {
+    if (query.has('join') && !identity.user.teacher) {
       const fields = form(area, '加入班級', async () => {
         const classroom = await api('join', { code: query.get('join') });
         append(area, 'p', '已加入 ' + classroom.name);
@@ -177,7 +188,7 @@ async function dashboard() {
       for (const classroom of owned) {
         const box = append(area, 'section');
         append(box, 'h3', classroom.name);
-        share(box, 'join', classroom.code, '班級加入連結');
+        classInvitation(box, classroom.code);
         const creator = form(box, '建立測驗', async () => {
           await api('exams', { classroom: classroom.id, title: title.value, lab: experiment.value, prompt: prompt.value,
             opens: opens.value ? opens.value + ':00+08:00' : '', closes: closes.value ? closes.value + ':00+08:00' : '',
