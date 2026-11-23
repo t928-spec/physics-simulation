@@ -23,8 +23,8 @@ test('homepage advertises the longitudinal wave simulation', () => {
 
   assert.match(home, /href="\.\/longitudinal-wave-displacement-pressure\.html"/);
   assert.match(home, /縱波：位移、密疏與壓力/);
-  assert.match(home, /十二個適合課堂投影/);
-  assert.match(home, /12 個主題/);
+  assert.match(home, /十三個適合課堂投影/);
+  assert.match(home, /13 個主題/);
 });
 
 test('renderer uses shared modules and supports dragging and help dialog', () => {

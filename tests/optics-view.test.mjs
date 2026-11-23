@@ -1,6 +1,13 @@
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
 import test from 'node:test';
 import { createCamera, drawScene } from '../optics/scene.js';
+
+test('the simulation catalogue includes a dedicated optics lab card', () => {
+  const home = readFileSync(new URL('../index.html', import.meta.url), 'utf8');
+  assert.match(home, /<a class="card" href="\.\/optics\/">[\s\S]*?<h3>光學實驗室<\/h3>/);
+  assert.match(home, /src="\.\/assets\/optics-lab-preview\.png"/);
+});
 
 test('projected pins can be picked on the paper after camera rotation', () => {
   for (const [yaw, pitch] of [[-.28, .67], [.8, .36], [-1.4, 1.2]]) {

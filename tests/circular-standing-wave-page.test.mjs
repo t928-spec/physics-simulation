@@ -18,8 +18,8 @@ test('circular-wave page has canvas, accessible controls, and module controller'
 test('homepage advertises and links all newly merged simulations', () => {
   const home = readFileSync(new URL('../index.html', import.meta.url), 'utf8');
 
-  assert.match(home, /十二個適合課堂投影/);
-  assert.match(home, /12 個主題/);
+  assert.match(home, /十三個適合課堂投影/);
+  assert.match(home, /13 個主題/);
   assert.match(home, /href="\.\/circular-standing-wave\.html"/);
   assert.match(home, /圓形駐波：看見節線與腹部/);
   assert.match(home, /href="\.\/molecular-degrees-of-freedom\.html"/);
