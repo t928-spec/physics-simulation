@@ -7,7 +7,10 @@ import { googleAuthorization, googleIdentity, random } from './google.mjs';
 
 const labs = new Set(['refraction', 'lens', 'slit']);
 const root = new URL('../', import.meta.url);
-const labAssets = new Set(['index.html', 'style.css', 'lab.js', 'physics.js', 'classroom.js', 'scene.js']);
+const labAssets = new Set([
+  'index.html', 'style.css', 'lab.js', 'physics.js', 'scene.js', 'classroom.js',
+  'classroom-entry.js', 'supabase-config.js', 'supabase-classroom.js', 'supabase-backend.js'
+]);
 const simulationAssets = new Set([
   'index.html', 'BJT.html', 'double-slit-interference.html', 'double-slit-parallel-rays.html', 'elliptical-orbit-energy.html',
   'gas-kinetic-theory.html', 'string-wave-boundary.html', 'string-wave-derivation.html',

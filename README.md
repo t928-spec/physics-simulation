@@ -20,6 +20,8 @@
 
 ## 光學實驗室
 
+另有 [Supabase 測驗與 Google 試算表寄送班級邀請](./supabase/README-optics-invitations.md) 的部署方式。這條路線使用 Email 和實驗室專用密碼。
+
 光學練習頁可用 GitHub Pages。若在本機試用，請用 Node.js 24 執行 `node optics/server.mjs`，再開啟 [光學實驗室](http://localhost:3000/optics/)。
 
 登入、收卷與批改使用同一個 Node 服務和 SQLite。正式使用時透過 HTTPS 反向代理部署，並讓 `OPTICS_DB` 指向有持久儲存與備份的路徑。正式部署使用 OAuth 的 Web 應用程式憑證，並在 Google Cloud Console 登記完整的回呼網址 `https://你的平台網址/optics/auth/callback`。
