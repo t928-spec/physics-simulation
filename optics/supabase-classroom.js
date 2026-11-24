@@ -395,6 +395,7 @@ async function review(submission, examId) {
   button(area, '返回批改清單', () => showExam(examId).catch(error => append(area, 'p', error.message)));
   append(area, 'h2', exam.title + '｜' + student.name);
   append(area, 'p', '交卷時間 ' + formatTime(attempt.submitted));
+  const total = append(append(area, 'p'), 'strong', '', { role: 'status' });
   if (attempt.grade?.source === 'auto') append(area, 'p', '以下分數與評語是系統自動批改的結果，可以調整後儲存。');
   const fields = form(area, '儲存批改', async () => {
     const result = await api('submissions/' + submission + '/grade', {
@@ -404,6 +405,13 @@ async function review(submission, examId) {
   });
   const scores = rubric.map((name, i) => input(fields, name + '（0–25）', 'number',
     { min: 0, max: 25, step: 1, required: true, value: attempt.grade?.scores[i] ?? '' }));
+  const updateTotal = () => {
+    total.textContent = scores.every(score => score.validity.valid)
+      ? '總分 ' + scores.reduce((sum, score) => sum + score.valueAsNumber, 0) + '／100'
+      : '總分：請填妥四項分數';
+  };
+  for (const score of scores) score.addEventListener('input', updateTotal);
+  updateTotal();
   const comment = input(fields, '評語', 'textarea', { value: attempt.grade?.comment || '', maxLength: 5000, rows: 6 });
   const published = input(fields, '發布給學生', 'checkbox', { checked: Boolean(attempt.published) });
   const details = append(area, 'details');
