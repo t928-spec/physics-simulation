@@ -245,7 +245,7 @@ function grades(parent, attempt) {
 }
 async function showExam(id) {
   const version = viewVersion;
-  const { exam, teacher, attempt, roster } = await api('exams/' + id);
+  const { exam, teacher, attempt, roster, canDelete } = await api('exams/' + id);
   if (version !== viewVersion) return;
   showPanel();
   link(append(area, 'p'), '返回班級與測驗', { classroom: 1 });
@@ -259,6 +259,22 @@ async function showExam(id) {
   if (teacher) {
     append(area, 'p', exam.prompt);
     share(area, 'exam', id, '測驗作答連結');
+    if (canDelete) {
+      const deletionStatus = status(area);
+      const remove = button(area, '刪除測驗', async () => {
+        if (!confirm('確定刪除「' + exam.title + '」？刪除後無法復原。')) return;
+        remove.disabled = true;
+        try {
+          await api('exams/' + id + '/delete');
+          location.href = new URL('?classroom=1', location.href);
+        } catch (error) {
+          deletionStatus.textContent = error.message;
+          remove.disabled = false;
+        }
+      });
+    } else if (canDelete === false) {
+      append(area, 'p', '已有學生儲存草稿或交卷，無法刪除此測驗。');
+    }
     append(area, 'h3', '作答與批改');
     if (!roster.length) append(area, 'p', '班級尚無學生加入。');
     if (roster.some(student => student.submitted && !student.published)) {

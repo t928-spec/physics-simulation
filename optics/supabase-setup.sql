@@ -588,6 +588,23 @@ begin
   return jsonb_build_object('id', e.id);
 end $$;
 
+create or replace function public.app_delete_empty_exam(p_exam uuid) returns void
+language plpgsql security definer set search_path = '' as $$
+declare u uuid := app_private.uid();
+begin
+  -- The exam lock serializes deletion with the foreign-key check on new attempts.
+  perform e.id from public.exams e
+    join public.classes c on c.id = e.class_id
+    join public.profiles p on p.id = c.teacher_id
+    where e.id = p_exam and c.teacher_id = u and p.is_teacher
+    for update of e;
+  if not found then raise exception '找不到可刪除的測驗'; end if;
+  if exists (select 1 from public.attempts where exam_id = p_exam) then
+    raise exception '已有學生作答紀錄，無法刪除測驗';
+  end if;
+  delete from public.exams where id = p_exam;
+end $$;
+
 create or replace function public.app_get_exam(p_exam uuid) returns jsonb
 language plpgsql security definer set search_path = '' as $$
 declare u uuid := app_private.uid(); e public.exams; c public.classes; a public.attempts; is_owner boolean;
@@ -604,6 +621,7 @@ begin
   if is_owner then
     return jsonb_build_object(
       'exam', app_private.exam_json(e, u), 'teacher', true, 'attempt', null,
+      'canDelete', not exists (select 1 from public.attempts where exam_id = e.id),
       'roster', coalesce((
         select jsonb_agg(jsonb_build_object(
                  'name', p.name,
@@ -762,7 +780,7 @@ begin
     from pg_proc p join pg_namespace n on n.oid = p.pronamespace
     where n.nspname = 'public' and p.proname in (
       'app_me', 'app_dashboard', 'app_join', 'app_create_class', 'app_create_exam',
-      'app_get_exam', 'app_save_draft', 'app_submit', 'app_get_submission', 'app_grade', 'app_publish_all'
+      'app_get_exam', 'app_delete_empty_exam', 'app_save_draft', 'app_submit', 'app_get_submission', 'app_grade', 'app_publish_all'
     )
   loop
     execute format('revoke all on function %s from public, anon', f.sig);
