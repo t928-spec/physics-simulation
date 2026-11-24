@@ -59,6 +59,28 @@ section, aside {
 .exam-card-class { font-size: .8rem; color: #456579; }
 .exam-card-arrow { flex: none; font-size: 1.4rem; line-height: 1; }
 #instructions { background: #fffdf6; border-color: #e1dbcb; }
+.student-exam {
+  --ink-accent: #63355f;
+  --edge: #dfcbdc;
+  --wash: #f1e4ef;
+  --stage: #eee2ed;
+  background: #f8f0f7;
+}
+.student-exam header { background: #442640; }
+.student-exam header a { color: #f4ddf0; }
+.student-exam header button { background: #62385e; border-color: #aa80a4; }
+.student-exam header button:hover, .student-exam button.primary:hover { background: #4f2b4b; }
+.student-exam #workbench { background: #fcf6fb; }
+.student-exam #instructions { background: #f9edf5; border-color: var(--edge); }
+.exam-mode-label {
+  display: inline-block;
+  margin: 0;
+  padding: .35rem .75rem;
+  border-radius: 6px;
+  background: var(--ink-accent);
+  color: #fff;
+  font-weight: 700;
+}
 .bench { display: grid; grid-template-columns: minmax(0, 2.5fr) minmax(290px, 1fr); gap: .9rem; }
 .bench-toolbar { display: flex; align-items: start; justify-content: space-between; flex-wrap: wrap; gap: .35rem .6rem; margin-bottom: .8rem; }
 #view-controls { margin-bottom: 0; }

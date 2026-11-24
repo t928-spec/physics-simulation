@@ -86,9 +86,11 @@ async function practice() {
   history.replaceState(null, '', url);
   area.hidden = true;
   lab.hidden = false;
+  document.body.classList.remove('student-exam');
   toggle.textContent = '班級與測驗';
 }
 function showPanel() {
+  document.body.classList.remove('student-exam');
   area.replaceChildren();
   area.hidden = false;
   lab.hidden = true;
@@ -256,6 +258,10 @@ async function showExam(id) {
   const { exam, teacher, attempt, roster, canDelete } = await api('exams/' + id);
   if (version !== viewVersion) return;
   showPanel();
+  if (!teacher) {
+    document.body.classList.add('student-exam');
+    append(area, 'p', '測驗模式', { className: 'exam-mode-label' });
+  }
   link(append(area, 'p'), '返回班級與測驗', { classroom: 1 });
   accountControls();
   append(area, 'h2', exam.title);
