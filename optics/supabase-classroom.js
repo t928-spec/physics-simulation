@@ -6,6 +6,11 @@ const lab = document.getElementById('lab');
 const toggle = document.getElementById('classroom-toggle');
 const query = new URLSearchParams(location.search);
 const titles = { refraction: '折射率的測定', lens: '薄透鏡成像', slit: '光的干涉與繞射' };
+const defaultPrompts = {
+  refraction: '使用玻璃磚完成折射率測定。改變入射角，記錄至少 3 組入射角、折射角與折射率。以 sin θr 為橫軸、sin θi 為縱軸繪圖並加入趨勢線。在「分析與結論」說明斜率的物理意義，以及一項可能的量測偏差。',
+  lens: '使用凸透鏡，改變物距並調整像屏至成像清晰。記錄至少 3 組物距 p、像距 q 與算得的焦距。以 1/p 為橫軸、1/q 為縱軸繪圖並加入趨勢線。在「分析與結論」說明如何從趨勢線求焦距，以及一項可能的量測偏差。',
+  slit: '選擇同一色雷射與同一片雙狹縫，改變狹縫到屏幕的距離 L，記錄至少 3 組 L、相鄰暗紋間距 Δy 與算得的波長。以 L 為橫軸、Δy 為縱軸繪圖並加入趨勢線。在「分析與結論」說明斜率與波長的關係，並留意單位換算。'
+};
 const rubric = ['實驗步驟', '器材使用', '讀值', '數據分析'];
 const formatTime = time => new Date(time).toLocaleString('zh-TW', { timeZone: 'Asia/Taipei' });
 let identity;
@@ -200,6 +205,18 @@ async function dashboard() {
         const opens = input(creator, '開放時間（臺灣）', 'datetime-local');
         const closes = input(creator, '截止時間（臺灣）', 'datetime-local');
         const prompt = input(creator, '作答任務', 'textarea', { required: true, maxLength: 5000, rows: 3 });
+        let previousDefault = defaultPrompts[experiment.value];
+        prompt.value = previousDefault;
+        experiment.addEventListener('change', () => {
+          const nextDefault = defaultPrompts[experiment.value];
+          if (!prompt.value.trim() || prompt.value === previousDefault) prompt.value = nextDefault;
+          previousDefault = nextDefault;
+        });
+        button(creator, '套用此實驗的預設任務', () => {
+          if (prompt.value.trim() && prompt.value !== previousDefault &&
+              !confirm('要用預設任務取代目前的文字嗎？')) return;
+          prompt.value = previousDefault;
+        });
         const autoPublish = input(creator, '交卷後立即發布成績（學生馬上看到分數與回饋）', 'checkbox', { checked: false });
         append(creator, 'span', '系統會依「實驗步驟、器材使用、讀值、數據分析」各 25 分自動批改，老師可再調整。');
       }
