@@ -5,6 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>光學實驗室</title>
   <link rel="stylesheet" href="./style.css">
+  <script>
+    if (new URLSearchParams(location.search).has('exam')) {
+      document.documentElement.classList.add('exam-entry');
+    }
+  </script>
   <script type="module" src="./lab.js"></script>
   <script type="module" src="./classroom-entry.js"></script>
 </head>

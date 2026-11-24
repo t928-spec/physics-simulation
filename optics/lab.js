@@ -1217,6 +1217,7 @@ export function openAssessment(assessment, snapshot, readOnly = false) {
     assessmentState = undefined;
   }
   $('experiments').hidden = Boolean(assessment);
+  $('lab').classList.toggle('exam-ready', Boolean(assessment));
   render();
 }
 

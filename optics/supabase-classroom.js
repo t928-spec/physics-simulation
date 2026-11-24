@@ -84,6 +84,7 @@ async function practice() {
   const url = new URL(location.href);
   url.search = query.toString();
   history.replaceState(null, '', url);
+  document.documentElement.classList.remove('exam-entry');
   area.hidden = true;
   lab.hidden = false;
   document.body.classList.remove('student-exam');

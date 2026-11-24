@@ -11,6 +11,7 @@
 }
 * { box-sizing: border-box; }
 [hidden] { display: none !important; }
+.exam-entry #experiments, .exam-entry #lab:not(.exam-ready) { display: none; }
 body { margin: 0; }
 header { display: flex; align-items: center; justify-content: space-between; gap: 1rem; background: #10354e; color: #fff; padding: .8rem max(1rem, calc((100vw - 1400px) / 2)); }
 .site-brand { display: flex; align-items: baseline; flex-wrap: wrap; gap: .12rem .95rem; min-width: 0; }
