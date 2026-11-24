@@ -208,10 +208,92 @@ function updatePinView() {
   const start = glass ? [farFace, Math.max(35, Math.min(265, exitY))] : origin;
   if (ray) {
     $('pin-view').hidden = false;
-    $('pin-image').style.left = (50 + Math.max(-45, Math.min(45, 38 * shift))) + '%';
-    $('pin-caption').textContent = `橘點是 A 針像，深色點是${glass ? ' B 針像' : '圓心 O 針'}。移動人眼，讓兩點重疊。`;
+    drawPinEyeScene(glass, s.medium, view, shift);
+    const alignment = Math.abs(shift) < .015 ? '兩支針接近重疊。' : '透過介質仍可分辨兩支針。';
+    $('pin-caption').textContent = `前方深色針是${glass ? ' B 針像' : '圓心 O 針'}，另一支是 A 針像。${alignment}調整「觀察角」，讓兩支針重疊。`;
   }
   return observerGuide(view, glass, start);
+}
+
+function drawPinEyeScene(glass, medium, view, shift) {
+  const eye = $('pin-eye-scene').getContext('2d');
+  const turn = Math.sin(radians(view));
+  const center = 320 - (glass ? 42 : 76) * turn;
+  const width = glass ? 1 - .28 * Math.abs(turn) : 1;
+  const tilt = glass ? .065 * turn : 0;
+  const gradient = (top, bottom, stops) => {
+    const fill = eye.createLinearGradient(0, top, 0, bottom);
+    for (const [offset, color] of stops) fill.addColorStop(offset, color);
+    return fill;
+  };
+  eye.fillStyle = gradient(0, 220, [[0, '#7e939a'], [.39, '#c2d0d3'], [.4, '#eef4f5'], [1, '#d4e4e9']]);
+  eye.fillRect(0, 0, 640, 220);
+  for (let x = -280; x <= 920; x += 24) {
+    line(eye, [320 + 190 * turn + (x - 320) * .34, 90], [x, 220], '#afc8cf', .65);
+  }
+  for (const y of [94, 103, 115, 130, 150, 176, 209]) {
+    const skew = (y - 90) * .18 * turn;
+    line(eye, [0, y - skew], [640, y + skew], '#afc8cf', .65);
+  }
+
+  // Pan the semicircular cell as a rigid shape; only the glass block changes projection.
+  const vesselPerspective = () => {
+    eye.save();
+    eye.transform(width, tilt, 0, 1, center - 320 * width, -320 * tilt);
+  };
+  vesselPerspective();
+  eye.fillStyle = '#48626c38';
+  eye.beginPath();
+  eye.ellipse(320, 178, 232, 19, 0, 0, 2 * Math.PI);
+  eye.fill();
+
+  const shape = glass
+    ? [[80, 71], [536, 71], [561, 91], [561, 177], [110, 177], [80, 153]]
+    : null;
+  const outline = () => {
+    eye.beginPath();
+    if (shape) {
+      eye.moveTo(...shape[0]);
+      for (const point of shape.slice(1)) eye.lineTo(...point);
+    } else {
+      eye.moveTo(78, 75);
+      eye.bezierCurveTo(155, 48, 485, 48, 562, 75);
+      eye.lineTo(562, 159);
+      eye.bezierCurveTo(535, 194, 105, 194, 78, 159);
+    }
+    eye.closePath();
+  };
+  outline();
+  eye.fillStyle = medium === 'salt' ? '#addfdb65' : '#9acfe66b';
+  eye.fill();
+  eye.restore();
+  const pin = (offset, color) => {
+    const x = center + offset * width;
+    const y = 81 + offset * tilt;
+    line(eye, [x, y], [x, y + 92], color, 4);
+    eye.fillStyle = color;
+    eye.beginPath();
+    eye.arc(x, y, 3.1, 0, 2 * Math.PI);
+    eye.fill();
+  };
+  pin(Math.max(-221, Math.min(221, shift * 245)), '#736057');
+  pin(0, '#243a46');
+  vesselPerspective();
+  outline();
+  eye.fillStyle = gradient(63, 181, [[0, '#ffffff44'], [.35, '#ffffff0d'], [.42, '#ffffff69'], [.48, '#bde4f019'], [.87, '#e7f7ff26'], [1, '#507f9260']]);
+  eye.fill();
+  eye.strokeStyle = '#527e90';
+  eye.lineWidth = 1.5;
+  eye.stroke();
+  if (glass) line(eye, [80, 71], [110, 91], '#ffffffb0', 2);
+  else {
+    eye.beginPath();
+    eye.ellipse(320, 75, 242, 17, 0, 0, 2 * Math.PI);
+    eye.strokeStyle = '#ecf9ffca';
+    eye.lineWidth = 2;
+    eye.stroke();
+  }
+  eye.restore();
 }
 function drawObserver({ start, eye, theta }) {
   line(ctx, start, eye, '#257385', 2, [6, 5]);
@@ -628,6 +710,7 @@ function renderViewControls() {
       for (const other of controls.querySelectorAll('[data-mode]')) {
         other.setAttribute('aria-pressed', String(other.dataset.mode === mode));
       }
+      syncRotationControl();
       drawBench();
     });
     choice.dataset.mode = mode;
@@ -637,6 +720,28 @@ function renderViewControls() {
     Object.assign(camera, initialCamera);
     controls.querySelector('[data-mode=orbit]').click();
   });
+  const label = el('label', '旋轉角度', { id: 'rotation-control' });
+  const slider = el('input', null, { id: 'rotation-angle', type: 'range', min: -180, max: 180, step: 1 });
+  const value = el('span', null, { id: 'rotation-value' });
+  value.setAttribute('aria-hidden', 'true');
+  label.append(slider, value);
+  controls.append(label);
+  slider.addEventListener('input', () => {
+    camera.yaw = radians(Number(slider.value));
+    value.textContent = slider.value + '°';
+    drawBench();
+  });
+  syncRotationControl();
+}
+
+function syncRotationControl() {
+  const camera = cameraState();
+  const degreesYaw = Math.round(degrees(camera.yaw));
+  const fullTurn = degreesYaw % 360;
+  const normalized = fullTurn > 180 ? fullTurn - 360 : fullTurn < -180 ? fullTurn + 360 : fullTurn;
+  $('rotation-control').hidden = camera.mode !== 'orbit';
+  $('rotation-angle').value = normalized;
+  $('rotation-value').textContent = normalized + '°';
 }
 
 const analysisExamples = {
@@ -902,6 +1007,7 @@ function rotate(dx, dy) {
   const camera = cameraState();
   camera.yaw = (camera.yaw + dx) % (Math.PI * 2);
   camera.pitch = Math.max(.32, Math.min(1.23, camera.pitch + dy));
+  syncRotationControl();
   drawBench();
 }
 canvas.addEventListener('pointerdown', event => {
