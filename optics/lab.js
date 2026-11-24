@@ -210,7 +210,8 @@ function updatePinView() {
     $('pin-view').hidden = false;
     drawPinEyeScene(glass, s.medium, view, shift);
     const alignment = Math.abs(shift) < .015 ? '兩支針接近重疊。' : '透過介質仍可分辨兩支針。';
-    $('pin-caption').textContent = `前方深色針是${glass ? ' B 針像' : '圓心 O 針'}，另一支是 A 針像。${alignment}調整「觀察角」，讓兩支針重疊。`;
+    const reference = glass ? '深綠色圖釘是 B 針像，另一支是 A 針像。' : '前方深色針是圓心 O 針，另一支是 A 針像。';
+    $('pin-caption').textContent = reference + alignment + '調整「觀察角」，讓兩支針重疊。';
   }
   return observerGuide(view, glass, start);
 }
@@ -248,7 +249,7 @@ function drawPinEyeScene(glass, medium, view, shift) {
   eye.fill();
 
   const shape = glass
-    ? [[80, 71], [536, 71], [561, 91], [561, 177], [110, 177], [80, 153]]
+    ? [[105, 89], [517, 89], [559, 110], [559, 171], [147, 171], [105, 150]]
     : null;
   const outline = () => {
     eye.beginPath();
@@ -264,35 +265,75 @@ function drawPinEyeScene(glass, medium, view, shift) {
     eye.closePath();
   };
   outline();
-  eye.fillStyle = medium === 'salt' ? '#addfdb65' : '#9acfe66b';
+  eye.fillStyle = glass ? '#6cbeb255' : medium === 'salt' ? '#addfdb65' : '#9acfe66b';
   eye.fill();
   eye.restore();
   const pin = (offset, color) => {
     const x = center + offset * width;
     const y = 81 + offset * tilt;
+    if (glass) {
+      line(eye, [x, y + 7], [x, y + 79], '#243a40', 2);
+      eye.fillStyle = color;
+      eye.beginPath();
+      eye.moveTo(x - 9, y - 9);
+      eye.quadraticCurveTo(x - 5, y - 5, x - 5, y + 3);
+      eye.lineTo(x - 8, y + 10);
+      eye.quadraticCurveTo(x, y + 13, x + 8, y + 10);
+      eye.lineTo(x + 5, y + 3);
+      eye.quadraticCurveTo(x + 5, y - 5, x + 9, y - 9);
+      eye.closePath();
+      eye.fill();
+      eye.beginPath();
+      eye.ellipse(x, y - 9, 9, 3, 0, 0, 2 * Math.PI);
+      eye.fill();
+      eye.strokeStyle = '#ffffff8a';
+      eye.lineWidth = 1;
+      eye.stroke();
+      return;
+    }
     line(eye, [x, y], [x, y + 92], color, 4);
     eye.fillStyle = color;
     eye.beginPath();
     eye.arc(x, y, 3.1, 0, 2 * Math.PI);
     eye.fill();
   };
-  pin(Math.max(-221, Math.min(221, shift * 245)), '#736057');
-  pin(0, '#243a46');
+  const pinOffset = Math.max(-221, Math.min(221, shift * 245));
+  pin(pinOffset, glass ? '#539e8c' : '#736057');
+  pin(0, glass ? '#176954' : '#243a46');
   vesselPerspective();
+  if (glass) {
+    const face = (points, fill) => {
+      eye.beginPath();
+      eye.moveTo(...points[0]);
+      for (const point of points.slice(1)) eye.lineTo(...point);
+      eye.closePath();
+      eye.fillStyle = fill;
+      eye.fill();
+      eye.strokeStyle = '#346c67a0';
+      eye.lineWidth = 1.4;
+      eye.stroke();
+    };
+    face([[105, 89], [517, 89], [559, 110], [147, 110]], '#effffc72');
+    face([[105, 89], [147, 110], [147, 171], [105, 150]], '#1e736465');
+    face([[147, 110], [559, 110], [559, 171], [147, 171]],
+      gradient(110, 171, [[0, '#c6fff178'], [.13, '#f4fff761'], [.31, '#54a3991f'], [.85, '#3a82753d'], [1, '#226a5e8c']]));
+    line(eye, [149, 112], [556, 112], '#f6fff4dd', 2);
+    line(eye, [148, 115], [148, 167], '#f6fff4a0', 1.5);
+    line(eye, [153, 167], [555, 167], '#e8fff797', 1.4);
+    eye.restore();
+    return;
+  }
   outline();
   eye.fillStyle = gradient(63, 181, [[0, '#ffffff44'], [.35, '#ffffff0d'], [.42, '#ffffff69'], [.48, '#bde4f019'], [.87, '#e7f7ff26'], [1, '#507f9260']]);
   eye.fill();
   eye.strokeStyle = '#527e90';
   eye.lineWidth = 1.5;
   eye.stroke();
-  if (glass) line(eye, [80, 71], [110, 91], '#ffffffb0', 2);
-  else {
-    eye.beginPath();
-    eye.ellipse(320, 75, 242, 17, 0, 0, 2 * Math.PI);
-    eye.strokeStyle = '#ecf9ffca';
-    eye.lineWidth = 2;
-    eye.stroke();
-  }
+  eye.beginPath();
+  eye.ellipse(320, 75, 242, 17, 0, 0, 2 * Math.PI);
+  eye.strokeStyle = '#ecf9ffca';
+  eye.lineWidth = 2;
+  eye.stroke();
   eye.restore();
 }
 function drawObserver({ start, eye, theta }) {
@@ -521,8 +562,26 @@ function drawBench() {
   else if (id === 'lens' && mode === 'eye') drawLensEye(s, imageDistance(s.p, lensF()));
   else if (id === 'lens') drawLens();
   else drawSlit();
+  if (id === 'refraction' && s.phase === 'pins' && !locked &&
+      s.pins.length < (s.medium === 'glass' ? 4 : 2)) drawPinTarget(mode);
   ctx.restore();
   $('readout').textContent = benchReadout(s, mode);
+}
+
+function drawPinTarget(mode) {
+  const x = $('pin-target-x')?.valueAsNumber;
+  const y = $('pin-target-y')?.valueAsNumber;
+  if (!(x >= 0 && x <= 720 && y >= 0 && y <= 300)) return;
+  const [px, py] = mode === 'orbit' ? cameraProjection().project([x - 360, y - 145, 0]) : [x, y];
+  ctx.beginPath();
+  ctx.arc(px, py, 6, 0, 2 * Math.PI);
+  ctx.fillStyle = '#fff';
+  ctx.fill();
+  ctx.strokeStyle = '#c52b40';
+  ctx.lineWidth = 2;
+  ctx.stroke();
+  line(ctx, [px - 9, py], [px + 9, py], '#c52b40', 1.5);
+  line(ctx, [px, py - 9], [px, py + 9], '#c52b40', 1.5);
 }
 
 function refractionTools(tools, reading) {
@@ -544,8 +603,8 @@ function refractionTools(tools, reading) {
     setting(tools, 'view', '觀察角（°）', -limit, limit);
     const outside = next === 'D' || (next === 'B' && s.medium !== 'glass');
     const initialX = fixedX ?? (outside && s.px < 440 ? 470 : s.px);
-    const xInput = input(tools, '插針 X', initialX, { type: 'number', min: 0, max: 720, readOnly: fixedX !== null }, value => { s.px = +value; changed(); });
-    const yInput = input(tools, '插針 Y', s.py, { type: 'number', min: 0, max: 300 }, value => { s.py = +value; changed(); });
+    const xInput = input(tools, '插針 X', initialX, { id: 'pin-target-x', type: 'number', min: 0, max: 720, readOnly: fixedX !== null }, value => { s.px = +value; drawBench(); changed(); });
+    const yInput = input(tools, '插針 Y', s.py, { id: 'pin-target-y', type: 'number', min: 0, max: 300 }, value => { s.py = +value; drawBench(); changed(); });
     button(tools, '在座標處插針', () => {
       const x = xInput.valueAsNumber;
       const y = yInput.valueAsNumber;
