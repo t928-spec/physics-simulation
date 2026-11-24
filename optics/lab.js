@@ -449,7 +449,9 @@ function drawLens() {
         ctx.restore();
       }
     } else {
-      line(ctx, [x(-s.reference), 93], [x(-s.reference), 225], '#86633c', 3);
+      const referenceX = x(-s.reference);
+      line(ctx, [referenceX, 93], [referenceX, 225], '#86633c', 3);
+      label(ctx, '參考物', referenceX - 21, 84, '#72512f');
       if (!exam && q < 0 && Number.isFinite(q)) {
         const height = 48 * Math.abs(q / s.p);
         arrow(ctx, x(q), 150, height, '#255e8b');
