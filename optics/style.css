@@ -81,8 +81,9 @@ canvas { display: block; width: 100%; height: auto; border-radius: 8px; backgrou
 #bench[data-view=orbit]:active { cursor: grabbing; }
 .mobile-bench-link { display: none; }
 #view-controls { align-items: center; }
-#pin-view { margin-top: .6rem; padding: .6rem .8rem; border: 1px solid var(--edge); border-radius: 10px; background: var(--wash); }
-#pin-eye-scene { margin: .5rem 0; }
+#pin-view, #lens-eye-view { margin-top: .6rem; padding: .6rem .8rem; border: 1px solid var(--edge); border-radius: 10px; background: var(--wash); }
+#pin-eye-scene, #lens-eye-scene { margin: .5rem 0; }
+#lens-eye-view p { margin: .25rem 0 0; font-size: .9rem; }
 #rotation-control { grid-template-columns: auto minmax(6rem, 10rem) 3.1em; align-items: center; gap: .45rem; }
 #rotation-angle { width: 100%; min-height: 44px; margin: 0; padding: 0; }
 #rotation-value { text-align: right; font-variant-numeric: tabular-nums; }

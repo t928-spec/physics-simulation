@@ -338,6 +338,9 @@ function drawPinEyeScene(glass, medium, view, shift) {
 }
 function drawObserver({ start, eye, theta }) {
   line(ctx, start, eye, '#257385', 2, [6, 5]);
+  drawEyeSymbol(eye, theta);
+}
+function drawEyeSymbol(eye, theta = 0) {
   ctx.save();
   ctx.translate(...eye);
   ctx.rotate(theta);
@@ -447,13 +450,17 @@ function drawLens() {
       }
     } else {
       line(ctx, [x(-s.reference), 93], [x(-s.reference), 225], '#86633c', 3);
-      label(ctx, '凹透鏡後方看到的像', 491, 44);
-      arrow(ctx, 597, 147, 30, '#a65625');
-      const displacement = (s.reference + q) * s.eye * 1.3;
-      line(ctx, [597 + displacement, 99], [597 + displacement, 123], '#86633c', 4);
+      if (!exam && q < 0 && Number.isFinite(q)) {
+        const height = 48 * Math.abs(q / s.p);
+        arrow(ctx, x(q), 150, height, '#255e8b');
+        label(ctx, '虛像', x(q) - 14, 133 - height, '#255e8b');
+      }
+      drawEyeSymbol([590, 150]);
     }
   }
 }
+const lensParallax = (s, q) => Math.max(-115, Math.min(115, (s.reference + q) * s.eye * 3));
+
 function drawLensEye(s, q) {
   if (!s.mounted) return;
   point(ctx, [360,157], '#d5eaf0', 94);
@@ -462,12 +469,57 @@ function drawLensEye(s, q) {
   ctx.beginPath();
   ctx.arc(360,157,94,0,Math.PI*2);
   ctx.stroke();
-  const shift = Math.max(-115, Math.min(115, (s.reference + q) * s.eye * 3));
+  const shift = lensParallax(s, q);
   arrow(ctx, 360, 218, 81, '#a65625');
   line(ctx, [360 + shift, 27], [360 + shift, 106], '#86633c', 5);
   line(ctx, [360, 106], [360, 235], '#a65625', 1, [3, 5]);
   label(ctx, '參考物上緣', 390 + Math.max(0, shift), 40);
   label(ctx, '凹透鏡內的正立虛像', 481, 179);
+}
+
+function drawLensEyePreview(s, q) {
+  const eye = $('lens-eye-scene').getContext('2d');
+  const x = 320 - s.eye * 12;
+  const y = 166;
+  const radius = 110;
+  const background = eye.createLinearGradient(0, 0, 0, 260);
+  background.addColorStop(0, '#e6e8e3');
+  background.addColorStop(.73, '#f9f9f2');
+  background.addColorStop(.74, '#c4b9a6');
+  background.addColorStop(1, '#a79782');
+  eye.fillStyle = background;
+  eye.fillRect(0, 0, 640, 260);
+
+  const referenceX = x + lensParallax(s, q) * .65;
+  line(eye, [referenceX, 26], [referenceX, 100], '#ad8614', 9);
+  line(eye, [referenceX - 1, 26], [referenceX - 1, 99], '#f4d84c', 5);
+  eye.fillStyle = '#34404a';
+  eye.fillRect(x - 12, 238, 24, 22);
+  eye.fillRect(x - 38, 251, 76, 9);
+
+  eye.save();
+  eye.beginPath();
+  eye.arc(x, y, radius, 0, Math.PI * 2);
+  eye.clip();
+  const glass = eye.createRadialGradient(x - 35, y - 50, 15, x, y, radius);
+  glass.addColorStop(0, '#edf7f4');
+  glass.addColorStop(.77, '#d5e5df');
+  glass.addColorStop(1, '#809d96');
+  eye.fillStyle = glass;
+  eye.fillRect(x - radius, y - radius, radius * 2, radius * 2);
+  eye.fillStyle = '#62827a';
+  eye.fillRect(x - radius, 208, radius * 2, 13);
+  const imageHeight = Math.max(40, Math.min(116, 245 * Math.abs(q / s.p)));
+  line(eye, [x, 216], [x, 216 - imageHeight], '#a74331', 5);
+  line(eye, [x - 1, 215], [x - 1, 217 - imageHeight], '#e0785d', 1.5);
+  line(eye, [x - 63, 117], [x - 36, 99], '#ffffff9c', 5);
+  line(eye, [x + 45, 126], [x + 73, 108], '#ffffffa0', 5);
+  eye.restore();
+  eye.beginPath();
+  eye.arc(x, y, radius, 0, Math.PI * 2);
+  eye.strokeStyle = '#23292d';
+  eye.lineWidth = 14;
+  eye.stroke();
 }
 const laserWavelength = () => (setup().color === 'red' ? 650 : 532) + seed();
 const realWidth = () => setup().variant === 1 ? .10 : .16;
@@ -550,6 +602,9 @@ function drawBench() {
   ctx.scale(frame.scale, frame.scale);
   ctx.translate(-frame.x, -frame.y);
   $('pin-view').hidden = true;
+  const showLensEye = id === 'lens' && s.lens === 'concave' && s.mounted;
+  $('lens-eye-view').hidden = !showLensEye;
+  if (showLensEye) drawLensEyePreview(s, imageDistance(s.p, lensF()));
   const guide = id === 'refraction' ? updatePinView() : null;
   canvas.dataset.view = mode;
   if (mode === 'orbit') {
