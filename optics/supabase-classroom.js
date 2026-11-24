@@ -228,8 +228,16 @@ async function dashboard() {
     if (joined.length) append(area, 'p', '已加入班級｜' + joined.map(item => item.name).join('、'));
     append(area, 'h3', '測驗');
     if (!exams.length) append(area, 'p', '目前沒有測驗。');
-    for (const exam of exams) {
-      link(append(area, 'p'), exam.className + '｜' + exam.title, { exam: exam.id });
+    else {
+      const list = append(area, 'ul', '', { className: 'exam-list' });
+      for (const exam of exams) {
+        const card = link(append(list, 'li'), '', { exam: exam.id });
+        card.className = 'exam-card';
+        const summary = append(card, 'span', '', { className: 'exam-card-summary' });
+        append(summary, 'span', '班級 ' + exam.className, { className: 'exam-card-class' });
+        append(summary, 'strong', exam.title);
+        append(card, 'span', '›', { className: 'exam-card-arrow' }).setAttribute('aria-hidden', 'true');
+      }
     }
   } catch (error) {
     if (version !== viewVersion) return;

@@ -30,6 +30,34 @@ section, aside {
   min-width: 0;
 }
 #workbench { background: #f5f9fc; }
+.exam-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 16rem), 1fr));
+  gap: .7rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.exam-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: .8rem;
+  height: 100%;
+  padding: .85rem 1rem;
+  border: 1px solid var(--edge);
+  border-radius: 10px;
+  background: #f5f9fc;
+  color: var(--ink-accent);
+  text-decoration: none;
+}
+.exam-card:hover, .exam-card:focus-visible {
+  background: var(--wash);
+  border-color: #8eacbf;
+}
+.exam-card-summary { display: grid; gap: .3rem; min-width: 0; overflow-wrap: anywhere; }
+.exam-card-class { font-size: .8rem; color: #456579; }
+.exam-card-arrow { flex: none; font-size: 1.4rem; line-height: 1; }
 #instructions { background: #fffdf6; border-color: #e1dbcb; }
 .bench { display: grid; grid-template-columns: minmax(0, 2.5fr) minmax(290px, 1fr); gap: .9rem; }
 .bench-toolbar { display: flex; align-items: start; justify-content: space-between; flex-wrap: wrap; gap: .35rem .6rem; margin-bottom: .8rem; }
