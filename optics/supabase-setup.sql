@@ -538,7 +538,11 @@ begin
     'joined', coalesce((select jsonb_agg(jsonb_build_object('id', c.id, 'name', c.name) order by m.joined_at)
                         from public.class_members m join public.classes c on c.id = m.class_id
                         where m.student_id = u), '[]'::jsonb),
-    'exams', coalesce((select jsonb_agg(jsonb_build_object('id', e.id, 'title', e.title, 'className', c.name) order by e.created_at desc)
+    'exams', coalesce((select jsonb_agg(jsonb_build_object(
+                       'id', e.id, 'title', e.title, 'className', c.name,
+                       'opens', app_private.ms(e.opens_at), 'closes', app_private.ms(e.closes_at),
+                       'submitUntil', app_private.ms(e.closes_at + app_private.grace())
+                     ) order by e.created_at desc)
                        from public.exams e join public.classes c on c.id = e.class_id
                        where c.teacher_id = u
                           or exists (select 1 from public.class_members m where m.class_id = c.id and m.student_id = u)),
@@ -635,6 +639,17 @@ begin
   return affected;
 end $$;
 
+create table if not exists app_private.optics_roster (
+  class_id uuid not null references public.classes(id) on delete cascade,
+  email text not null,
+  student_number text not null,
+  student_name text not null,
+  primary key (class_id, email),
+  unique (class_id, student_number)
+);
+alter table app_private.optics_roster enable row level security;
+revoke all on app_private.optics_roster from public, anon, authenticated;
+
 create or replace function public.app_get_exam(p_exam uuid) returns jsonb
 language plpgsql security definer set search_path = '' as $$
 declare u uuid := app_private.uid(); e public.exams; c public.classes; a public.attempts; is_owner boolean;
@@ -653,22 +668,40 @@ begin
       'exam', app_private.exam_json(e, u), 'teacher', true, 'attempt', null,
       'canDelete', not exists (select 1 from public.attempts where exam_id = e.id),
       'roster', coalesce((
+        with members as (
+          select p.id, p.name, p.email, p.sid, app_private.label(p) as label
+          from public.class_members m join public.profiles p on p.id = m.student_id
+          where m.class_id = c.id
+        ), invited as (
+          select r.student_number, r.student_name
+          from app_private.optics_roster r
+          where r.class_id = c.id and not exists (
+            select 1 from members m where m.sid = r.student_number or lower(m.email) = r.email
+          )
+        ), full_roster as (
+          select id, name, sid as student_number, label from members
+          union all
+          select null::uuid, student_name, student_number, student_number from invited
+          union all
+          select null::uuid, '', s.student_number, s.student_number
+          from app_private.optics_class_seats s
+          where s.class_id = c.id and not exists (
+            select 1 from members m where m.sid = s.student_number
+          ) and not exists (
+            select 1 from app_private.optics_roster r where r.class_id = c.id and r.student_number = s.student_number
+          )
+        )
         select jsonb_agg(jsonb_build_object(
-                 'name', p.name,
-                 'label', app_private.label(p),
-                 'studentNumber', p.sid,
-                 'seat', seats.seat,
-                 'scores', at.scores,
-                 'attempt', at.id,
-                 'submitted', at.submitted_at is not null,
-                 'published', coalesce(at.published, false),
-                 'total', case when at.scores is null then null else (select sum(x) from unnest(at.scores) as x) end)
-               order by seats.seat nulls last, nullif(p.sid, ''), p.name)
-        from public.class_members m
-        join public.profiles p on p.id = m.student_id
-        left join app_private.optics_class_seats seats on seats.class_id = m.class_id and seats.student_number = p.sid
-        left join public.attempts at on at.exam_id = e.id and at.student_id = m.student_id
-        where m.class_id = c.id), '[]'::jsonb));
+          'name', f.name, 'label', f.label, 'studentNumber', f.student_number,
+          'seat', seats.seat, 'joined', f.id is not null,
+          'scores', at.scores, 'attempt', at.id, 'submitted', at.submitted_at is not null,
+          'published', coalesce(at.published, false),
+          'total', (select sum(x) from unnest(at.scores) as x)
+        ) order by seats.seat nulls last, nullif(f.student_number, ''), f.name)
+        from full_roster f
+        left join app_private.optics_class_seats seats on seats.class_id = c.id and seats.student_number = f.student_number
+        left join public.attempts at on at.exam_id = e.id and at.student_id = f.id
+      ), '[]'::jsonb));
   end if;
 
   select * into a from public.attempts where exam_id = e.id and student_id = u;

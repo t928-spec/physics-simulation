@@ -58,6 +58,9 @@ section, aside {
 }
 .exam-card-summary { display: grid; gap: .3rem; min-width: 0; overflow-wrap: anywhere; }
 .exam-card-class { font-size: .8rem; color: #456579; }
+.exam-card-meta { display: flex; align-items: center; flex-wrap: wrap; gap: .3rem .6rem; }
+.exam-card-status { padding: .12rem .48rem; border-radius: 1rem; background: #dcecf6; color: #12496c; font-size: .75rem; font-weight: 700; }
+.exam-card-status.ended { background: #e7e9ec; color: #465260; }
 .exam-card-arrow { flex: none; font-size: 1.4rem; line-height: 1; }
 #instructions { background: #fffdf6; border-color: #e1dbcb; }
 .student-exam {

@@ -192,11 +192,12 @@ function addSeatImport(parent, classId) {
 }
 
 function submissionStatus(student) {
+  if (student.joined === false) return '尚未加入';
   return student.published ? '已發布' : student.submitted ? '已交卷' : student.attempt ? '有草稿' : '未作答';
 }
 
 function displayedTotal(student) {
-  return submissionStatus(student) === '未作答' ? 0 : student.total;
+  return student.joined === false || submissionStatus(student) === '未作答' ? 0 : student.total;
 }
 
 function gradeRows(roster) {
@@ -297,7 +298,16 @@ async function dashboard() {
         const card = link(append(list, 'li'), '', { exam: exam.id });
         card.className = 'exam-card';
         const summary = append(card, 'span', '', { className: 'exam-card-summary' });
-        append(summary, 'span', '班級 ' + exam.className, { className: 'exam-card-class' });
+        const meta = append(summary, 'span', '', { className: 'exam-card-meta' });
+        append(meta, 'span', '班級 ' + exam.className, { className: 'exam-card-class' });
+        if ('closes' in exam) {
+          const now = Date.now();
+          const deadline = exam.submitUntil ?? exam.closes;
+          const ended = deadline != null && now >= deadline;
+          const caption = ended ? '已結束' : exam.opens != null && now < exam.opens ? '尚未開始'
+            : exam.closes != null && now >= exam.closes ? '交卷寬限中' : '進行中';
+          append(meta, 'span', caption, { className: ended ? 'exam-card-status ended' : 'exam-card-status' });
+        }
         append(summary, 'strong', exam.title);
         append(card, 'span', '›', { className: 'exam-card-arrow' }).setAttribute('aria-hidden', 'true');
       }
@@ -351,7 +361,7 @@ async function showExam(id) {
       append(area, 'p', '已有學生儲存草稿或交卷，無法刪除此測驗。');
     }
     append(area, 'h3', '作答與批改');
-    if (!roster.length) append(area, 'p', '班級尚無學生加入。');
+    if (!roster.length) append(area, 'p', '班級尚無學生名單。');
     else {
       button(area, '匯出成績 CSV', () => downloadGrades(exam.title, roster));
       const copyStatus = status(area);
@@ -381,7 +391,7 @@ async function showExam(id) {
       const row = append(area, 'div', '', { className: 'controls' });
       const seat = student.seat == null ? '' : student.seat + ' 號｜';
       const total = displayedTotal(student);
-      append(row, 'span', seat + `${student.name}（${student.label}）｜${submissionStatus(student)}` + (total == null ? '' : `｜${total} 分`));
+      append(row, 'span', seat + `${student.name || '未登錄姓名'}（${student.label}）｜${submissionStatus(student)}` + (total == null ? '' : `｜${total} 分`));
       if (student.submitted) button(row, '檢視與批改', () => review(student.attempt, id).catch(error => append(area, 'p', error.message)));
     }
     return;
