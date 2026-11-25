@@ -195,18 +195,28 @@ function submissionStatus(student) {
   return student.published ? '已發布' : student.submitted ? '已交卷' : student.attempt ? '有草稿' : '未作答';
 }
 
+function displayedTotal(student) {
+  return submissionStatus(student) === '未作答' ? 0 : student.total;
+}
+
+function gradeRows(roster) {
+  return [
+    ['座號', '學號', '姓名', '狀態', ...rubric, '總分'],
+    ...roster.map(student => [student.seat, student.studentNumber, student.name, submissionStatus(student),
+      ...(student.scores ?? ['', '', '', '']), displayedTotal(student)])
+  ];
+}
+
+function safeSpreadsheetText(value) {
+  const text = String(value ?? '');
+  return /^[\s\uFEFF]*[=+\-@]|^[\t\r\n]/.test(text) ? "'" + text : text;
+}
+
 function downloadGrades(title, roster) {
   const cell = value => {
-    const text = String(value ?? '');
-    const safe = /^[\s\uFEFF]*[=+\-@]|^[\t\r\n]/.test(text) ? "'" + text : text;
-    return '"' + safe.replaceAll('"', '""') + '"';
+    return '"' + safeSpreadsheetText(value).replaceAll('"', '""') + '"';
   };
-  const rows = [['座號', '學號', '姓名', '狀態', ...rubric, '總分']];
-  for (const student of roster) {
-    rows.push([student.seat, student.studentNumber, student.name, submissionStatus(student),
-      ...(student.scores ?? ['', '', '', '']), student.total]);
-  }
-  const csv = '\uFEFF' + rows.map(row => row.map(cell).join(',')).join('\r\n');
+  const csv = '\uFEFF' + gradeRows(roster).map(row => row.map(cell).join(',')).join('\r\n');
   const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
   const download = append(document.body, 'a', '', { href: url, download: title.replace(/[<>:"/\\|?*]/g, '_') + '－成績.csv' });
   download.click();
@@ -344,6 +354,18 @@ async function showExam(id) {
     if (!roster.length) append(area, 'p', '班級尚無學生加入。');
     else {
       button(area, '匯出成績 CSV', () => downloadGrades(exam.title, roster));
+      const copyStatus = status(area);
+      button(area, '複製成績以貼到試算表', async () => {
+        const text = gradeRows(roster).map(row => row.map(value =>
+          safeSpreadsheetText(value).replace(/[\t\r\n]+/g, ' ')
+        ).join('\t')).join('\n');
+        try {
+          await navigator.clipboard.writeText(text);
+          copyStatus.textContent = '已複製成績，可直接貼到試算表。';
+        } catch {
+          copyStatus.textContent = '無法存取剪貼簿，可使用「匯出成績 CSV」。';
+        }
+      });
       if (roster.some(student => student.seat == null)) append(area, 'p', '未填座號的學生會排在匯出名單最後。');
     }
     if (roster.some(student => student.submitted && !student.published)) {
@@ -360,7 +382,8 @@ async function showExam(id) {
     for (const student of roster) {
       const row = append(area, 'div', '', { className: 'controls' });
       const seat = student.seat == null ? '' : student.seat + ' 號｜';
-      append(row, 'span', seat + `${student.name}（${student.label}）｜${submissionStatus(student)}` + (student.total == null ? '' : `｜${student.total} 分`));
+      const total = displayedTotal(student);
+      append(row, 'span', seat + `${student.name}（${student.label}）｜${submissionStatus(student)}` + (total == null ? '' : `｜${total} 分`));
       if (student.submitted) button(row, '檢視與批改', () => review(student.attempt, id).catch(error => append(area, 'p', error.message)));
     }
     return;
