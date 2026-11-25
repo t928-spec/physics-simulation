@@ -8,6 +8,7 @@ let benchZoom = 1;
 const benchCenterX = canvas.width / 2;
 const benchCenterY = canvas.height / 2;
 const graph = $('graph').getContext('2d');
+const practiceAnalysisPlaceholder = $('analysis').placeholder;
 const fmt = (n, digits = 3) => Number.isFinite(n) ? +n.toFixed(digits) : '—';
 const sin = angle => Math.sin(radians(angle));
 const distance = ([x, y], [a, b]) => Math.hypot(x - a, y - b);
@@ -901,6 +902,7 @@ function render() {
   reading.replaceChildren();
   ({ refraction: refractionTools, lens: lensTools, slit: slitTools })[id](tools, reading);
   $('analysis').value = current().analysis;
+  $('analysis').placeholder = exam ? '' : practiceAnalysisPlaceholder;
   renderAnalysisGuide();
   message('');
   renderViewControls();
