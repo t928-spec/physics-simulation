@@ -717,17 +717,32 @@ function lensTools(tools, reading) {
     if (s.lens === 'convex') {
       setting(tools, 'screen', '移動像屏（cm）', 5, 85, .5);
       button(tools, '像屏移到近端', () => { Object.assign(s, { screen: 5, direction: 'near', first: null }); action('screen-near'); });
-      button(tools, '像屏移到遠端', () => { Object.assign(s, { screen: 85, direction: 'far' }); action('screen-far'); });
+      button(tools, '像屏移到遠端', () => {
+        if (s.direction === 'near' && s.readings) s.readings.q = '';
+        Object.assign(s, { screen: 85, direction: 'far' });
+        action('screen-far');
+      });
     } else {
       setting(tools, 'reference', '移動參考物（cm）', 2, 20, .2);
       setting(tools, 'eye', '左右移動視點', -5, 5);
     }
   }
   numeric(reading, 'p', '物距 p（cm）');
-  numeric(reading, 'q', '帶正負號的像距 q（cm）');
+  const qInput = numeric(reading, 'q', '帶正負號的像距 q（cm）');
   const result = numeric(reading, 'result', '計算焦距（cm）');
   if (s.lens === 'convex') {
     result.closest('label').hidden = s.direction === 'near';
+    if (s.direction === 'far' && s.first) {
+      const average = el('output', null);
+      average.setAttribute('for', qInput.id);
+      qInput.parentElement.append(average);
+      const updateAverage = () => {
+        const q = qInput.valueAsNumber;
+        average.value = '平均像距 = ' + (q > 0 ? fmt((s.first.q + q) / 2) + ' cm' : '—');
+      };
+      qInput.addEventListener('input', updateAverage);
+      updateAverage();
+    }
     const hint = s.direction === 'near'
       ? (s.first ? '已暫存第一筆。保持物距，按「像屏移到遠端」開始第二次調焦。'
         : '第一次調焦只需填物距與像距。按「記下這次量測」後，先暫存讀值。')
