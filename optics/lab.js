@@ -220,9 +220,7 @@ function updatePinView() {
 function drawPinEyeScene(glass, medium, view, shift) {
   const eye = $('pin-eye-scene').getContext('2d');
   const turn = Math.sin(radians(view));
-  const center = 320 - (glass ? 42 : 76) * turn;
-  const width = glass ? 1 - .28 * Math.abs(turn) : 1;
-  const tilt = glass ? .065 * turn : 0;
+  const center = 320 - 76 * turn;
   const gradient = (top, bottom, stops) => {
     const fill = eye.createLinearGradient(0, top, 0, bottom);
     for (const [offset, color] of stops) fill.addColorStop(offset, color);
@@ -230,6 +228,7 @@ function drawPinEyeScene(glass, medium, view, shift) {
   };
   eye.fillStyle = gradient(0, 220, [[0, '#7e939a'], [.39, '#c2d0d3'], [.4, '#eef4f5'], [1, '#d4e4e9']]);
   eye.fillRect(0, 0, 640, 220);
+  if (glass) return drawGlassEyeScene(eye, view, shift, gradient);
   for (let x = -280; x <= 920; x += 24) {
     line(eye, [320 + 190 * turn + (x - 320) * .34, 90], [x, 220], '#afc8cf', .65);
   }
@@ -238,10 +237,9 @@ function drawPinEyeScene(glass, medium, view, shift) {
     line(eye, [0, y - skew], [640, y + skew], '#afc8cf', .65);
   }
 
-  // Pan the semicircular cell as a rigid shape; only the glass block changes projection.
   const vesselPerspective = () => {
     eye.save();
-    eye.transform(width, tilt, 0, 1, center - 320 * width, -320 * tilt);
+    eye.translate(center - 320, 0);
   };
   vesselPerspective();
   eye.fillStyle = '#48626c38';
@@ -249,49 +247,22 @@ function drawPinEyeScene(glass, medium, view, shift) {
   eye.ellipse(320, 178, 232, 19, 0, 0, 2 * Math.PI);
   eye.fill();
 
-  const shape = glass
-    ? [[105, 89], [517, 89], [559, 110], [559, 171], [147, 171], [105, 150]]
-    : null;
   const outline = () => {
     eye.beginPath();
-    if (shape) {
-      eye.moveTo(...shape[0]);
-      for (const point of shape.slice(1)) eye.lineTo(...point);
-    } else {
-      eye.moveTo(78, 75);
-      eye.bezierCurveTo(155, 48, 485, 48, 562, 75);
-      eye.lineTo(562, 159);
-      eye.bezierCurveTo(535, 194, 105, 194, 78, 159);
-    }
+    eye.moveTo(78, 75);
+    eye.bezierCurveTo(155, 48, 485, 48, 562, 75);
+    eye.lineTo(562, 159);
+    eye.bezierCurveTo(535, 194, 105, 194, 78, 159);
     eye.closePath();
   };
   outline();
-  eye.fillStyle = glass ? '#6cbeb255' : medium === 'salt' ? '#addfdb65' : '#9acfe66b';
+  eye.fillStyle = medium === 'salt' ? '#addfdb65' : '#9acfe66b';
   eye.fill();
   eye.restore();
   const pin = (offset, color) => {
-    const x = center + offset * width;
-    const y = 81 + offset * tilt;
-    if (glass) {
-      line(eye, [x, y + 7], [x, y + 79], '#243a40', 2);
-      eye.fillStyle = color;
-      eye.beginPath();
-      eye.moveTo(x - 9, y - 9);
-      eye.quadraticCurveTo(x - 5, y - 5, x - 5, y + 3);
-      eye.lineTo(x - 8, y + 10);
-      eye.quadraticCurveTo(x, y + 13, x + 8, y + 10);
-      eye.lineTo(x + 5, y + 3);
-      eye.quadraticCurveTo(x + 5, y - 5, x + 9, y - 9);
-      eye.closePath();
-      eye.fill();
-      eye.beginPath();
-      eye.ellipse(x, y - 9, 9, 3, 0, 0, 2 * Math.PI);
-      eye.fill();
-      eye.strokeStyle = '#ffffff8a';
-      eye.lineWidth = 1;
-      eye.stroke();
-      return;
-    }
+    const x = center + offset;
+    const y = 81;
+
     line(eye, [x, y], [x, y + 92], color, 4);
     eye.fillStyle = color;
     eye.beginPath();
@@ -299,31 +270,9 @@ function drawPinEyeScene(glass, medium, view, shift) {
     eye.fill();
   };
   const pinOffset = Math.max(-221, Math.min(221, shift * 245));
-  pin(pinOffset, glass ? '#539e8c' : '#736057');
-  pin(0, glass ? '#176954' : '#243a46');
+  pin(pinOffset, '#736057');
+  pin(0, '#243a46');
   vesselPerspective();
-  if (glass) {
-    const face = (points, fill) => {
-      eye.beginPath();
-      eye.moveTo(...points[0]);
-      for (const point of points.slice(1)) eye.lineTo(...point);
-      eye.closePath();
-      eye.fillStyle = fill;
-      eye.fill();
-      eye.strokeStyle = '#346c67a0';
-      eye.lineWidth = 1.4;
-      eye.stroke();
-    };
-    face([[105, 89], [517, 89], [559, 110], [147, 110]], '#effffc72');
-    face([[105, 89], [147, 110], [147, 171], [105, 150]], '#1e736465');
-    face([[147, 110], [559, 110], [559, 171], [147, 171]],
-      gradient(110, 171, [[0, '#c6fff178'], [.13, '#f4fff761'], [.31, '#54a3991f'], [.85, '#3a82753d'], [1, '#226a5e8c']]));
-    line(eye, [149, 112], [556, 112], '#f6fff4dd', 2);
-    line(eye, [148, 115], [148, 167], '#f6fff4a0', 1.5);
-    line(eye, [153, 167], [555, 167], '#e8fff797', 1.4);
-    eye.restore();
-    return;
-  }
   outline();
   eye.fillStyle = gradient(63, 181, [[0, '#ffffff44'], [.35, '#ffffff0d'], [.42, '#ffffff69'], [.48, '#bde4f019'], [.87, '#e7f7ff26'], [1, '#507f9260']]);
   eye.fill();
@@ -337,6 +286,73 @@ function drawPinEyeScene(glass, medium, view, shift) {
   eye.stroke();
   eye.restore();
 }
+
+function drawGlassEyeScene(eye, view, shift, gradient) {
+  const yaw = radians(view) * .65;
+  const sinYaw = Math.sin(yaw);
+  const cosYaw = Math.cos(yaw);
+  const center = 320 - 36 * sinYaw;
+  const project = (x, y, height = 0) => [
+    center + x * cosYaw - y * sinYaw,
+    153 + .24 * (x * sinYaw + y * cosYaw) - height
+  ];
+  eye.save();
+  eye.beginPath();
+  eye.rect(0, 90, 640, 130);
+  eye.clip();
+  for (let offset = -720; offset <= 720; offset += 25) {
+    line(eye, project(offset, -720), project(offset, 720), '#afc8cf', .65);
+    line(eye, project(-720, offset), project(720, offset), '#afc8cf', .65);
+  }
+  eye.restore();
+
+  const corners = [[-207, -42], [207, -42], [207, 42], [-207, 42]];
+  const base = corners.map(([x, y]) => project(x, y));
+  const top = corners.map(([x, y]) => project(x, y, 58));
+  const face = (points, fill, stroke = true) => {
+    eye.beginPath();
+    eye.moveTo(...points[0]);
+    for (const point of points.slice(1)) eye.lineTo(...point);
+    eye.closePath();
+    eye.fillStyle = fill;
+    eye.fill();
+    if (stroke) {
+      eye.strokeStyle = '#346c67a0';
+      eye.lineWidth = 1.4;
+      eye.stroke();
+    }
+  };
+  face(base, '#45766c43', false);
+  const pin = (x, y, color) => {
+    line(eye, [x, y + 7], [x, y + 79], '#243a40', 2);
+    eye.fillStyle = color;
+    eye.beginPath();
+    eye.moveTo(x - 9, y - 9);
+    eye.quadraticCurveTo(x - 5, y - 5, x - 5, y + 3);
+    eye.lineTo(x - 8, y + 10);
+    eye.quadraticCurveTo(x, y + 13, x + 8, y + 10);
+    eye.lineTo(x + 5, y + 3);
+    eye.quadraticCurveTo(x + 5, y - 5, x + 9, y - 9);
+    eye.closePath();
+    eye.fill();
+    eye.beginPath();
+    eye.ellipse(x, y - 9, 9, 3, 0, 0, 2 * Math.PI);
+    eye.fill();
+    eye.strokeStyle = '#ffffff8a';
+    eye.lineWidth = 1;
+    eye.stroke();
+  };
+  pin(center + Math.max(-180, Math.min(180, shift * 245)) * cosYaw, 74, '#539e8c');
+  pin(center, 74, '#176954');
+  face(top, '#effffc72');
+  const [a, b] = sinYaw < 0 ? [3, 0] : [1, 2];
+  if (sinYaw !== 0) face([top[a], top[b], base[b], base[a]], '#1e736465');
+  face([top[3], top[2], base[2], base[3]],
+    gradient(81, 185, [[0, '#e0fff18c'], [.35, '#74bca530'], [.76, '#3a82753d'], [1, '#226a5e8c']]));
+  line(eye, top[3], top[2], '#f6fff4d0', 2);
+  line(eye, base[3], base[2], '#376e64', 1.8);
+}
+
 function drawObserver({ start, eye, theta }) {
   line(ctx, start, eye, '#257385', 2, [6, 5]);
   drawEyeSymbol(eye, theta);
@@ -709,7 +725,16 @@ function lensTools(tools, reading) {
   }
   numeric(reading, 'p', '物距 p（cm）');
   numeric(reading, 'q', '帶正負號的像距 q（cm）');
-  numeric(reading, 'result', '計算焦距（cm）');
+  const result = numeric(reading, 'result', '計算焦距（cm）');
+  if (s.lens === 'convex') {
+    result.closest('label').hidden = s.direction === 'near';
+    const hint = s.direction === 'near'
+      ? (s.first ? '已暫存第一筆。保持物距，按「像屏移到遠端」開始第二次調焦。'
+        : '第一次調焦只需填物距與像距。按「記下這次量測」後，先暫存讀值。')
+      : (s.first ? `第一次像距是 ${fmt(s.first.q)} cm。填入第二次的像距，再用兩次像距的平均值算焦距。`
+        : '請先按「像屏移到近端」，完成第一次調焦與記錄。');
+    reading.before(el('p', hint, { className: 'lens-stage-hint' }));
+  }
 }
 function slitTools(tools, reading) {
   const s = setup();
@@ -779,7 +804,7 @@ const steps = {
   lens: [
     ['將光源屏和透鏡裝上光具座。使用凸透鏡時裝上像屏，使用凹透鏡時裝上參考物。',
       '凸透鏡所成的實像可用像屏承接，凹透鏡的虛像則用參考物比較位置。'],
-    ['測凸透鏡時，先使物距大於焦距。把像屏放在靠近透鏡處，慢慢向外移，直到出現清晰倒立像。讀取並記錄物距與像距，再從遠端往透鏡方向調焦一次。',
+    ['測凸透鏡時，可先把物距設為 30 cm，再按「像屏移到近端」。向外移動像屏，找到清晰的倒立像。填物距與像距後按「記下這次量測」，先暫存第一筆。保持物距不變，按「像屏移到遠端」，向透鏡移動像屏重新調焦。填第二次的像距，用兩次像距的平均值計算焦距，再按一次記錄。',
       '從兩個方向各找一次清晰位置，可用兩次讀值的平均值估計像距。'],
     ['測凹透鏡時，切到「透鏡後方」。左右移動視點，再調整參考物，直到參考物上緣與虛像在不同視點都上下對齊。',
       '兩者深度不同時，視點改變會讓它們產生相對位移。視差消失時，可用參考物的位置估計虛像位置。'],
@@ -898,6 +923,7 @@ function render() {
   renderSteps();
   for (const tab of $('experiments').querySelectorAll('button')) tab.setAttribute('aria-pressed', tab.dataset.lab === id);
   const tools = $('tools'), reading = $('reading');
+  reading.parentElement.querySelector('.lens-stage-hint')?.remove();
   tools.replaceChildren();
   reading.replaceChildren();
   ({ refraction: refractionTools, lens: lensTools, slit: slitTools })[id](tools, reading);
@@ -969,19 +995,26 @@ function capture() {
     expected = sin(i) / sin(r);
     row = { group: media[s.medium], i, r, si: sin(i), sr: sin(r), result };
   } else if (id === 'lens') {
-    if (!s.mounted) return message('先把器材裝上光具座。');
+    if (!s.mounted) return message('請先在實驗台按「裝上光具座」，再調整器材與讀值。');
     const [p, q] = readings('p', 'q');
-    if (!Number.isFinite(p) || !Number.isFinite(q) || p <= 0 || q === 0 || p + q === 0) return message('請輸入可代入成像公式的物距與像距。');
+    if (!Number.isFinite(p) || p <= 0) return message('請先填入大於 0 的物距 p。');
+    if (!Number.isFinite(q) || q === 0) return message('請填入帶正負號的像距 q，像距不能為 0。');
+    if (p + q === 0) return message('這組物距與像距無法求出有限焦距，請重新讀值。');
     const convex = s.lens === 'convex';
     const qActual = imageDistance(s.p, lensF());
     if (convex && !(qActual > 0 && qActual <= 85)) return message('目前無法在光具座的像屏行程內取得實像，請調整物距。');
-    if (!exam && (Math.abs(p - s.p) > .55 || Math.abs(q - (convex ? s.screen : -s.reference)) > .55)) return message('請核對刻度與像距的正負號。');
+    if (!exam && Math.abs(p - s.p) > .55) return message('物距 p 與光源屏刻度不符。請從透鏡的 0 刻度讀取光源屏到透鏡的距離。');
+    if (!exam && Math.abs(q - (convex ? s.screen : -s.reference)) > .55) {
+      return message(convex ? '像距 q 與像屏刻度不符。請讀取像屏到透鏡的距離，填正值。'
+        : '像距 q 與參考物刻度不符。請讀取參考物到透鏡的距離，填負值。');
+    }
     if (!exam && Math.abs((convex ? s.screen : -s.reference) - qActual) > (convex ? 2 : .65)) return message(convex ? '繼續移動像屏，直到箭頭清晰。' : '左右改變視點，並調整參考物直到視差消失。');
     if (convex && s.direction === 'near') {
       s.first = { p, q };
       event('near-focus-reading', { p, q, screen: s.screen });
+      render();
       changed();
-      return message('近端調焦讀值已記下。把像屏移到遠端，再從遠端向透鏡找一次。');
+      return message('第一筆已暫存，兩次調焦完成後才會進入量測紀錄。');
     }
     if (convex && (!s.first || Math.abs(s.first.p - p) > .5)) return message('請在相同物距下先完成近端調焦。');
     const meanQ = convex ? (q + s.first.q) / 2 : q;

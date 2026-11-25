@@ -355,13 +355,11 @@ async function showExam(id) {
     else {
       button(area, '匯出成績 CSV', () => downloadGrades(exam.title, roster));
       const copyStatus = status(area);
-      button(area, '複製成績以貼到試算表', async () => {
-        const text = gradeRows(roster).map(row => row.map(value =>
-          safeSpreadsheetText(value).replace(/[\t\r\n]+/g, ' ')
-        ).join('\t')).join('\n');
+      button(area, '複製總分以貼到試算表', async () => {
+        const text = roster.map(student => displayedTotal(student) ?? '').join('\n');
         try {
           await navigator.clipboard.writeText(text);
-          copyStatus.textContent = '已複製成績，可直接貼到試算表。';
+          copyStatus.textContent = '已複製總分，可貼到試算表的一欄。';
         } catch {
           copyStatus.textContent = '無法存取剪貼簿，可使用「匯出成績 CSV」。';
         }

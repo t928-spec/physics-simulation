@@ -387,12 +387,11 @@ begin
 
   mean_err := case when n_err > 0 then sum_err / n_err end;
   has_fit := jsonb_typeof(p_snap -> 'fit') = 'object';
-  text_len := char_length(btrim(coalesce(p_snap ->> 'analysis', '')));
+  text_len := char_length(regexp_replace(coalesce(p_snap ->> 'analysis', ''), '^[[:space:]　]+|[[:space:]　]+$', '', 'g'));
   a_calc := case when n_rows = 0 then 0 else round(10.0 * n_calc_ok / n_rows)::int end;
-  a_acc := case when mean_err is null then 0 when mean_err <= 0.03 then 8 when mean_err <= 0.06 then 5
-                when mean_err <= 0.10 then 2 else 0 end;
-  a_graph := case when n_rows >= 2 and has_fit then 4 else 0 end;
-  a_text := case when n_rows = 0 then 0 when text_len >= 30 then 3 when text_len >= 10 then 1 else 0 end;
+  a_acc := case when mean_err <= 0.03 then 2 when mean_err <= 0.06 then 1 else 0 end;
+  a_graph := case when n_rows >= 2 and has_fit then 3 else 0 end;
+  a_text := case when n_rows = 0 then 0 when text_len >= 30 then 10 when text_len >= 10 then 3 else 0 end;
   s_ana := a_calc + a_acc + a_graph + a_text;
 
   s_step := least(greatest(s_step, 0), 25); s_equip := least(greatest(s_equip, 0), 25);
@@ -404,6 +403,7 @@ begin
     c2 := format('器材使用 %s/25：沒有量測紀錄，無法評估。', s_equip);
     c3 := format('讀值 %s/25：沒有量測紀錄，無法評估。', s_read);
     c4 := format('數據分析 %s/25：沒有量測紀錄，無法評估。', s_ana);
+    if text_len = 0 then c4 := c4 || ' 未填寫分析與結論。'; end if;
   else
     c1 := format('實驗步驟 %s/25：共記錄 %s 筆，其中 %s 筆依完整流程（%s）取得。', s_step, total_rec, good_rec, flow)
        || case when good_rec < total_rec then ' 有些紀錄沒有重新完成流程就記下（例如沒有重新插針、重新調焦或重設尺標），每一組數據都應該重新量測。' else '' end
@@ -414,10 +414,12 @@ begin
             then format(' 建議至少改變 3 種%s，且範圍至少 %s%s，才能檢驗關係是否成立。', var_name, thr, var_unit) else '' end;
     c3 := format('讀值 %s/25：%s 筆讀值準確、%s 筆略有偏差、%s 筆誤差過大。', s_read, n_full, n_half, n_bad)
        || case when n_full < n_rows then ' ' || read_hint else '' end;
-    c4 := format('數據分析 %s/25：%s/%s 筆計算結果與自己的讀值相符；結果與標準值的平均相對誤差約 %s%%；%s；%s。',
-                 s_ana, n_calc_ok, n_rows, coalesce(round(mean_err * 100, 1)::text, '—'),
+    c4 := format('數據分析 %s/25：計算 %s/10（%s/%s 筆相符）；標準值差距 %s/2（平均相對誤差約 %s%%）；趨勢線 %s/3（%s）；文字 %s/10（%s）。',
+                 s_ana, a_calc, n_calc_ok, n_rows, a_acc, coalesce(round(mean_err * 100, 1)::text, '—'), a_graph,
                  case when a_graph > 0 then '已畫出趨勢線' else '尚未啟用趨勢線（請在散布圖勾選最小平方法趨勢線）' end,
-                 case when a_text >= 3 then '已寫分析與結論（內容由老師審閱）'
+                 a_text,
+                 case when text_len = 0 then '未填寫分析與結論'
+                      when a_text = 10 then '已寫分析與結論（內容由老師審閱）'
                       else '分析與結論太短，建議說明選軸理由、斜率的物理意義與誤差來源' end)
        || case when n_calc_ok < n_rows then ' 請檢查公式、單位換算與正負號。' else '' end;
   end if;
