@@ -165,6 +165,55 @@ function activationPanel() {
   const second = input(fields, '再輸入一次密碼', 'password', { required: true, minLength: 8, autocomplete: 'new-password' });
 }
 
+function addSeatImport(parent, classId) {
+  const details = append(parent, 'details');
+  append(details, 'summary', '匯入座號');
+  append(details, 'p', '從試算表複製「學號、座號」兩欄，貼到下方。每列一位學生，可含欄名。');
+  const importer = form(details, '儲存座號', async () => {
+    const lines = source.value.trim().split(/\r?\n/).filter(line => line.trim());
+    if (/^學號[\t,，]/.test(lines[0])) lines.shift();
+    const students = new Set();
+    const seats = new Set();
+    const rows = lines.map(line => {
+      const [studentNumber, seatText, extra] = line.split(/[\t,，]/).map(value => value.trim());
+      const seat = Number(seatText);
+      if (extra !== undefined || !/^\d{1,30}$/.test(studentNumber) ||
+          !/^\d{1,3}$/.test(seatText) || seat < 1 || students.has(studentNumber) || seats.has(seat)) {
+        throw new Error('每列請填一組學號與座號，兩者都不能重複。');
+      }
+      students.add(studentNumber);
+      seats.add(seat);
+      return { studentNumber, seat };
+    });
+    const count = await api('classes/' + classId + '/seats', { rows });
+    return '已儲存 ' + count + ' 筆座號。';
+  });
+  const source = input(importer, '學號、座號', 'textarea', { required: true, rows: 4, maxLength: 20000 });
+}
+
+function submissionStatus(student) {
+  return student.published ? '已發布' : student.submitted ? '已交卷' : student.attempt ? '有草稿' : '未作答';
+}
+
+function downloadGrades(title, roster) {
+  const cell = value => {
+    const text = String(value ?? '');
+    const safe = /^[\s\uFEFF]*[=+\-@]|^[\t\r\n]/.test(text) ? "'" + text : text;
+    return '"' + safe.replaceAll('"', '""') + '"';
+  };
+  const rows = [['座號', '學號', '姓名', '狀態', ...rubric, '總分']];
+  for (const student of roster) {
+    rows.push([student.seat, student.studentNumber, student.name, submissionStatus(student),
+      ...(student.scores ?? ['', '', '', '']), student.total]);
+  }
+  const csv = '\uFEFF' + rows.map(row => row.map(cell).join(',')).join('\r\n');
+  const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
+  const download = append(document.body, 'a', '', { href: url, download: title.replace(/[<>:"/\\|?*]/g, '_') + '－成績.csv' });
+  download.click();
+  download.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
 async function dashboard() {
   const version = ++viewVersion;
   showPanel();
@@ -197,6 +246,7 @@ async function dashboard() {
         const box = append(area, 'section');
         append(box, 'h3', classroom.name);
         classInvitation(box, classroom.code);
+        addSeatImport(box, classroom.id);
         const creator = form(box, '建立測驗', async () => {
           await api('exams', { classroom: classroom.id, title: title.value, lab: experiment.value, prompt: prompt.value,
             opens: opens.value ? opens.value + ':00+08:00' : '', closes: closes.value ? closes.value + ':00+08:00' : '',
@@ -292,6 +342,10 @@ async function showExam(id) {
     }
     append(area, 'h3', '作答與批改');
     if (!roster.length) append(area, 'p', '班級尚無學生加入。');
+    else {
+      button(area, '匯出成績 CSV', () => downloadGrades(exam.title, roster));
+      if (roster.some(student => student.seat == null)) append(area, 'p', '未填座號的學生會排在匯出名單最後。');
+    }
     if (roster.some(student => student.submitted && !student.published)) {
       const output = status(area);
       button(area, '發布全部已交卷學生的成績', async () => {
@@ -305,8 +359,8 @@ async function showExam(id) {
     }
     for (const student of roster) {
       const row = append(area, 'div', '', { className: 'controls' });
-      const state = student.published ? '已發布' : student.submitted ? '已交卷' : student.attempt ? '有草稿' : '未作答';
-      append(row, 'span', `${student.name}（${student.label}）｜${state}` + (student.total == null ? '' : `｜${student.total} 分`));
+      const seat = student.seat == null ? '' : student.seat + ' 號｜';
+      append(row, 'span', seat + `${student.name}（${student.label}）｜${submissionStatus(student)}` + (student.total == null ? '' : `｜${student.total} 分`));
       if (student.submitted) button(row, '檢視與批改', () => review(student.attempt, id).catch(error => append(area, 'p', error.message)));
     }
     return;

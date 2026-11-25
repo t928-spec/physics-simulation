@@ -605,6 +605,34 @@ begin
   delete from public.exams where id = p_exam;
 end $$;
 
+create table if not exists app_private.optics_class_seats (
+  class_id uuid not null references public.classes(id) on delete cascade,
+  student_number text not null,
+  seat integer not null check (seat between 1 and 999),
+  primary key (class_id, student_number),
+  unique (class_id, seat) deferrable initially deferred
+);
+
+create or replace function public.app_save_class_seats(p_class uuid, p_rows jsonb) returns int
+language plpgsql security definer set search_path = '' as $$
+declare u uuid := app_private.uid(); affected int;
+begin
+  if not app_private.is_teacher(u) or not exists (
+    select 1 from public.classes where id = p_class and teacher_id = u
+  ) then raise exception '找不到可管理的班級'; end if;
+  if jsonb_typeof(p_rows) is distinct from 'array' then raise exception '名單格式不正確'; end if;
+  if jsonb_array_length(p_rows) not between 1 and 500 or exists (
+    select 1 from jsonb_array_elements(p_rows) row
+    where coalesce(row->>'studentNumber', '') !~ '^[0-9]{1,30}$'
+       or coalesce(row->>'seat', '') !~ '^[1-9][0-9]{0,2}$'
+  ) then raise exception '請檢查學號與座號（1–999）'; end if;
+  insert into app_private.optics_class_seats(class_id, student_number, seat)
+  select p_class, row->>'studentNumber', (row->>'seat')::int from jsonb_array_elements(p_rows) row
+  on conflict (class_id, student_number) do update set seat = excluded.seat;
+  get diagnostics affected = row_count;
+  return affected;
+end $$;
+
 create or replace function public.app_get_exam(p_exam uuid) returns jsonb
 language plpgsql security definer set search_path = '' as $$
 declare u uuid := app_private.uid(); e public.exams; c public.classes; a public.attempts; is_owner boolean;
@@ -626,13 +654,17 @@ begin
         select jsonb_agg(jsonb_build_object(
                  'name', p.name,
                  'label', app_private.label(p),
+                 'studentNumber', p.sid,
+                 'seat', seats.seat,
+                 'scores', at.scores,
                  'attempt', at.id,
                  'submitted', at.submitted_at is not null,
                  'published', coalesce(at.published, false),
                  'total', case when at.scores is null then null else (select sum(x) from unnest(at.scores) as x) end)
-               order by nullif(p.sid, ''), p.name)
+               order by seats.seat nulls last, nullif(p.sid, ''), p.name)
         from public.class_members m
         join public.profiles p on p.id = m.student_id
+        left join app_private.optics_class_seats seats on seats.class_id = m.class_id and seats.student_number = p.sid
         left join public.attempts at on at.exam_id = e.id and at.student_id = m.student_id
         where m.class_id = c.id), '[]'::jsonb));
   end if;
@@ -780,7 +812,7 @@ begin
     from pg_proc p join pg_namespace n on n.oid = p.pronamespace
     where n.nspname = 'public' and p.proname in (
       'app_me', 'app_dashboard', 'app_join', 'app_create_class', 'app_create_exam',
-      'app_get_exam', 'app_delete_empty_exam', 'app_save_draft', 'app_submit', 'app_get_submission', 'app_grade', 'app_publish_all'
+      'app_get_exam', 'app_save_class_seats', 'app_delete_empty_exam', 'app_save_draft', 'app_submit', 'app_get_submission', 'app_grade', 'app_publish_all'
     )
   loop
     execute format('revoke all on function %s from public, anon', f.sig);

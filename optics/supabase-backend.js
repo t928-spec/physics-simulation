@@ -86,6 +86,7 @@ export async function api(path, data = {}) {
   }
 
   let match;
+  if ((match = path.match(/^classes\/([^/]+)\/seats$/))) return rpc('app_save_class_seats', { p_class: match[1], p_rows: data.rows });
   if ((match = path.match(/^exams\/([^/]+)$/))) return rpc('app_get_exam', { p_exam: match[1] });
   if ((match = path.match(/^exams\/([^/]+)\/delete$/))) return rpc('app_delete_empty_exam', { p_exam: match[1] });
   if ((match = path.match(/^exams\/([^/]+)\/draft$/))) return rpc('app_save_draft', { p_exam: match[1], p_snapshot: data.snapshot });
