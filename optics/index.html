@@ -35,7 +35,7 @@
           <div class="bench-toolbar">
             <div id="view-controls" class="controls" role="group" aria-label="實驗台視角"></div>
             <button id="expand-bench" type="button" aria-controls="bench" aria-pressed="false">放大實驗畫面</button>
-            <a class="mobile-bench-link" href="#instructions">查看操作指引</a>
+            <a id="guide-link" class="mobile-bench-link" href="#guide">查看操作指引</a>
           </div>
           <canvas id="bench" width="720" height="300" tabindex="0" aria-label="量測工作區"></canvas>
           <div id="pin-view" hidden>
@@ -52,16 +52,20 @@
           <div id="tools" class="controls"></div>
         </section>
         <aside id="instructions">
-          <h2>操作指引</h2>
-          <a class="mobile-bench-link" href="#workbench">返回實驗台</a>
-          <ol id="steps"></ol>
-          <div id="reading" class="controls"></div>
-          <button id="record" class="primary">記下這次量測</button>
-          <p id="feedback" role="status"></p>
-          <details id="feedback-reason" hidden>
-            <summary>原因？</summary>
-            <p id="feedback-explanation"></p>
-          </details>
+          <div id="guide">
+            <h2 id="guide-heading">操作指引</h2>
+            <a class="mobile-bench-link" href="#workbench">返回實驗台</a>
+            <ol id="steps"></ol>
+          </div>
+          <div id="measurement-entry">
+            <div id="reading" class="controls"></div>
+            <button id="record" class="primary">記下這次量測</button>
+            <p id="feedback" role="status"></p>
+            <details id="feedback-reason" hidden>
+              <summary>原因？</summary>
+              <p id="feedback-explanation"></p>
+            </details>
+          </div>
         </aside>
       </div>
       <section>

@@ -796,6 +796,9 @@ const steps = {
 };
 let guideKey;
 function renderSteps() {
+  const testGuide = Boolean(exam) && document.body.classList.contains('student-exam');
+  $('guide-heading').textContent = testGuide ? '考試說明' : '操作指引';
+  $('guide-link').textContent = testGuide ? '查看考試說明' : '查看操作指引';
   const key = exam ? exam.prompt || '完成實驗操作，保留原始讀值，並用圖表支持結論。'
     : id === 'refraction' ? (setup().medium === 'glass' ? 'glass' : 'liquid') : id;
   const version = exam ? 'exam:' + key : key;

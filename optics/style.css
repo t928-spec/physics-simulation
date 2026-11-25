@@ -138,6 +138,17 @@ hr { border: 0; border-top: 1px solid #dce7e0; margin: 1rem 0; }
 }
 @media (max-width: 740px) {
   .bench { display: block; }
+  .student-exam .bench { display: flex; flex-direction: column; gap: 0; }
+  .student-exam #instructions { display: contents; }
+  .student-exam #guide, .student-exam #measurement-entry {
+    padding: 1.1rem;
+    margin-bottom: .85rem;
+    border: 1px solid var(--edge);
+    border-radius: 12px;
+    background: #f9edf5;
+  }
+  .student-exam #guide { order: -1; }
+  .student-exam #guide .mobile-bench-link { display: none; }
   header { gap: .5rem; }
   header button { flex-shrink: 0; }
   main { padding-top: 1rem; }
