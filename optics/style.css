@@ -165,3 +165,55 @@ hr { border: 0; border-top: 1px solid #dce7e0; margin: 1rem 0; }
   #tools select, #reading select, #graph-settings select { width: 100%; }
   #record { width: 100%; }
 }
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+    color: #e5eef5;
+    background: #101922;
+    --ink-accent: #9dd3f7;
+    --surface: #182431;
+    --edge: #455968;
+    --wash: #253a4c;
+    --panel: #1c2c3a;
+    --control: #13202b;
+    --control-edge: #6a8295;
+    --action: #235a80;
+  }
+  .student-exam {
+    color: #f5e9f3;
+    background: #201723;
+    --ink-accent: #efbce8;
+    --surface: #2c2130;
+    --edge: #694e68;
+    --wash: #422e45;
+    --panel: #342738;
+    --control: #251c29;
+    --control-edge: #92728e;
+    --action: #75406e;
+    min-height: 100vh;
+  }
+  main a { color: var(--ink-accent); }
+  main a:visited { color: #d4baf6; }
+  #workbench, #instructions, .exam-card, .student-exam #workbench, .student-exam #instructions,
+  .student-exam #guide, .student-exam #measurement-entry {
+    background: var(--panel);
+    border-color: var(--edge);
+  }
+  .exam-card:hover, .exam-card:focus-visible { background: var(--wash); }
+  .exam-card-class { color: #bed1df; }
+  .exam-card-status { background: #294861; color: #cdeaff; }
+  .exam-card-status.ended { background: #374450; color: #e2eaf1; }
+  main :is(input, button, select, textarea) { background: var(--control); border-color: var(--control-edge); }
+  main :is(input, textarea)::placeholder { color: #b1bfcb; }
+  main button:hover { background: var(--wash); }
+  main button[aria-pressed=true], main button.primary, .exam-mode-label {
+    color: #fff;
+    background: var(--action);
+    border-color: var(--control-edge);
+  }
+  main button[aria-pressed=true]:hover, main button.primary:hover { filter: brightness(1.15); }
+  td, th, hr { border-color: var(--edge); }
+  :focus-visible { outline-color: #ffd28a; }
+  /* Canvas labels use dark ink, so their drawing surfaces stay light. */
+}
