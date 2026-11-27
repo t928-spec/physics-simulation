@@ -310,11 +310,10 @@ async function dashboard() {
         append(creator, 'span', '系統會依「實驗步驟、器材使用、讀值、數據分析」各 25 分自動批改，老師可再調整。');
       }
     }
-    if (!query.has('join') && !identity.user.teacher) {
-      const joiner = form(area, '加入班級', async () => { await api('join', { code: code.value }); await dashboard(); });
-      const code = input(joiner, '班級代碼', 'text', { required: true, maxLength: 100 });
-    }
     if (joined.length) append(area, 'p', '已加入班級｜' + joined.map(item => item.name).join('、'));
+    else if (!identity.user.teacher && !query.has('join')) {
+      append(area, 'p', '目前尚未加入班級。請確認你使用的是收到班級邀請的信箱，或請老師核對名單。');
+    }
     append(area, 'h3', '測驗');
     if (!exams.length) append(area, 'p', '目前沒有測驗。');
     else {
