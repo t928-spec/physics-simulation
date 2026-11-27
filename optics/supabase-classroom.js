@@ -15,6 +15,7 @@ const rubric = ['實驗步驟', '器材使用', '讀值', '數據分析'];
 const formatTime = time => new Date(time).toLocaleString('zh-TW', { timeZone: 'Asia/Taipei' });
 let identity;
 let active;
+let countdownTimer;
 let saveTimer;
 let saveQueue = Promise.resolve();
 let viewVersion = 0;
@@ -79,6 +80,7 @@ async function practice() {
     }
   }
   viewVersion++;
+  clearTimeout(countdownTimer);
   if (query.has('exam')) openAssessment(null);
   for (const key of ['exam', 'join', 'login', 'classroom']) query.delete(key);
   const url = new URL(location.href);
@@ -91,11 +93,34 @@ async function practice() {
   toggle.textContent = '班級與測驗';
 }
 function showPanel() {
+  clearTimeout(countdownTimer);
   document.body.classList.remove('student-exam');
   area.replaceChildren();
   area.hidden = false;
   lab.hidden = true;
   toggle.textContent = '返回實驗練習';
+}
+
+function showCountdown(exam) {
+  if (exam.closes == null) {
+    append(area, 'p', '此測驗無作答時間限制。');
+    return;
+  }
+  const display = append(area, 'p', '', { className: 'exam-countdown' });
+  const deadline = exam.submitUntil ?? exam.closes;
+  function tick() {
+    const now = Date.now();
+    if (now >= deadline) {
+      display.textContent = '測驗已結束';
+      return;
+    }
+    const grace = now >= exam.closes;
+    const seconds = Math.ceil(((grace ? deadline : exam.closes) - now) / 1000);
+    const duration = Math.floor(seconds / 60) + ':' + String(seconds % 60).padStart(2, '0');
+    display.textContent = (grace ? '交卷寬限剩餘 ' : '作答時間剩餘 ') + duration;
+    countdownTimer = setTimeout(tick, 1000);
+  }
+  tick();
 }
 function resetRoute() {
   location.href = new URL('./', location.href);
@@ -411,6 +436,7 @@ async function showExam(id) {
     if (late && attempt?.snapshot) { openAssessment(exam, attempt.snapshot, true); lab.hidden = false; }
     return;
   }
+  showCountdown(exam);
   openAssessment(exam, attempt?.snapshot);
   lab.hidden = false;
   const feedback = status(area);

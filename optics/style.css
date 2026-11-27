@@ -62,6 +62,7 @@ section, aside {
 .exam-card-status { padding: .12rem .48rem; border-radius: 1rem; background: #dcecf6; color: #12496c; font-size: .75rem; font-weight: 700; }
 .exam-card-status.ended { background: #e7e9ec; color: #465260; }
 .exam-card-arrow { flex: none; font-size: 1.4rem; line-height: 1; }
+.exam-countdown { color: var(--ink-accent); font-weight: 700; font-variant-numeric: tabular-nums; }
 #instructions { background: #fffdf6; border-color: #e1dbcb; }
 .student-exam {
   --ink-accent: #63355f;
